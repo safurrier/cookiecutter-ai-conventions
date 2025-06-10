@@ -1,0 +1,30 @@
+# CLAUDE.md Template
+
+This is a placeholder for the CLAUDE.md Jinja2 template.
+
+TODO: Port the original CLAUDE.md router structure here with:
+- Conditional domain imports based on selected_domains
+- Conditional learning system imports
+- Context mapping table
+- Automatic loading instructions
+
+Example structure:
+```
+# CLAUDE.md - AI Development Conventions
+
+## Core Imports (Always Active)
+
+@global.md
+
+## Domain Knowledge (Auto-loaded based on context)
+{% for domain in selected_domains %}
+@domains/{{ domain }}/core.md
+{% endfor %}
+
+{% if enable_learning_capture %}
+## Learning System
+@staging/learnings.md
+@commands/capture-learning.md
+@commands/review-learnings.md
+{% endif %}
+```
