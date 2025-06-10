@@ -1,41 +1,37 @@
-# Git Core - Essential Git Development Guidance
+# Git Core - Essential Git Practices
+
+This file contains the fundamental git patterns and practices for development work.
 
 ## Commit Standards
 
+### Clean Commits
+- **Remove all debug artifacts before committing**: No debug files, excessive print statements, temporary scripts, or debug HTML files
+- Keep test output minimal and focused
+- Clean up exploratory code and commented-out sections
+- Verify no development artifacts remain in production code
+
 ### Commit Message Format
-- Use present tense ("Add feature" not "Added feature")
-- Use imperative mood ("Move cursor to..." not "Moves cursor to...")
-- First line should be 50 characters or less
-- Separate subject from body with a blank line
-- Body should wrap at 72 characters
+- Use clear, descriptive commit messages that explain the "why" not just the "what"
+- First line should be a concise summary (50 characters or less)
+- Use imperative mood: "add feature" not "added feature"
+- Include context in the body when helpful
 
-### Commit Message Examples
-```
-Add user authentication system
+### AI Attribution Rules
+- **Never reference Claude, Claude Code, or Anthropic** in commit messages
+- **No AI attribution or co-authorship** in commits
+- Keep all AI assistance invisible in git history
 
-Implement JWT-based authentication with refresh tokens.
-Includes middleware for protecting routes and user
-session management.
-```
+## Branch Naming
 
-## Branching Strategy
+Follow consistent naming conventions:
+- Feature branches: `feat/description`
+- Bug fixes: `bug/description`
+- Improvements: `improve/description`
+- Documentation: `docs/description`
+- Maintenance: `maint/description`
 
-### Branch Naming
-- `feature/` - New features
-- `fix/` - Bug fixes
-- `chore/` - Maintenance tasks
-- `docs/` - Documentation updates
+## Specialized Git Topics
 
-### Branch Workflow
-1. Create branch from main
-2. Make focused commits
-3. Push and create PR
-4. Review and merge
+For detailed guidance on specific git workflows, see:
+- workflows.md: Advanced git patterns and team collaboration practices
 
-## Best Practices
-
-- **Commit Often**: Small, focused commits are better than large ones
-- **Write Meaningful Messages**: Future you will thank present you
-- **Never Force Push to Main**: Protect shared history
-- **Use .gitignore**: Don't commit generated files or secrets
-- **Review Before Committing**: Use `git diff` to check changes

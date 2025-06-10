@@ -34,3 +34,6 @@ build/
 # Temporary files
 test.txt
 setup_structure.py
+
+# Project Implementation
+dev_docs/**
