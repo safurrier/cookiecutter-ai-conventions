@@ -7,6 +7,7 @@ Copies selected domains and cleans up based on user selections.
 import json
 import os
 import shutil
+import stat
 from pathlib import Path
 
 
@@ -65,6 +66,13 @@ def conditionally_remove_dirs():
         if staging_dir.exists():
             shutil.rmtree(staging_dir)
             print("✓ Removed staging directory (learning capture disabled)")
+    else:
+        # Make command scripts executable
+        for script in ["capture-learning.py", "review-learnings.py"]:
+            script_path = project_root / "commands" / script
+            if script_path.exists():
+                script_path.chmod(0o755)
+                print(f"✓ Made {script} executable")
 
 
 def create_provider_configs():
