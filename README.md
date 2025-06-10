@@ -20,10 +20,10 @@ Build and maintain your own self-improving AI conventions system. Start with com
 
 ```bash
 # One-liner setup (installs uv if needed)
-curl -LsSf https://raw.githubusercontent.com/yourusername/cookiecutter-ai-conventions/main/bootstrap.sh | sh
+curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions-experimental/main/bootstrap.sh | sh
 
 # Or if you have uv installed
-uvx cookiecutter gh:yourusername/cookiecutter-ai-conventions
+uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions-experimental
 ```
 
 Then:
