@@ -24,7 +24,10 @@ Thumbs.db
 # Testing
 .pytest_cache/
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
+test-output/
 
 # Build
 dist/
@@ -37,3 +40,12 @@ setup_structure.py
 
 # Project Implementation
 dev_docs/**
+
+# UV
+.uv/
+
+# Ruff
+.ruff_cache/
+
+# Mypy
+.mypy_cache/
