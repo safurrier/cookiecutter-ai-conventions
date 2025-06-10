@@ -1,0 +1,33 @@
+{
+    "version": 1.0,
+    "domains": [
+        {
+            "name": "git",
+            "description": "Git workflows and commit standards",
+            "author": "core",
+            "files": [
+                "core.md"
+            ],
+            "default": true
+        },
+        {
+            "name": "testing",
+            "description": "Testing patterns and philosophy",
+            "author": "core",
+            "files": [
+                "core.md"
+            ],
+            "default": true
+        },
+        {
+            "name": "writing",
+            "description": "Technical writing and commit messages",
+            "author": "core",
+            "files": [
+                "core.md",
+                "commit-messages.md"
+            ],
+            "default": true
+        }
+    ]
+}
