@@ -1,0 +1,109 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      run: |
+        uv venv --python ${{ matrix.python-version }}
+        echo "VIRTUAL_ENV=$PWD/.venv" >> $GITHUB_ENV
+        echo "$PWD/.venv/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: |
+        uv pip install -e ".[dev]"
+    
+    - name: Run linting
+      run: |
+        uv run ruff check .
+        uv run ruff format --check .
+    
+    - name: Run type checking
+      run: |
+        uv run mypy hooks tests
+    
+    - name: Run tests with coverage
+      run: |
+        uv run pytest --cov=hooks --cov-report=xml --cov-report=term
+    
+    - name: Test cookiecutter generation
+      run: |
+        uv run cookiecutter . --no-input -o test-output/
+        test -d test-output/my-ai-conventions
+    
+    - name: Upload coverage to Codecov
+      if: matrix.python-version == '3.12'
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  test-cross-platform:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        python-version: ["3.12"]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      run: |
+        uv venv --python ${{ matrix.python-version }}
+    
+    - name: Activate virtualenv (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        echo "$PWD\.venv\Scripts" >> $env:GITHUB_PATH
+    
+    - name: Activate virtualenv (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        echo "VIRTUAL_ENV=$PWD/.venv" >> $GITHUB_ENV
+        echo "$PWD/.venv/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: |
+        uv pip install -e ".[dev]"
+    
+    - name: Run tests
+      run: |
+        uv run pytest
+    
+    - name: Test cookiecutter generation
+      run: |
+        uv run cookiecutter . --no-input -o test-output/
+
+  all-checks:
+    needs: [test, test-cross-platform]
+    runs-on: ubuntu-latest
+    steps:
+    - name: All checks passed
+      run: echo "All checks passed!"

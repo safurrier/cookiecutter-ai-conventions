@@ -1,0 +1,42 @@
+# See https://pre-commit.com for more information
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: "{{cookiecutter.project_slug}}"
+      - id: end-of-file-fixer
+        exclude: "{{cookiecutter.project_slug}}"
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: debug-statements
+        exclude: "{{cookiecutter.project_slug}}"
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+        exclude: "{{cookiecutter.project_slug}}"
+      - id: ruff-format
+        exclude: "{{cookiecutter.project_slug}}"
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+        exclude: "{{cookiecutter.project_slug}}"
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: make test
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
