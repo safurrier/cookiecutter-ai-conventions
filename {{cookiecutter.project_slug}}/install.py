@@ -262,16 +262,45 @@ def generate_claude_md(project_root: Path) -> str:
     template_path = project_root / "templates" / "claude" / "CLAUDE.md.j2"
     
     if template_path.exists():
-        # In real implementation, this would use Jinja2
-        # For now, we'll use a simple approach
+        try:
+            from jinja2 import Template
+        except ImportError:
+            # Simple fallback without Jinja2
+            with open(template_path) as f:
+                content = f.read()
+            
+            # Basic variable replacement
+            content = content.replace("{{ project_root }}", str(project_root))
+            content = content.replace("{{ cookiecutter.project_name }}", "{{ cookiecutter.project_name }}")
+            content = content.replace("{{ cookiecutter.author_name }}", "{{ cookiecutter.author_name }}")
+            
+            # Remove Jinja2 syntax for basic implementation
+            import re
+            content = re.sub(r'{%-.*?%}', '', content, flags=re.DOTALL)
+            content = re.sub(r'{%.*?%}', '', content, flags=re.DOTALL)
+            
+            return content
+        
+        # Full Jinja2 implementation
         with open(template_path) as f:
-            content = f.read()
+            template = Template(f.read())
         
-        # Replace template variables
-        content = content.replace("{{ project_root }}", str(project_root))
-        content = content.replace("{{ cookiecutter.project_name }}", "{{ cookiecutter.project_name }}")
+        # Gather installed domains
+        domains_dir = project_root / "domains"
+        selected_domains = []
+        if domains_dir.exists():
+            selected_domains = [d.name for d in domains_dir.iterdir() if d.is_dir()]
         
-        return content
+        # Render template
+        return template.render(
+            cookiecutter={
+                "project_name": "{{ cookiecutter.project_name }}",
+                "author_name": "{{ cookiecutter.author_name }}"
+            },
+            project_root=str(project_root),
+            selected_domains=selected_domains,
+            enable_learning_capture="{{ cookiecutter.enable_learning_capture }}" == "true"
+        )
     
     # Fallback: generate basic CLAUDE.md
     return f"""# CLAUDE.md - {{ cookiecutter.project_name }}

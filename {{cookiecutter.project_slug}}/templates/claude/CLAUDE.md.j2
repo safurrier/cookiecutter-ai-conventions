@@ -1,30 +1,145 @@
-# CLAUDE.md Template
+# CLAUDE.md - {{ cookiecutter.project_name }}
 
-This is a placeholder for the CLAUDE.md Jinja2 template.
+This is your AI Development Standard Library. It implements automatic domain loading based on the current task context.
 
-TODO: Port the original CLAUDE.md router structure here with:
-- Conditional domain imports based on selected_domains
-- Conditional learning system imports
-- Context mapping table
-- Automatic loading instructions
+## 🚨 CRITICAL: Automatic Domain Loading
 
-Example structure:
-```
-# CLAUDE.md - AI Development Conventions
+**When working on ANY task, IMMEDIATELY follow this 3-step process:**
+
+1. **Identify the context** - What kind of task is this? What files/commands are involved?
+2. **Load relevant domain cores** - Read the appropriate domain core files based on context
+3. **Apply the guidance** - Use the loaded patterns and conventions in your work
+
+### Context → Domain Mapping
+
+**AUTOMATICALLY load these domains when you detect:**
+
+| Context | Load Domain | Trigger Keywords/Actions |
+|---------|-------------|-------------------------|
+{%- for domain in selected_domains %}
+{%- if domain == "git" %}
+| Git operations | @domains/git/core.md | git, commit, branch, merge, rebase |
+{%- elif domain == "testing" %}
+| Testing code | @domains/testing/core.md | test_, pytest, assert, fixture |
+{%- elif domain == "writing" %}
+| Writing docs/commits | @domains/writing/core.md | README, docs, commit message |
+{%- endif %}
+{%- endfor %}
+| Any code task | @global.md | Always active |
 
 ## Core Imports (Always Active)
 
+### Universal Guidelines
 @global.md
 
-## Domain Knowledge (Auto-loaded based on context)
-{% for domain in selected_domains %}
+### Domain Knowledge (Auto-loaded based on context)
+{%- for domain in selected_domains %}
 @domains/{{ domain }}/core.md
-{% endfor %}
+{%- endfor %}
 
-{% if enable_learning_capture %}
-## Learning System
+{%- if enable_learning_capture %}
+
+### Learning System
 @staging/learnings.md
-@commands/capture-learning.md
-@commands/review-learnings.md
-{% endif %}
+{%- endif %}
+
+## System Architecture
+
+This CLAUDE.md system follows a **progressive context loading** approach:
+
+1. **Global rules** (always active): Universal development principles
+2. **Domain cores** (context-aware): Essential knowledge automatically loaded based on task
+3. **Learning capture** (continuous): New patterns staged for review and promotion
+
+## Domain-Specific Loading Instructions
+
+{%- if "git" in selected_domains %}
+
+### Git Domain
+**Auto-load @domains/git/core.md when:**
+- Any git command is used or mentioned
+- Working with branches, commits, merges
+- User asks about version control
+{%- endif %}
+
+{%- if "testing" in selected_domains %}
+
+### Testing Domain
+**Auto-load @domains/testing/core.md when:**
+- Files contain "test_" or "_test"
+- User mentions testing, pytest, fixtures
+- Writing test cases or assertions
+{%- endif %}
+
+{%- if "writing" in selected_domains %}
+
+### Writing Domain
+**Auto-load @domains/writing/core.md when:**
+- Creating or editing documentation
+- Writing commit messages
+- Creating pull request descriptions
+{%- endif %}
+
+## Usage Examples
+
+### Automatic Loading in Action
 ```
+{%- if "writing" in selected_domains %}
+User: "Help me write a commit message for these changes"
+Claude: [IMMEDIATELY reads @domains/writing/commit-messages.md]
+        [Applies natural language patterns, avoids LLM tells]
+        "Add user authentication middleware"
+{%- endif %}
+
+{%- if "testing" in selected_domains %}
+User: "Create tests for this function"
+Claude: [IMMEDIATELY reads @domains/testing/core.md]
+        [Applies testing patterns and best practices]
+{%- endif %}
+```
+
+{%- if enable_learning_capture %}
+
+### Learning Capture
+When patterns emerge or corrections are needed:
+1. Use `/capture-learning` to format insights
+2. Add to staging/learnings.md with target domain
+3. Review periodically and promote stable patterns
+
+Available commands:
+- `/capture-learning` - Format and save new learnings
+- `/review-learnings` - Review staged learnings for promotion
+{%- endif %}
+
+## Available Domains
+
+{%- for domain in selected_domains %}
+{%- if domain == "git" %}
+- **git/**: Version control workflows and commit standards
+{%- elif domain == "testing" %}
+- **testing/**: Testing patterns and philosophy
+{%- elif domain == "writing" %}
+- **writing/**: Technical writing, commit messages, and documentation
+{%- endif %}
+{%- endfor %}
+
+## Evolution Process
+
+This system evolves through use:
+{%- if enable_learning_capture %}
+1. **Capture**: New learnings go to staging/learnings.md
+2. **Review**: Periodic review of staged learnings
+3. **Promote**: Stable patterns move to appropriate domain files
+4. **Archive**: Historical learnings preserved for context
+{%- else %}
+1. **Manual Updates**: Edit domain files directly as patterns emerge
+2. **Version Control**: Track changes through git history
+{%- endif %}
+
+The goal is building a comprehensive, maintainable knowledge base that improves AI assistance quality over time while keeping context manageable.
+
+## Project Information
+
+- **Project**: {{ cookiecutter.project_name }}
+- **Author**: {{ cookiecutter.author_name }}
+- **Conventions Path**: {{ project_root }}
