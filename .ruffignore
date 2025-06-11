@@ -1,7 +1,0 @@
-# Ignore the cookiecutter template directory
-# Ruff can't parse the {{cookiecutter.project_slug}} syntax
-{{cookiecutter.project_slug}}/
-**/*{{*}}*
-
-# Also ignore any generated output
-test-output/
