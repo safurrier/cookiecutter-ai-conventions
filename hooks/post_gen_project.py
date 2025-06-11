@@ -102,6 +102,21 @@ def main():
                 if rule_file.stem not in ["main"] + selected_domains:
                     rule_file.unlink()
     
+    # Handle Aider provider files
+    if providers and "aider" not in providers:
+        # Remove Aider files if not selected
+        conventions_file = Path("CONVENTIONS.md")
+        if conventions_file.exists():
+            conventions_file.unlink()
+        
+        aider_conf_file = Path(".aider.conf.yml")
+        if aider_conf_file.exists():
+            aider_conf_file.unlink()
+        
+        aider_docs = Path("docs/aider-setup.md")
+        if aider_docs.exists():
+            aider_docs.unlink()
+    
     # Clean up learning capture commands if not enabled
     if not enable_learning:
         commands_dir = Path("commands")
@@ -157,7 +172,10 @@ def main():
         
         if "aider" in providers:
             print("\nAider setup:")
-            print("  Use --read flag with stdlib/")
+            print("  Your conventions are configured in:")
+            print("  - CONVENTIONS.md (automatically loaded)")
+            print("  - .aider.conf.yml (configuration)")
+            print("  Just run 'aider' to start coding!")
     
     print("\nNext steps:")
     print("  1. cd into your project directory")

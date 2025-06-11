@@ -1,0 +1,37 @@
+# Aider configuration file
+# https://aider.chat/docs/config.html
+
+# Automatically read conventions file to provide context
+read: CONVENTIONS.md
+
+# Include domain-specific conventions
+{%- set domains = cookiecutter.default_domains.split(',') %}
+read-only:
+  - global.md
+{%- for domain in domains %}
+  - domains/{{ domain.strip() }}/core.md
+{%- endfor %}
+{%- if cookiecutter.enable_learning_capture %}
+  - staging/learnings.md
+{%- endif %}
+
+# Model preferences (optional)
+# model: gpt-4o
+# edit-format: diff
+
+# Git configuration
+auto-commits: false
+commit: false
+
+# Output preferences
+pretty: true
+stream: true
+
+# Testing configuration
+test-cmd: {% if "testing" in domains %}pytest{% else %}# Configure your test command{% endif %}
+
+# Linting configuration  
+lint-cmd: {% if "python" in domains %}ruff check{% else %}# Configure your lint command{% endif %}
+
+# Additional settings
+encoding: utf-8

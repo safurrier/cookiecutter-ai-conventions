@@ -136,23 +136,72 @@ your-project/
 
 ## Aider
 
-Aider support through `.aider.conf.yml` is coming.
+Full Aider support with automatic convention loading.
 
-### Planned Integration
+### Installation
+When you select Aider as a provider, the template automatically creates:
+- `CONVENTIONS.md` - Main conventions file (automatically loaded)
+- `.aider.conf.yml` - Configuration with auto-loading setup
+- `docs/aider-setup.md` - Complete setup guide
+
+### How It Works
+
+#### Convention Loading
+- Aider automatically reads `CONVENTIONS.md` on startup
+- Domain files included as read-only context
+- No manual loading required
+
+#### Configuration
+The `.aider.conf.yml` file sets up:
 ```yaml
-# .aider.conf.yml
-conventions:
-  source: ~/.ai-conventions/
-  domains:
-    - python
-    - git
-    - testing
+# Auto-loaded files
+read: CONVENTIONS.md
+
+# Read-only domain files
+read-only:
+  - global.md
+  - domains/git/core.md
+  - domains/testing/core.md
+  # ... other selected domains
 ```
 
-### Current Workaround
-Use Aider's `--read` flag:
+### Features
+- ✅ Automatic convention loading
+- ✅ Domain-specific context
+- ✅ Test command integration
+- ✅ Learning capture support
+- ✅ Multiple model support
+- ✅ Git integration
+
+### File Structure
+```
+your-project/
+├── CONVENTIONS.md       # Main conventions (auto-loaded)
+├── .aider.conf.yml     # Aider configuration
+├── domains/            # Domain conventions
+│   ├── git/core.md
+│   ├── testing/core.md
+│   └── ...
+└── docs/
+    └── aider-setup.md  # Setup guide
+```
+
+### Best Practices
+- Let Aider automatically load conventions
+- Use chat mode to ask about standards
+- Configure test/lint commands in `.aider.conf.yml`
+- Keep CONVENTIONS.md concise and clear
+
+### Usage
 ```bash
-aider --read ~/.claude/CLAUDE.md
+# Just run aider - conventions load automatically
+aider
+
+# Work on specific files
+aider src/main.py tests/
+
+# Use a specific model
+aider --model gpt-4o
 ```
 
 ---
@@ -251,7 +300,7 @@ If you want to contribute a provider integration:
 | Claude   | ✅ | ✅ | ✅ | 8K tokens |
 | Cursor   | ✅ | ✅ | ❌ | Per-file |
 | Windsurf | ✅ | ✅ | ❌ | 12K total |
-| Aider    | 🚧 | ❌ | ❌ | Unlimited |
+| Aider    | ✅ | ✅ | ❌ | Unlimited |
 | Copilot  | ❌ | ❌ | ❌ | Limited |
 
 ---
