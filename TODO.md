@@ -1,41 +1,60 @@
 # TODO - Implementation Checklist
 
+## 1.0 Roadmap ✅
+
+Core features completed for 1.0 release:
+
+- [x] UV-first development workflow with CLI architecture (#37)
+- [x] Context canary system for verifying conventions are loaded (#38) 
+- [x] Provider abstraction to support Claude, Cursor, Windsurf, Aider, Copilot, Codex (#39)
+- [x] Domain composition (extends) for DRY convention management (#40)
+- [x] Textual TUI for install.py (#41) - Basic implementation complete
+- [x] Configuration system with format migration (#42) - Basic implementation complete
+- [x] Bootstrap script for zero-install experience (#43)
+- [x] Test coverage for all core features (#44)
+
+## Future Enhancements
+
+### Textual TUI Improvements
+- [ ] Add configuration editor screen
+- [ ] Domain browser and manager
+- [ ] Provider status dashboard
+- [ ] Learning review interface
+- [ ] Update checker
+
+### Configuration System Enhancements
+- [ ] Environment variable support
+- [ ] Schema export for validation
+- [ ] Config diff tool
+- [ ] Config merge functionality
+- [ ] Watch mode for auto-reload
+
+### General Improvements
+- [ ] Create demo GIF for README
+- [ ] Add more example projects
+- [ ] Create video tutorials
+- [ ] Add telemetry (opt-in)
+- [ ] Plugin system for custom providers
+
 ## Immediate Tasks
 
-- [ ] Run `convert_yaml.py` to convert YAML files to JSON (requires PyYAML: `pip install pyyaml`)
-- [ ] Make bootstrap.sh executable: `chmod +x bootstrap.sh`
-- [ ] Update README.md with your GitHub username
-- [ ] Initialize git repository
-
-## Core Implementation
-
-- [ ] Implement Textual TUI in `hooks/pre_gen_project.py`
-- [ ] Complete `install.py` with domain selection
-- [ ] Create CLAUDE.md.j2 template
-- [ ] Add conditional directories (commands/, staging/)
-- [ ] Implement learning capture commands
-
-## Nice to Have
-
-- [ ] Add tests
-- [ ] Create example generated repositories
-- [ ] Add GitHub Actions CI/CD
-- [ ] Create demo GIF for README
+- [ ] Update README.md with new features
+- [ ] Create release notes for 1.0
+- [ ] Update documentation site
+- [ ] Tag 1.0 release
 
 ## Commands to Run
 
 ```bash
-# Install dependencies
-pip install pyyaml
+# Run tests
+uv run pytest
 
-# Convert YAML to JSON
-python3 convert_yaml.py
+# Check test coverage
+uv run pytest --cov
 
-# Make scripts executable
-chmod +x bootstrap.sh
+# Run linting
+uv run ruff check .
 
-# Initialize git
-git init
-git add -A
-git commit -m "Initial commit"
+# Format code
+uv run ruff format .
 ```

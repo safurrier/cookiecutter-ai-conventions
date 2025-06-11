@@ -7,6 +7,7 @@ from pathlib import Path
 
 try:
     from ai_conventions.providers import get_provider
+    from ai_conventions.config import ConfigManager
 except ImportError:
     print("Error: ai_conventions module not found. Please run: uv tool install .")
     sys.exit(1)
@@ -17,33 +18,28 @@ class ConventionsInstaller:
     
     def __init__(self, project_root: Path = None):
         self.project_root = project_root or Path.cwd()
+        self.config_manager = ConfigManager(self.project_root)
         self.config = self._load_config()
         
     def _load_config(self) -> dict:
         """Load configuration from various sources."""
-        config = {
-            "project_name": "{{ cookiecutter.project_name }}",
-            "project_slug": "{{ cookiecutter.project_slug }}",
-            "author_name": "{{ cookiecutter.author_name }}",
-            "enable_learning_capture": {{ cookiecutter.enable_learning_capture | lower }},
-            "enable_context_canary": {{ cookiecutter.enable_context_canary | lower }},
-            "enable_domain_composition": {{ cookiecutter.enable_domain_composition | lower }},
-            "default_domains": "{{ cookiecutter.default_domains }}",
-            "selected_providers": {{ cookiecutter.selected_providers | jsonify }}
-        }
-        
-        # Try to load from .ai-conventions.yaml if it exists
-        config_file = self.project_root / ".ai-conventions.yaml"
-        if config_file.exists():
-            try:
-                import yaml
-                with open(config_file, "r", encoding="utf-8") as f:
-                    file_config = yaml.safe_load(f)
-                    config.update(file_config)
-            except ImportError:
-                pass
-                
-        return config
+        # Try to load from config file first
+        try:
+            config_obj = self.config_manager.load_config()
+            return config_obj.dict()
+        except Exception:
+            # Fall back to template defaults
+            config = {
+                "project_name": "{{ cookiecutter.project_name }}",
+                "project_slug": "{{ cookiecutter.project_slug }}",
+                "author_name": "{{ cookiecutter.author_name }}",
+                "enable_learning_capture": {{ cookiecutter.enable_learning_capture | lower }},
+                "enable_context_canary": {{ cookiecutter.enable_context_canary | lower }},
+                "enable_domain_composition": {{ cookiecutter.enable_domain_composition | lower }},
+                "default_domains": "{{ cookiecutter.default_domains }}",
+                "selected_providers": {{ cookiecutter.selected_providers | jsonify }}
+            }
+            return config
     
     def install_provider(self, provider_name: str):
         """Install conventions to a specific provider.
@@ -108,6 +104,14 @@ def main():
     if len(sys.argv) > 1:
         if sys.argv[1] == "--all":
             installer.install_all()
+        elif sys.argv[1] == "--tui":
+            # Run Textual TUI
+            try:
+                from ai_conventions.tui import run_tui
+                run_tui(installer.project_root, installer.config)
+            except ImportError:
+                print("Error: Textual not installed. Run: uv add textual")
+                sys.exit(1)
         else:
             # Install specific provider
             installer.install_provider(sys.argv[1])
