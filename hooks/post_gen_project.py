@@ -78,7 +78,19 @@ def conditionally_remove_dirs():
 def create_provider_configs():
     """Create configuration files for selected providers."""
     project_root = Path.cwd()
-    selected_providers = {{ cookiecutter.selected_providers }}
+    # Handle the fact that cookiecutter may pass a string or list
+    selected_providers_raw = """{{ cookiecutter.selected_providers }}"""
+    
+    # Parse the providers
+    if isinstance(selected_providers_raw, list):
+        selected_providers = selected_providers_raw
+    elif selected_providers_raw.startswith("[") and selected_providers_raw.endswith("]"):
+        # It's a string representation of a list
+        import ast
+        selected_providers = ast.literal_eval(selected_providers_raw)
+    else:
+        # Single provider as string
+        selected_providers = [selected_providers_raw.strip()]
     
     # For now, we'll just create a marker file
     # In the future, this could create provider-specific config files
