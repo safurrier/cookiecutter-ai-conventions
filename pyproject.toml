@@ -7,15 +7,18 @@ name = "cookiecutter-ai-conventions"
 version = "0.1.0"
 description = "A cookiecutter template for AI development conventions"
 readme = "README.md"
-requires-python = ">=3.8"
 license = {text = "MIT"}
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
+    "pytest-cookies>=0.7.0",
     "cookiecutter>=2.0",
     "textual>=0.38.0",  # For the TUI
+    "jinja2>=3.0.0",
+    "pyyaml>=6.0",
+    "ruff>=0.1.0",
 ]
 
 [tool.pytest.ini_options]
@@ -30,15 +33,8 @@ addopts = [
 ]
 
 [tool.ruff]
-exclude = [
-    ".venv",
-    "venv",
-    "__pycache__",
-    "test-output",
-]
-line-length = 100
 target-version = "py38"
-# Template directory exclusions are handled in .ruffignore
+line-length = 88
 
 [tool.ruff.lint]
 select = [

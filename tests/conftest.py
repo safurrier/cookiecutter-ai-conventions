@@ -8,7 +8,7 @@ import pytest
 
 @pytest.fixture
 def test_project_dir():
-    """Return the project root directory."""
+    """Return the project directory."""
     return Path(__file__).parent.parent
 
 
@@ -21,6 +21,11 @@ def cleanup_test_output(test_project_dir):
     if test_output.exists():
         shutil.rmtree(test_output)
 
+
+@pytest.fixture(autouse=True)
+def cleanup_temp_files():
+    """Clean up temporary files after each test."""
+    yield
     # Clean up temp domain selection file if it exists
     temp_file = Path("/tmp/cookiecutter_selected_domains.json")
     if temp_file.exists():
