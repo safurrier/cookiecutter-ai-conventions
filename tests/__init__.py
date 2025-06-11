@@ -1,1 +1,1 @@
-"""Test suite for cookiecutter-ai-conventions."""
+# Tests package for cookiecutter-ai-conventions

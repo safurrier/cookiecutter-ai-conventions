@@ -16,7 +16,7 @@ This is your AI Development Standard Library. It implements automatic domain loa
 
 | Context | Load Domain | Trigger Keywords/Actions |
 |---------|-------------|-------------------------|
-{%- for domain in selected_domains %}
+{%- for domain in cookiecutter.selected_domains %}
 {%- if domain == "git" %}
 | Git operations | @domains/git/core.md | git, commit, branch, merge, rebase |
 {%- elif domain == "testing" %}
@@ -33,11 +33,11 @@ This is your AI Development Standard Library. It implements automatic domain loa
 @global.md
 
 ### Domain Knowledge (Auto-loaded based on context)
-{%- for domain in selected_domains %}
+{%- for domain in cookiecutter.selected_domains %}
 @domains/{{ domain }}/core.md
 {%- endfor %}
 
-{%- if enable_learning_capture %}
+{%- if cookiecutter.enable_learning_capture %}
 
 ### Learning System
 @staging/learnings.md
@@ -53,7 +53,7 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 
 ## Domain-Specific Loading Instructions
 
-{%- if "git" in selected_domains %}
+{%- if "git" in cookiecutter.selected_domains %}
 
 ### Git Domain
 **Auto-load @domains/git/core.md when:**
@@ -62,7 +62,7 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 - User asks about version control
 {%- endif %}
 
-{%- if "testing" in selected_domains %}
+{%- if "testing" in cookiecutter.selected_domains %}
 
 ### Testing Domain
 **Auto-load @domains/testing/core.md when:**
@@ -71,7 +71,7 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 - Writing test cases or assertions
 {%- endif %}
 
-{%- if "writing" in selected_domains %}
+{%- if "writing" in cookiecutter.selected_domains %}
 
 ### Writing Domain
 **Auto-load @domains/writing/core.md when:**
@@ -84,21 +84,21 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 
 ### Automatic Loading in Action
 ```
-{%- if "writing" in selected_domains %}
+{%- if "writing" in cookiecutter.selected_domains %}
 User: "Help me write a commit message for these changes"
 Claude: [IMMEDIATELY reads @domains/writing/commit-messages.md]
         [Applies natural language patterns, avoids LLM tells]
         "Add user authentication middleware"
 {%- endif %}
 
-{%- if "testing" in selected_domains %}
+{%- if "testing" in cookiecutter.selected_domains %}
 User: "Create tests for this function"
 Claude: [IMMEDIATELY reads @domains/testing/core.md]
         [Applies testing patterns and best practices]
 {%- endif %}
 ```
 
-{%- if enable_learning_capture %}
+{%- if cookiecutter.enable_learning_capture %}
 
 ### Learning Capture
 When patterns emerge or corrections are needed:
@@ -113,7 +113,7 @@ Available commands:
 
 ## Available Domains
 
-{%- for domain in selected_domains %}
+{%- for domain in cookiecutter.selected_domains %}
 {%- if domain == "git" %}
 - **git/**: Version control workflows and commit standards
 {%- elif domain == "testing" %}
@@ -126,7 +126,7 @@ Available commands:
 ## Evolution Process
 
 This system evolves through use:
-{%- if enable_learning_capture %}
+{%- if cookiecutter.enable_learning_capture %}
 1. **Capture**: New learnings go to staging/learnings.md
 2. **Review**: Periodic review of staged learnings
 3. **Promote**: Stable patterns move to appropriate domain files
@@ -142,4 +142,4 @@ The goal is building a comprehensive, maintainable knowledge base that improves 
 
 - **Project**: {{ cookiecutter.project_name }}
 - **Author**: {{ cookiecutter.author_name }}
-- **Conventions Path**: {{ project_root }}
+- **Conventions Path**: ~/.claude/{{ cookiecutter.project_slug }}
