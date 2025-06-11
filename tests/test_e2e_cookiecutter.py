@@ -62,7 +62,7 @@ class TestE2ECookiecutterGeneration:
         assert generated_project.name == "my-custom-conventions"
 
         # Verify the name is used in files
-        readme_content = (generated_project / "README.md").read_text()
+        readme_content = (generated_project / "README.md").read_text(encoding="utf-8")
         assert "My Custom Conventions" in readme_content
 
     def test_learning_capture_enabled_includes_commands(self, tmp_path):
@@ -135,7 +135,7 @@ class TestE2ECookiecutterGeneration:
         # With Claude provider, should have Claude commands
         assert (generated_project / ".claude").exists()
         # Check that the README mentions Claude setup
-        readme_content = (generated_project / "README.md").read_text()
+        readme_content = (generated_project / "README.md").read_text(encoding="utf-8")
         assert "Claude" in readme_content or "claude" in readme_content
 
     def test_all_domains_can_be_selected(self, tmp_path):

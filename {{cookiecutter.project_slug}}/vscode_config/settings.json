@@ -1,0 +1,30 @@
+{
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "text": "Follow the conventions in .github/copilot-instructions.md"
+    }
+{%- set domains = cookiecutter.default_domains.split(',') -%}
+{%- if "python" in domains %},
+    {
+      "text": "Always use type hints in Python functions"
+    }
+{%- endif -%}
+{%- if "testing" in domains %},
+    {
+      "text": "Use pytest for all tests, following the test_behavior_when_condition naming pattern"
+    }
+{%- endif -%}
+{%- if "git" in domains %},
+    {
+      "text": "Use conventional commit format for all commit messages"
+    }
+{%- endif %}
+  ]
+{%- if cookiecutter.enable_learning_capture %},
+  "github.copilot.chat.instructionsFilesLocations": [
+    ".github/copilot-instructions.md",
+    "staging/learnings.md"
+  ]
+{%- endif %}
+}

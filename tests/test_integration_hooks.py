@@ -27,7 +27,8 @@ class TestPostGenProjectHook:
             (domain_dir / "core.md").write_text(f"# {domain} core content")
 
         # Arrange: Create selection file
-        temp_file = Path("/tmp/cookiecutter_selected_domains.json")
+        import tempfile
+        temp_file = Path(tempfile.gettempdir()) / "cookiecutter_selected_domains.json"
         temp_file.write_text(json.dumps({"selected_domains": ["git", "testing"]}))
 
         # Arrange: Set up destination
@@ -102,9 +103,11 @@ class TestPostGenProjectHook:
                 if script_path.exists():
                     script_path.chmod(0o755)
 
-        # Assert: Scripts are executable
-        assert capture_script.stat().st_mode & 0o111
-        assert review_script.stat().st_mode & 0o111
+        # Assert: Scripts are executable (skip on Windows)
+        import platform
+        if platform.system() != "Windows":
+            assert capture_script.stat().st_mode & 0o111
+            assert review_script.stat().st_mode & 0o111
 
     def test_create_provider_config_file(self, tmp_path):
         """Test that provider configuration file is created."""

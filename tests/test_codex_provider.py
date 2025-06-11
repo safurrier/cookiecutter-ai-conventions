@@ -26,7 +26,7 @@ def test_codex_creates_agents_md_file(cookies):
     assert agents_file.exists()
     
     # Check content includes project info and conventions
-    content = agents_file.read_text()
+    content = agents_file.read_text(encoding="utf-8")
     assert "# AI Development Agent" in content
     assert "Test AI Conventions" in content
     assert "conventions" in content.lower() or "standards" in content.lower()
@@ -48,7 +48,7 @@ def test_codex_agents_includes_all_domains(cookies):
     assert result.exit_code == 0
     
     agents_file = result.project_path / "AGENTS.md"
-    content = agents_file.read_text()
+    content = agents_file.read_text(encoding="utf-8")
     
     # Check git conventions
     assert "git" in content.lower()
@@ -125,7 +125,7 @@ def test_codex_setup_documentation_created(cookies):
     # Check Codex setup docs exist
     codex_docs = result.project_path / "docs" / "codex-setup.md"
     assert codex_docs.exists()
-    content = codex_docs.read_text()
+    content = codex_docs.read_text(encoding="utf-8")
     assert "Codex Setup Guide" in content
     assert "AGENTS.md" in content
     assert "npm" in content.lower()
@@ -147,7 +147,7 @@ def test_codex_agents_format(cookies):
     assert result.exit_code == 0
     
     agents_file = result.project_path / "AGENTS.md"
-    content = agents_file.read_text()
+    content = agents_file.read_text(encoding="utf-8")
     
     # Check format follows Codex conventions
     assert "# AI Development Agent" in content or "# Agent" in content
@@ -173,7 +173,7 @@ def test_codex_with_learning_capture(cookies):
     
     # Check AGENTS.md mentions learning capture
     agents_file = result.project_path / "AGENTS.md"
-    content = agents_file.read_text()
+    content = agents_file.read_text(encoding="utf-8")
     # Could mention evolving conventions or learning system
 
 
@@ -195,8 +195,11 @@ def test_codex_creates_wrapper_script(cookies):
     # Check for codex wrapper script
     wrapper_script = result.project_path / "codex.sh"
     assert wrapper_script.exists()
-    assert wrapper_script.stat().st_mode & 0o111  # Is executable
+    # Check executable bit (skip on Windows)
+    import platform
+    if platform.system() != "Windows":
+        assert wrapper_script.stat().st_mode & 0o111  # Is executable
     
-    content = wrapper_script.read_text()
+    content = wrapper_script.read_text(encoding="utf-8")
     assert "codex" in content
     assert "AGENTS.md" in content or ".codex" in content

@@ -118,6 +118,12 @@ def main():
             aider_docs.unlink()
     
     # Handle Copilot provider files
+    if providers and "copilot" in providers:
+        # Rename vscode_config to .vscode if Copilot is selected
+        vscode_config = Path("vscode_config")
+        if vscode_config.exists():
+            vscode_config.rename(".vscode")
+    
     if providers and "copilot" not in providers:
         # Remove Copilot files if not selected
         github_dir = Path(".github")
@@ -147,6 +153,11 @@ def main():
         copilot_docs = Path("docs/copilot-setup.md")
         if copilot_docs.exists():
             copilot_docs.unlink()
+        
+        # Remove vscode_config if it wasn't renamed
+        vscode_config = Path("vscode_config")
+        if vscode_config.exists():
+            shutil.rmtree(vscode_config)
     elif providers and "copilot" in providers:
         # Clean up empty prompt files
         prompts_dir = Path(".github/prompts")
@@ -207,7 +218,7 @@ def main():
             if claude_commands_dir.exists():
                 shutil.rmtree(Path(".claude"))
     
-    print("\n✨ Project setup complete!")
+    print("\n[OK] Project setup complete!")
     
     # Provider-specific instructions
     if providers:
