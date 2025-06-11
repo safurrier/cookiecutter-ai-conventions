@@ -1,6 +1,5 @@
 """Pytest configuration and fixtures for cookiecutter-ai-conventions tests."""
 
-import json
 import shutil
 from pathlib import Path
 
@@ -21,7 +20,7 @@ def cleanup_test_output(test_project_dir):
     test_output = test_project_dir / "test-output"
     if test_output.exists():
         shutil.rmtree(test_output)
-    
+
     # Clean up temp domain selection file if it exists
     temp_file = Path("/tmp/cookiecutter_selected_domains.json")
     if temp_file.exists():
