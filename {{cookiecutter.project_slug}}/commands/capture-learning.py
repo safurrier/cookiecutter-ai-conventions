@@ -21,6 +21,7 @@ def get_project_root() -> Path:
         current = current.parent
     return Path.cwd()  # Fallback to current directory
 
+
 def parse_learning_input() -> List[Dict[str, str]]:
     """Parse learning details from user input."""
     learnings = []
@@ -57,16 +58,17 @@ def parse_learning_input() -> List[Dict[str, str]]:
             "user_feedback": user_feedback,
             "domain": domain,
             "promote_to": promote_to or "core.md",
-            "date": datetime.now().strftime("%Y-%m-%d")
+            "date": datetime.now().strftime("%Y-%m-%d"),
         }
 
         learnings.append(learning)
 
         another = input("\nAdd another learning? (y/n): ").strip().lower()
-        if another != 'y':
+        if another != "y":
             break
 
     return learnings
+
 
 def format_learning(learning: Dict[str, str]) -> str:
     """Format a learning entry for the markdown file."""
@@ -74,19 +76,22 @@ def format_learning(learning: Dict[str, str]) -> str:
         f"## {learning['date']}: {learning['title']}",
         f"**Context**: {learning['context']}",
         f"**Problem**: {learning['problem']}",
-        f"**Solution**: {learning['solution']}"
+        f"**Solution**: {learning['solution']}",
     ]
 
-    if learning['user_feedback']:
+    if learning["user_feedback"]:
         lines.append(f"**User Feedback**: {learning['user_feedback']}")
 
-    lines.extend([
-        f"**Domain**: {learning['domain']}",
-        f"**Promote to**: {learning['promote_to']}",
-        ""
-    ])
+    lines.extend(
+        [
+            f"**Domain**: {learning['domain']}",
+            f"**Promote to**: {learning['promote_to']}",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
+
 
 def append_to_staging(learnings: List[Dict[str, str]], staging_path: Path) -> None:
     """Append learnings to the staging file."""
@@ -116,10 +121,11 @@ and promote stable patterns to appropriate domain files.
         final_content = f"{header}{new_content}\n"
 
     # Write to file
-    with open(staging_path, 'w') as f:
+    with open(staging_path, "w") as f:
         f.write(final_content)
 
     print(f"\n✅ Added {len(learnings)} learning(s) to {staging_path}")
+
 
 def main():
     """Main entry point."""
@@ -142,7 +148,9 @@ def main():
         append_to_staging(learnings, staging_path)
 
         print("\n💡 Next steps:")
-        print("1. Review staged learnings periodically with: ./commands/review-learnings.py")
+        print(
+            "1. Review staged learnings periodically with: ./commands/review-learnings.py"
+        )
         print("2. Promote stable patterns to domain files")
         print("3. Commit your staged learnings to version control")
 
@@ -152,6 +160,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

@@ -23,6 +23,7 @@ try:
 except ImportError:
     print("Installing required dependencies...")
     import subprocess
+
     subprocess.check_call([sys.executable, "-m", "pip", "install", "textual"])
     from textual.app import App, ComposeResult
     from textual.binding import Binding
@@ -108,11 +109,13 @@ class ConventionInstaller(App):
         if domains_dir.exists():
             for domain_dir in domains_dir.iterdir():
                 if domain_dir.is_dir() and domain_dir.name != "__pycache__":
-                    domains.append({
-                        "name": domain_dir.name,
-                        "description": f"Conventions for {domain_dir.name}",
-                        "installed": True
-                    })
+                    domains.append(
+                        {
+                            "name": domain_dir.name,
+                            "description": f"Conventions for {domain_dir.name}",
+                            "installed": True,
+                        }
+                    )
 
         return domains
 
@@ -124,7 +127,7 @@ class ConventionInstaller(App):
                 return [line.strip() for line in f if line.strip()]
 
         # Fallback to cookiecutter default
-        return {{ cookiecutter.selected_providers }}
+        return {{cookiecutter.selected_providers}}
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -145,7 +148,7 @@ class ConventionInstaller(App):
                                 label="",
                                 value=installed,
                                 disabled=installed,
-                                id=f"domain_{domain['name']}"
+                                id=f"domain_{domain['name']}",
                             )
                             self.domain_checkboxes[domain["name"]] = checkbox
                             yield checkbox
@@ -163,9 +166,7 @@ class ConventionInstaller(App):
                     for provider in self.providers:
                         with Horizontal(classes="provider-item"):
                             checkbox = Checkbox(
-                                label="",
-                                value=True,
-                                id=f"provider_{provider}"
+                                label="", value=True, id=f"provider_{provider}"
                             )
                             self.provider_checkboxes[provider] = checkbox
                             yield checkbox
@@ -200,10 +201,9 @@ class ConventionInstaller(App):
             if checkbox.value:
                 providers_to_configure.append(name)
 
-        self.exit(result={
-            "domains": domains_to_install,
-            "providers": providers_to_configure
-        })
+        self.exit(
+            result={"domains": domains_to_install, "providers": providers_to_configure}
+        )
 
     def action_quit(self) -> None:
         """Exit without installing."""
@@ -270,13 +270,18 @@ def generate_claude_md(project_root: Path) -> str:
 
             # Basic variable replacement
             content = content.replace("{{ project_root }}", str(project_root))
-            content = content.replace("{{ cookiecutter.project_name }}", "{{ cookiecutter.project_name }}")
-            content = content.replace("{{ cookiecutter.author_name }}", "{{ cookiecutter.author_name }}")
+            content = content.replace(
+                "{{ cookiecutter.project_name }}", "{{ cookiecutter.project_name }}"
+            )
+            content = content.replace(
+                "{{ cookiecutter.author_name }}", "{{ cookiecutter.author_name }}"
+            )
 
             # Remove Jinja2 syntax for basic implementation
             import re
-            content = re.sub(r'{%-.*?%}', '', content, flags=re.DOTALL)
-            content = re.sub(r'{%.*?%}', '', content, flags=re.DOTALL)
+
+            content = re.sub(r"{%-.*?%}", "", content, flags=re.DOTALL)
+            content = re.sub(r"{%.*?%}", "", content, flags=re.DOTALL)
 
             return content
 
@@ -294,11 +299,12 @@ def generate_claude_md(project_root: Path) -> str:
         return template.render(
             cookiecutter={
                 "project_name": "{{ cookiecutter.project_name }}",
-                "author_name": "{{ cookiecutter.author_name }}"
+                "author_name": "{{ cookiecutter.author_name }}",
             },
             project_root=str(project_root),
             selected_domains=selected_domains,
-            enable_learning_capture="{{ cookiecutter.enable_learning_capture }}" == "true"
+            enable_learning_capture="{{ cookiecutter.enable_learning_capture }}"
+            == "true",
         )
 
     # Fallback: generate basic CLAUDE.md

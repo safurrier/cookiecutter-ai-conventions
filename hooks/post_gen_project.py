@@ -54,7 +54,7 @@ def conditionally_remove_dirs():
     project_root = Path.cwd()
 
     # Check if learning capture is enabled
-    enable_learning = {{ cookiecutter.enable_learning_capture }}
+    enable_learning = {{cookiecutter.enable_learning_capture}}  # noqa: F821
 
     if not enable_learning:
         # Remove learning-related directories
@@ -86,9 +86,12 @@ def create_provider_configs():
     # Parse the providers
     if isinstance(selected_providers_raw, list):
         selected_providers = selected_providers_raw
-    elif selected_providers_raw.startswith("[") and selected_providers_raw.endswith("]"):
+    elif selected_providers_raw.startswith("[") and selected_providers_raw.endswith(
+        "]"
+    ):
         # It's a string representation of a list
         import ast
+
         selected_providers = ast.literal_eval(selected_providers_raw)
     else:
         # Single provider as string

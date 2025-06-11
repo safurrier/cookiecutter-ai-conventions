@@ -5,3 +5,5 @@
 
 # Also ignore any generated output
 test-output/
+test-output*/
+temp-python-collab/

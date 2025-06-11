@@ -17,6 +17,7 @@ try:
 except ImportError:
     print("Installing required dependencies...")
     import subprocess
+
     subprocess.check_call([sys.executable, "-m", "pip", "install", "textual"])
     from textual.app import App, ComposeResult
     from textual.binding import Binding
@@ -31,35 +32,35 @@ class DomainSelector(App):
     Screen {
         align: center middle;
     }
-    
+
     Container {
         width: 80;
         height: auto;
         border: solid $primary;
         padding: 1 2;
     }
-    
+
     .domain-item {
         height: 3;
         margin: 0 0 1 0;
     }
-    
+
     .domain-name {
         color: $text;
         text-style: bold;
     }
-    
+
     .domain-description {
         color: $text-muted;
         margin-left: 4;
     }
-    
+
     .button-container {
         height: 3;
         align: center middle;
         margin-top: 1;
     }
-    
+
     Button {
         margin: 0 1;
     }
@@ -80,7 +81,9 @@ class DomainSelector(App):
         yield Header()
         with Container():
             yield Static("Select Convention Domains", classes="title")
-            yield Static("Choose which convention domains to include in your project:\n")
+            yield Static(
+                "Choose which convention domains to include in your project:\n"
+            )
 
             with Vertical():
                 for domain in self.domains:
@@ -88,11 +91,13 @@ class DomainSelector(App):
                         checkbox = Checkbox(
                             label="",
                             value=domain.get("default", False),
-                            id=f"domain_{domain['name']}"
+                            id=f"domain_{domain['name']}",
                         )
                         self.checkboxes[domain["name"]] = checkbox
                         yield checkbox
-                        yield Static(f"[bold]{domain['name']}[/bold] - {domain['description']}")
+                        yield Static(
+                            f"[bold]{domain['name']}[/bold] - {domain['description']}"
+                        )
 
             with Horizontal(classes="button-container"):
                 yield Button("Submit", variant="primary", id="submit")
@@ -127,7 +132,12 @@ def main():
     possible_paths = [
         Path(__file__).parent.parent / "community-domains" / "registry.json",
         Path.cwd() / "community-domains" / "registry.json",
-        Path.home() / ".claude-squad" / "worktrees" / "cookiecutter_1847ce84c97de8e0" / "community-domains" / "registry.json",
+        Path.home()
+        / ".claude-squad"
+        / "worktrees"
+        / "cookiecutter_1847ce84c97de8e0"
+        / "community-domains"
+        / "registry.json",
     ]
 
     registry_path = None
@@ -167,10 +177,7 @@ def main():
     # This will be available as {{cookiecutter.selected_domains}} in templates
     # Store the template root path for post_gen_project to use
     template_root = Path(__file__).parent.parent.resolve()
-    context = {
-        "selected_domains": selected,
-        "_template_root": str(template_root)
-    }
+    context = {"selected_domains": selected, "_template_root": str(template_root)}
 
     # Write to a temporary file that post_gen_project can read
     temp_file = Path("/tmp/cookiecutter_selected_domains.json")
