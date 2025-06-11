@@ -117,6 +117,45 @@ def main():
         if aider_docs.exists():
             aider_docs.unlink()
     
+    # Handle Copilot provider files
+    if providers and "copilot" not in providers:
+        # Remove Copilot files if not selected
+        github_dir = Path(".github")
+        if github_dir.exists():
+            copilot_instructions = github_dir / "copilot-instructions.md"
+            if copilot_instructions.exists():
+                copilot_instructions.unlink()
+            
+            prompts_dir = github_dir / "prompts"
+            if prompts_dir.exists():
+                shutil.rmtree(prompts_dir)
+            
+            # Remove .github if empty
+            if not any(github_dir.iterdir()):
+                github_dir.rmdir()
+        
+        vscode_dir = Path(".vscode")
+        if vscode_dir.exists():
+            settings_file = vscode_dir / "settings.json"
+            if settings_file.exists():
+                settings_file.unlink()
+            
+            # Remove .vscode if empty
+            if not any(vscode_dir.iterdir()):
+                vscode_dir.rmdir()
+        
+        copilot_docs = Path("docs/copilot-setup.md")
+        if copilot_docs.exists():
+            copilot_docs.unlink()
+    elif providers and "copilot" in providers:
+        # Clean up empty prompt files
+        prompts_dir = Path(".github/prompts")
+        if prompts_dir.exists():
+            for prompt_file in prompts_dir.glob("*.prompt.md"):
+                # Remove empty files (when domain not selected)
+                if prompt_file.stat().st_size == 0:
+                    prompt_file.unlink()
+    
     # Clean up learning capture commands if not enabled
     if not enable_learning:
         commands_dir = Path("commands")
@@ -176,6 +215,14 @@ def main():
             print("  - CONVENTIONS.md (automatically loaded)")
             print("  - .aider.conf.yml (configuration)")
             print("  Just run 'aider' to start coding!")
+        
+        if "copilot" in providers:
+            print("\nGitHub Copilot setup:")
+            print("  Your conventions are configured in:")
+            print("  - .github/copilot-instructions.md (automatically loaded)")
+            print("  - .vscode/settings.json (VS Code configuration)")
+            print("  - .github/prompts/ (domain-specific prompts)")
+            print("  Copilot will automatically use your conventions!")
     
     print("\nNext steps:")
     print("  1. cd into your project directory")

@@ -206,33 +206,63 @@ aider --model gpt-4o
 
 ---
 
-## VS Code Copilot
+## GitHub Copilot
 
-While not directly supported, you can improve Copilot suggestions:
+Full GitHub Copilot support with official convention files.
 
-### Setup
-1. Create workspace settings:
-   ```json
-   {
-     "github.copilot.advanced": {
-       "promptFiles": [
-         "domains/python/core.md",
-         "domains/git/core.md"
-       ]
-     }
-   }
-   ```
+### Installation
+When you select Copilot as a provider, the template automatically creates:
+- `.github/copilot-instructions.md` - Main instructions file (automatically loaded)
+- `.vscode/settings.json` - VS Code configuration
+- `.github/prompts/*.prompt.md` - Domain-specific prompt files
+- `docs/copilot-setup.md` - Complete setup guide
 
-2. Include conventions as comments:
-   ```python
-   # Conventions: Always use type hints
-   # Conventions: Prefer explicit imports
-   ```
+### How It Works
 
-### Limitations
-- No automatic loading
-- Limited context understanding
-- Best for simple patterns
+#### Convention Loading
+- Copilot automatically reads `.github/copilot-instructions.md`
+- Instructions included in every chat and code generation
+- No manual configuration required
+
+#### VS Code Integration
+The `.vscode/settings.json` file enables:
+```json
+{
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "text": "Follow the conventions in .github/copilot-instructions.md"
+    }
+  ]
+}
+```
+
+### Features
+- ✅ Official convention file support
+- ✅ Automatic loading in VS Code
+- ✅ Domain-specific prompt files
+- ✅ Multi-model support (GPT-4o, Claude 3.5, Gemini)
+- ✅ Works on GitHub.com
+- ✅ Pull request integration
+
+### File Structure
+```
+your-project/
+├── .github/
+│   ├── copilot-instructions.md    # Main instructions
+│   └── prompts/                    # Domain prompts
+│       ├── git.prompt.md
+│       ├── testing.prompt.md
+│       └── writing.prompt.md
+└── .vscode/
+    └── settings.json               # VS Code config
+```
+
+### Best Practices
+- Keep instructions concise and actionable
+- Use "Always" and "Never" for clear rules
+- Include concrete examples
+- Update based on team feedback
 
 ---
 
@@ -301,7 +331,7 @@ If you want to contribute a provider integration:
 | Cursor   | ✅ | ✅ | ❌ | Per-file |
 | Windsurf | ✅ | ✅ | ❌ | 12K total |
 | Aider    | ✅ | ✅ | ❌ | Unlimited |
-| Copilot  | ❌ | ❌ | ❌ | Limited |
+| Copilot  | ✅ | ✅ | ❌ | Per-chat |
 
 ---
 
