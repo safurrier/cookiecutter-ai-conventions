@@ -1,72 +1,105 @@
-# /review-learnings - Review and Promote Staged Learnings
+{% if cookiecutter.enable_learning_capture -%}
+# /review-learnings - Review and Promote Learnings
 
-Review learnings in staging and help promote stable patterns to appropriate domain files.
+Review staged learnings and provide guidance on promoting stable patterns to domain files.
 
 ## Usage
 
-Use this command to:
-- Review accumulated learnings in staging
-- Identify patterns ready for promotion to domain files
-- Clean up staging by archiving processed learnings
-- Ensure learnings get integrated into the stdlib
+Use this command for periodic review of accumulated learnings:
+- Weekly or bi-weekly review recommended
+- When staging/learnings.md gets large
+- Before major project milestones
 
 ## Process
 
-1. **Display staged learnings** from staging/learnings.md with numbers
+1. **Display all staged learnings** from staging/learnings.md
+   - Group by domain
+   - Show capture date
+   - Highlight patterns that appear multiple times
 
-2. **Analyze for promotion opportunities**:
-   - Learnings that fit existing domain files
-   - Patterns that suggest new domain files needed
-   - Learnings ready to become core principles
-   - Items that should be archived as one-time fixes
+2. **Analyze for promotion readiness**:
+   - Stable patterns (appeared multiple times)
+   - Widely applicable (not project-specific)
+   - Clear and actionable
+   - Improves on existing conventions
 
-3. **Present promotion options**:
+3. **Suggest promotion targets**:
    ```
-   Staged learnings ready for promotion:
-
-   1. [Title] → domains/testing/pytest.md (fixture scopes section)
-   2. [Title] → global.md (file access patterns)
-   3. [Title] → domains/testing/core.md (new anti-pattern section)
-
-   Select learnings to promote (e.g., "1,3"):
+   Ready for promotion:
+   
+   1. "No inline imports" → global.md
+      - Captured 3 times this month
+      - Universal pattern
+      
+   2. "Pytest fixture naming" → domains/testing/core.md
+      - Consistent pattern emerged
+      - Enhances existing testing guidance
+   
+   3. "Component file structure" → projects/webapp/patterns.md
+      - Project-specific but stable
    ```
 
-4. **Directly edit domain files** to add the promoted learnings in the appropriate sections.
-
-5. **Archive processed learnings** by moving them from staging to archive files, then clear the staging file.
+4. **Provide promotion commands**:
+   ```bash
+   # Edit the target file to add the learning
+   vim domains/testing/core.md
+   
+   # Remove from staging after promotion
+   vim staging/learnings.md
+   
+   # Commit the promotion
+   git add -A
+   git commit -m "Promote testing patterns from staging"
+   ```
 
 ## Promotion Guidelines
 
-### To CLAUDE.md (Automatic Loading)
-- When learning type is "Improve Automatic Domain Loading"
-- Update the Context → Domain Mapping table
-- Add new trigger keywords or file patterns
-- Ensures future automatic loading of conventions
-
-### To domain/*/core.md
+### To domain core.md files:
 - Universal principles for that domain
-- Essential patterns used frequently
-- Critical anti-patterns to avoid
+- Patterns that apply broadly
+- Essential knowledge
 
-### To domain/*/specific.md
-- Detailed implementation patterns
-- Tool-specific configurations
-- Advanced techniques
+### To domain specific files:
+- Advanced or specialized patterns
+- Tool-specific guidance
+- Optional practices
 
-### To global.md
-- Universal development principles
-- Cross-domain patterns
-- Project-agnostic best practices
+### To projects/:
+- Project-specific patterns
+- Team conventions
+- Local workarounds
 
-### To archive/
-- One-time fixes or very specific solutions
-- Learnings that became obsolete
-- Context-specific insights
+### To archive:
+- One-time fixes
+- Obsolete patterns
+- Historical context
 
-## Review Schedule
+## Example Review Output
 
-- **Weekly**: Review staging for promotion candidates
-- **Monthly**: Archive promoted learnings and clean staging
-- **Quarterly**: Review domain files for consolidation opportunities
+```
+=== Staged Learnings Review ===
 
-Keep the stdlib focused on reusable, actionable patterns rather than specific one-time fixes.
+GLOBAL DOMAIN (2 learnings):
+- "No inline imports" - Captured 3 times ✓ READY
+- "Avoid magic numbers" - Captured once
+
+TESTING DOMAIN (1 learning):  
+- "Fixture scoping patterns" - Captured 2 times ✓ READY
+
+PROJECT: webapp (1 learning):
+- "API response format" - Project-specific
+
+Suggested promotions:
+1. Move "No inline imports" to global.md
+2. Move "Fixture scoping patterns" to domains/testing/core.md
+
+Archive after promotion? (y/n)
+```
+
+## Tips
+
+- Don't promote too quickly - let patterns prove themselves
+- Keep staging/learnings.md clean - archive old learnings
+- Update existing sections rather than always adding new ones
+- Consider creating new domain files for emerging topics
+{%- endif %}

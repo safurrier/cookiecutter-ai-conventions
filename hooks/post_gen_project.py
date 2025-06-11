@@ -207,13 +207,15 @@ def main():
         if staging_dir.exists():
             shutil.rmtree(staging_dir)
     else:
-        # Clean up Python commands if using Claude native commands
-        if providers and "claude" in providers:
-            commands_dir = Path("commands")
-            if commands_dir.exists():
-                shutil.rmtree(commands_dir)
+        # Remove legacy Python scripts since we have CLI commands now
+        commands_dir = Path("commands")
+        if commands_dir.exists():
+            # Remove .py files but keep .md files
+            for py_file in commands_dir.glob("*.py"):
+                py_file.unlink()
+        
         # Clean up Claude commands if not using Claude
-        elif providers and "claude" not in providers:
+        if providers and "claude" not in providers:
             claude_commands_dir = Path(".claude/commands")
             if claude_commands_dir.exists():
                 shutil.rmtree(Path(".claude"))
@@ -228,7 +230,8 @@ def main():
             print("\nClaude setup:")
             print("  Your conventions will be automatically loaded via CLAUDE.md")
             if enable_learning:
-                print("  Use /capture-learning and /review-learnings commands")
+                print("  Capture learnings with: capture-learning")
+                print("  Review learnings with: ai-conventions review")
         
         if "cursor" in providers:
             print("\nCursor setup:")
@@ -270,8 +273,9 @@ def main():
     
     print("\nNext steps:")
     print("  1. cd into your project directory")
-    print("  2. Run ./install.py to select more domains")
-    print("  3. Start coding with your AI assistant!")
+    print("  2. Run 'uv tool install .' to install CLI commands")
+    print("  3. Run 'ai-conventions status' to check installation")
+    print("  4. Start coding with your AI assistant!")
 
 
 if __name__ == "__main__":
