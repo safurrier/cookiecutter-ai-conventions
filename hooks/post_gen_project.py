@@ -218,7 +218,7 @@ def main():
             if claude_commands_dir.exists():
                 shutil.rmtree(Path(".claude"))
     
-    print("\n✨ Project setup complete!")
+    print("\n[OK] Project setup complete!")
     
     # Provider-specific instructions
     if providers:
