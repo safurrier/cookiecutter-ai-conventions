@@ -1,91 +1,175 @@
-# cookiecutter-ai-conventions
+# Stop Repeating Yourself to Your AI Assistant
 
-> 🌱 A framework for growing your own AI coding conventions
+You know that moment when your AI suggests `import os` at the top of your function... again?
 
-[![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![uv](https://img.shields.io/badge/uv-latest-green.svg)](https://github.com/astral-sh/uv)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+Or formats a commit message like "Updated stuff" when your team uses conventional commits?
 
-Build and maintain your own self-improving AI conventions system. Start with community domains like git, testing, and writing - then grow your own conventions that adapt to your style over time.
+What if your AI just... knew your preferences?
 
-## ✨ Features
-
-- 🚀 **Zero-install setup** - One command, no dependencies required
-- 📦 **Modular domains** - Pick only the conventions you need
-- 🔄 **Self-improving** - Capture learnings as you code
-- 🎯 **Tool agnostic** - Works with Claude (more tools coming)
-- 📝 **Version controlled** - Your conventions evolve with your codebase
-
-## 🚀 Quick Start
+## See It In Action
 
 ```bash
-# One-liner setup (installs uv if needed)
+# Before: Your AI doesn't know your style
+> "Write a Python function to read environment variables"
+
+def get_env_var(name):
+    import os  # ❌ Inline import
+    return os.getenv(name, '')  # ❌ Wrong default
+```
+
+```bash
+# After: Your AI knows your conventions
+> "Write a Python function to read environment variables"
+
+import os
+from typing import Optional
+
+def get_env_var(name: str, default: Optional[str] = None) -> Optional[str]:
+    """Get environment variable with optional default.
+    
+    Args:
+        name: Environment variable name
+        default: Default value if not found
+        
+    Returns:
+        Environment variable value or default
+    """
+    return os.environ.get(name, default)
+```
+
+## Make Your AI Learn Your Style in 2 Minutes
+
+```bash
+# Install and generate your conventions (one-time setup)
 curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions-experimental/main/bootstrap.sh | sh
 
-# Or if you have uv installed
-uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions-experimental
+# That's it! Your AI now knows:
+# ✓ Your import style
+# ✓ Your docstring format  
+# ✓ Your type hints preferences
+# ✓ Your error handling patterns
 ```
 
-Then:
+## What Just Happened?
+
+You created a personal conventions system that:
+1. **Loads automatically** when you use Claude, Cursor, or other AI tools
+2. **Grows with you** - capture new patterns as you discover them
+3. **Version controls** your preferences alongside your code
+
+## Real Examples from Real Developers
+
+### Example: Consistent Commit Messages
+
+**Problem:** Your team uses conventional commits, but your AI keeps suggesting generic messages.
+
+**Solution:** After setup, your AI automatically knows:
 ```bash
+# Your AI now suggests:
+git commit -m "fix: resolve race condition in auth middleware"
+
+# Instead of:
+git commit -m "Fixed bug"
+```
+
+### Example: Testing Patterns
+
+**Problem:** You use pytest fixtures, but your AI keeps writing unittest classes.
+
+**Solution:** Your testing conventions are loaded automatically:
+```python
+# Your AI now writes:
+def test_user_creation(db_session, test_user):
+    """Test that users can be created with valid data."""
+    user = User.create(email=test_user.email)
+    assert user.id is not None
+    
+# Instead of:
+class TestUser(unittest.TestCase):
+    def setUp(self):
+        # ...
+```
+
+## Capture Your Team's Wisdom
+
+When you correct your AI, capture it for next time:
+
+```bash
+./commands/capture-learning.py
+
+📚 Capture Development Learnings
+================================
+Learning title: Use team's custom logger instead of print()
+Context: Debugging production issues
+Problem: print() statements don't appear in our log aggregator
+Solution: Always use logger.debug() or logger.info() from our custom logger
+```
+
+Now your AI will never suggest `print()` for debugging again.
+
+## Start With Community Conventions
+
+Choose from battle-tested conventions:
+
+- **git** - Commit messages, branching strategies, PR descriptions
+- **testing** - Pytest patterns, fixture design, test organization  
+- **writing** - Documentation style, API docs, code comments
+- **python** - Import style, type hints, error handling
+- **More coming** - JavaScript, Go, Rust, DevOps...
+
+## Installation
+
+### Quick Start (Recommended)
+```bash
+curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions-experimental/main/bootstrap.sh | sh
+```
+
+### Manual Installation
+```bash
+# Requires Python 3.9+ and uv
+uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions-experimental
 cd my-ai-conventions
-./install.py  # Select your domains
+./install.py
 ```
 
-## 🎯 What's This For?
-
-Ever notice how you correct your AI assistant with the same preferences repeatedly? 
-
-- "Don't use inline imports"
-- "Follow our commit message format"  
-- "Use our testing patterns"
-
-This tool lets you capture these preferences once and have them automatically loaded every time you code.
-
-## 📚 How It Works
-
-1. **Generate your conventions repo** - A personal, version-controlled set of conventions
-2. **Choose domains** - Start with git, testing, writing (or create your own!)
-3. **Install to your AI tools** - Currently Claude, more coming soon
-4. **Capture learnings** - When you correct your AI, capture it for next time
-5. **Evolve over time** - Your conventions improve as you use them
-
-## 🏗️ Architecture
+## How It Works
 
 ```
-your-ai-conventions/
-├── stdlib/
-│   ├── domains/        # Your selected convention domains
-│   ├── projects/       # Project-specific conventions
-│   ├── staging/        # Learning capture area
-│   └── global.md       # Universal rules
-└── install.py          # Domain selector & installer
+Your Code Editor → AI Assistant → Your Conventions → Better Suggestions
+                                   ↑
+                                   You control this
 ```
 
-## 📦 Available Domains
+1. **Generate** your conventions repository
+2. **Install** to `~/.claude/` (or other AI tools)
+3. **Use** your AI normally - conventions load automatically
+4. **Evolve** by capturing learnings when you spot patterns
 
-### Bundled with Template
-- **git** - Version control workflows and standards
-- **testing** - Testing philosophy and patterns
-- **writing** - Documentation and commit messages
+## Supported AI Tools
 
-### Coming Soon
-- **python** - Python patterns and idioms
-- **javascript** - JS/TS conventions
-- **rust** - Rust best practices
-- ...and more!
+- ✅ **Claude** - Full support via CLAUDE.md
+- 🚧 **Cursor** - Coming soon (currently via .cursorrules)
+- 🚧 **Windsurf** - Coming soon
+- 🚧 **Aider** - Coming soon
 
-## 🤝 Contributing
+## Next Steps After Installation
 
-We'd love your help! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- How to create new domains
-- Submitting improvements
-- Reporting issues
+1. **Try it out** - Ask your AI to write code and see your conventions in action
+2. **Capture patterns** - When you correct your AI, capture it: `./commands/capture-learning.py`
+3. **Share with your team** - Push your conventions to git, let everyone benefit
 
-## 📄 License
+## Contributing
 
-MIT - See [LICENSE](LICENSE) for details
+We're building a library of high-quality convention domains. Contributions welcome!
 
-## 🙏 Acknowledgments
+- [Contributing Guide](CONTRIBUTING.md)
+- [Create a new domain](docs/creating-domains.md)
+- [Improve existing domains](community-domains/)
 
-Inspired by the original CLAUDE.md automatic loading system. Built with [cookiecutter](https://github.com/cookiecutter/cookiecutter) and [Textual](https://github.com/Textualize/textual).
+## License
+
+MIT - Use freely in personal and commercial projects.
+
+---
+
+Built with ❤️ by developers tired of repeating themselves to AI.
