@@ -26,6 +26,9 @@ def main():
     # Check if learning capture is enabled
     enable_learning = {{ cookiecutter.enable_learning_capture }}  # noqa: F821
     
+    # Check if domain composition is enabled
+    enable_composition = {{ cookiecutter.enable_domain_composition }}  # noqa: F821
+    
     # Get providers
     providers = {{ cookiecutter.selected_providers | jsonify }}  # noqa: F821
     
@@ -219,6 +222,14 @@ def main():
             claude_commands_dir = Path(".claude/commands")
             if claude_commands_dir.exists():
                 shutil.rmtree(Path(".claude"))
+    
+    # Handle domain composition
+    if not enable_composition:
+        # Remove domain resolver module
+        resolver_path = Path("ai_conventions/domain_resolver.py")
+        if resolver_path.exists():
+            resolver_path.unlink()
+            print("  - Removed domain resolver (composition not enabled)")
     
     print("\n[OK] Project setup complete!")
     

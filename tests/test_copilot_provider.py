@@ -77,12 +77,12 @@ def test_copilot_creates_vscode_settings(cookies):
     
     assert result.exit_code == 0
     
-    # Check vscode_config exists (gets renamed to .vscode in post-gen)
-    vscode_config = result.project_path / "vscode_config"
-    assert vscode_config.exists()
+    # Check .vscode exists (renamed from vscode_config in post-gen)
+    vscode_dir = result.project_path / ".vscode"
+    assert vscode_dir.exists()
     
-    # Check settings.json exists in vscode_config
-    settings_file = vscode_config / "settings.json"
+    # Check settings.json exists in .vscode
+    settings_file = vscode_dir / "settings.json"
     assert settings_file.exists()
     
     # Check settings content

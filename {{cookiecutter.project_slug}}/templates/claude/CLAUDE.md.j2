@@ -50,7 +50,12 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 
 1. **Global rules** (always active): Universal development principles
 2. **Domain cores** (context-aware): Essential knowledge automatically loaded based on task
-3. **Learning capture** (continuous): New patterns staged for review and promotion
+{%- if cookiecutter.enable_domain_composition %}
+3. **Domain inheritance**: Domains can extend other domains for DRY conventions
+{%- endif %}
+{%- if cookiecutter.enable_learning_capture %}
+4. **Learning capture** (continuous): New patterns staged for review and promotion
+{%- endif %}
 
 ## Domain-Specific Loading Instructions
 
@@ -123,6 +128,30 @@ Available commands:
 - **writing/**: Technical writing, commit messages, and documentation
 {%- endif %}
 {%- endfor %}
+{%- if cookiecutter.enable_domain_composition %}
+
+### Domain Composition
+
+Domains can extend other domains using YAML frontmatter:
+
+```yaml
+---
+extends: parent_domain
+---
+```
+
+Or for multiple inheritance:
+
+```yaml
+---
+extends:
+  - parent1
+  - parent2
+---
+```
+
+This enables DRY (Don't Repeat Yourself) convention management by allowing specialized domains to build upon base domains.
+{%- endif %}
 
 ## Evolution Process
 
