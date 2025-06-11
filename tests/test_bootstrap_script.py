@@ -124,6 +124,10 @@ def test_bootstrap_script_provides_next_steps():
 
 def test_bootstrap_script_syntax():
     """Test that bootstrap.sh has valid bash syntax."""
+    # Skip on Windows without WSL
+    if os.name == 'nt':
+        pytest.skip("Skipping bash syntax check on Windows")
+    
     # This test only runs if bash is available
     try:
         result = subprocess.run(

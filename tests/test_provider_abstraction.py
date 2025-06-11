@@ -25,7 +25,7 @@ def test_base_provider_interface(cookies):
     assert base_provider_path.exists()
     
     # Verify it has required imports and classes
-    content = base_provider_path.read_text()
+    content = base_provider_path.read_text(encoding='utf-8')
     assert "from abc import ABC, abstractmethod" in content
     assert "class BaseProvider(ABC):" in content
     assert "@abstractmethod" in content
@@ -252,7 +252,7 @@ def test_provider_abstraction_in_install_py(cookies):
     assert result.exit_code == 0
     
     install_py = result.project_path / "install.py"
-    content = install_py.read_text()
+    content = install_py.read_text(encoding='utf-8')
     
     # Should import provider system
     assert "from ai_conventions.providers import get_provider" in content

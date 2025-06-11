@@ -25,7 +25,7 @@ def test_domain_resolver_module_created(cookies):
     assert resolver_path.exists()
     
     # Check module content
-    content = resolver_path.read_text()
+    content = resolver_path.read_text(encoding='utf-8')
     assert "class DomainResolver" in content
     assert "class CircularDependencyError" in content
     assert "def resolve_domain" in content
@@ -66,7 +66,7 @@ def test_domain_inheritance_files_created(cookies):
     pytest_domain = result.project_path / "domains" / "pytest" / "core.md"
     assert pytest_domain.exists()
     
-    content = pytest_domain.read_text()
+    content = pytest_domain.read_text(encoding='utf-8')
     assert "extends: testing" in content
 
 
@@ -83,7 +83,7 @@ def test_domain_resolver_handles_yaml_frontmatter(cookies):
     assert result.exit_code == 0
     
     resolver_path = result.project_path / "ai_conventions" / "domain_resolver.py"
-    content = resolver_path.read_text()
+    content = resolver_path.read_text(encoding='utf-8')
     
     # Check for YAML frontmatter handling
     assert "---" in content
@@ -104,7 +104,7 @@ def test_circular_dependency_detection_code_exists(cookies):
     assert result.exit_code == 0
     
     resolver_path = result.project_path / "ai_conventions" / "domain_resolver.py"
-    content = resolver_path.read_text()
+    content = resolver_path.read_text(encoding='utf-8')
     
     # Check for circular dependency handling
     assert "CircularDependencyError" in content
@@ -125,7 +125,7 @@ def test_domain_resolver_caching_implemented(cookies):
     assert result.exit_code == 0
     
     resolver_path = result.project_path / "ai_conventions" / "domain_resolver.py"
-    content = resolver_path.read_text()
+    content = resolver_path.read_text(encoding='utf-8')
     
     # Check for caching implementation
     assert "_cache" in content
@@ -145,7 +145,7 @@ def test_multiple_inheritance_support(cookies):
     assert result.exit_code == 0
     
     resolver_path = result.project_path / "ai_conventions" / "domain_resolver.py"
-    content = resolver_path.read_text()
+    content = resolver_path.read_text(encoding='utf-8')
     
     # Check for list handling in extends
     assert "isinstance(extends, list)" in content
@@ -167,6 +167,6 @@ def test_claude_md_template_includes_composition_info(cookies):
     template_path = result.project_path / "templates" / "claude" / "CLAUDE.md.j2"
     assert template_path.exists()
     
-    content = template_path.read_text()
+    content = template_path.read_text(encoding='utf-8')
     assert "Domain Composition" in content or "domain composition" in content
     assert "extends" in content

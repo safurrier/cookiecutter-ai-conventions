@@ -20,7 +20,7 @@ def test_cli_commands_available_after_install(cookies):
     
     # Check pyproject.toml has entry points
     pyproject = result.project_path / "pyproject.toml"
-    content = pyproject.read_text()
+    content = pyproject.read_text(encoding='utf-8')
     
     assert "[project.scripts]" in content
     assert 'ai-conventions = "ai_conventions.cli:main"' in content
@@ -42,7 +42,7 @@ def test_ai_conventions_status_command(cookies):
     cli_module = result.project_path / "ai_conventions" / "cli.py"
     assert cli_module.exists()
     
-    content = cli_module.read_text()
+    content = cli_module.read_text(encoding='utf-8')
     
     # Check for status command
     assert "@click.command()" in content or "@main.command()" in content
@@ -68,7 +68,7 @@ def test_capture_learning_command_structure(cookies):
     capture_module = result.project_path / "ai_conventions" / "capture.py"
     assert capture_module.exists()
     
-    content = capture_module.read_text()
+    content = capture_module.read_text(encoding='utf-8')
     
     # Check main function (might have parameters due to @click.command decorator)
     assert "def main(" in content
@@ -94,7 +94,7 @@ def test_sync_conventions_command_structure(cookies):
     sync_module = result.project_path / "ai_conventions" / "sync.py"
     assert sync_module.exists()
     
-    content = sync_module.read_text()
+    content = sync_module.read_text(encoding='utf-8')
     
     # Check main function
     assert "def main(" in content
@@ -193,7 +193,7 @@ def test_commands_removed_when_learning_disabled(cookies):
     
     # Check that capture-learning command is not in pyproject.toml
     pyproject = result.project_path / "pyproject.toml"
-    content = pyproject.read_text()
+    content = pyproject.read_text(encoding='utf-8')
     
     # Main CLI should still be there
     assert 'ai-conventions = "ai_conventions.cli:main"' in content
@@ -214,7 +214,7 @@ def test_cli_shell_completion_support(cookies):
     
     # Check CLI module for completion support
     cli_module = result.project_path / "ai_conventions" / "cli.py"
-    content = cli_module.read_text()
+    content = cli_module.read_text(encoding='utf-8')
     
     # Click automatically provides completion support when using @click.group()
     assert "@click.group()" in content

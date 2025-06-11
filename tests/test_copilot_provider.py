@@ -26,7 +26,7 @@ def test_copilot_creates_instructions_file(cookies):
     assert instructions_file.exists()
     
     # Check content includes project info and conventions
-    content = instructions_file.read_text()
+    content = instructions_file.read_text(encoding='utf-8')
     assert "# Copilot Instructions" in content
     assert "Test AI Conventions" in content
     assert "coding standards" in content.lower() or "conventions" in content.lower()
@@ -48,7 +48,7 @@ def test_copilot_instructions_includes_all_domains(cookies):
     assert result.exit_code == 0
     
     instructions_file = result.project_path / ".github" / "copilot-instructions.md"
-    content = instructions_file.read_text()
+    content = instructions_file.read_text(encoding='utf-8')
     
     # Check git conventions
     assert "commit" in content.lower()
@@ -86,7 +86,7 @@ def test_copilot_creates_vscode_settings(cookies):
     assert settings_file.exists()
     
     # Check settings content
-    settings = json.loads(settings_file.read_text())
+    settings = json.loads(settings_file.read_text(encoding='utf-8'))
     assert "github.copilot.chat.codeGeneration.useInstructionFiles" in settings
     assert settings["github.copilot.chat.codeGeneration.useInstructionFiles"] is True
 
@@ -115,7 +115,7 @@ def test_copilot_creates_prompt_files(cookies):
     assert (prompts_dir / "testing.prompt.md").exists()
     
     # Check content
-    git_prompt = (prompts_dir / "git.prompt.md").read_text()
+    git_prompt = (prompts_dir / "git.prompt.md").read_text(encoding='utf-8')
     assert "git" in git_prompt.lower()
     assert "commit" in git_prompt.lower()
 
@@ -159,7 +159,7 @@ def test_copilot_setup_documentation_created(cookies):
     # Check Copilot setup docs exist
     copilot_docs = result.project_path / "docs" / "copilot-setup.md"
     assert copilot_docs.exists()
-    content = copilot_docs.read_text()
+    content = copilot_docs.read_text(encoding='utf-8')
     assert "Copilot Setup Guide" in content
     assert "copilot-instructions.md" in content
     assert ".vscode/settings.json" in content
@@ -182,7 +182,7 @@ def test_copilot_instructions_format(cookies):
     assert result.exit_code == 0
     
     instructions_file = result.project_path / ".github" / "copilot-instructions.md"
-    content = instructions_file.read_text()
+    content = instructions_file.read_text(encoding='utf-8')
     
     # Check format follows best practices
     assert "# Copilot Instructions" in content
@@ -210,12 +210,12 @@ def test_copilot_with_learning_capture(cookies):
     
     # Check instructions mention learning capture
     instructions_file = result.project_path / ".github" / "copilot-instructions.md"
-    content = instructions_file.read_text()
+    content = instructions_file.read_text(encoding='utf-8')
     # Could mention evolving conventions
     
     # VS Code settings might include learning file references
     vscode_config = result.project_path / "vscode_config"
     settings_file = vscode_config / "settings.json"
     if settings_file.exists():
-        settings = json.loads(settings_file.read_text())
+        settings = json.loads(settings_file.read_text(encoding='utf-8'))
         # Could include reference to staging/learnings.md
