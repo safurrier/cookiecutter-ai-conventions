@@ -1,0 +1,52 @@
+---
+description: Writing Conventions
+globs: ["**/*.md", "**/README*", "**/CHANGELOG*", "**/docs/**"]
+alwaysApply: false
+---
+
+# Writing Conventions
+
+Apply these patterns for documentation, comments, and technical writing.
+
+## Convention Source
+@domains/writing/core.md
+
+## Quick Reference
+
+### Documentation
+- Start with the problem, not the solution
+- Use concrete examples
+- Progressive disclosure of complexity
+- Active voice
+
+### Code Comments
+- Explain why, not what
+- Document edge cases
+- Keep comments up to date
+
+### Commit Messages
+@domains/writing/commit-messages.md
+
+### PR Descriptions
+@domains/writing/pr-summaries.md
+
+## Examples
+
+Good documentation:
+```markdown
+## Handling Rate Limits
+
+When you hit the API too frequently, you'll see:
+\```
+Error 429: Too Many Requests
+\```
+
+To handle this, implement exponential backoff...
+```
+
+Bad documentation:
+```markdown
+## Rate Limiting
+
+This module implements rate limiting functionality.
+```

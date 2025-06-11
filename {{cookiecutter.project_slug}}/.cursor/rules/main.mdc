@@ -1,0 +1,58 @@
+---
+description: AI development conventions for {{ cookiecutter.project_name }}
+alwaysApply: true
+---
+
+# AI Development Conventions
+
+This project follows structured conventions to ensure consistent, high-quality code generation by AI assistants.
+
+## Active Convention Domains
+
+{%- set domains = cookiecutter.default_domains.split(',') %}
+{%- for domain in domains %}
+{%- if domain.strip() == "git" %}
+### Git Conventions
+Follow version control best practices for commits, branches, and collaboration.
+@domains/git/core.md
+
+{%- elif domain.strip() == "testing" %}
+### Testing Conventions
+Apply consistent testing patterns using pytest and proper test organization.
+@domains/testing/core.md
+
+{%- elif domain.strip() == "writing" %}
+### Writing Conventions
+Use clear, consistent documentation and commit message styles.
+@domains/writing/core.md
+
+{%- endif %}
+{%- endfor %}
+
+## Universal Conventions
+
+Apply these global patterns across all code:
+@global.md
+
+{%- if cookiecutter.enable_learning_capture %}
+
+## Learning System
+
+This project actively captures and evolves conventions:
+- Stage new learnings: @staging/learnings.md
+- Capture patterns: Use @commands/capture-learning.py
+- Review and promote: Use @commands/review-learnings.py
+
+{%- endif %}
+
+## Quick Reference
+
+When generating code:
+1. Check the relevant domain conventions first
+2. Apply global patterns
+3. Consider project-specific context
+4. Capture new patterns when they emerge
+
+---
+
+Generated for {{ cookiecutter.project_name }} by {{ cookiecutter.author_name }}

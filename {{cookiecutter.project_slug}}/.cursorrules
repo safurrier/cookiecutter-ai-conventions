@@ -1,0 +1,46 @@
+# AI Development Conventions for {{ cookiecutter.project_name }}
+
+This project uses structured AI development conventions. The conventions are automatically loaded to guide AI assistance.
+
+## Convention Domains
+
+{%- set domains = cookiecutter.default_domains.split(',') %}
+{%- for domain in domains %}
+{%- if domain.strip() == "git" %}
+- **Git Conventions**: Version control workflows, commit messages, branching strategies
+  - See: domains/git/core.md
+{%- elif domain.strip() == "testing" %}
+- **Testing Conventions**: Testing patterns, pytest usage, fixture design
+  - See: domains/testing/core.md
+{%- elif domain.strip() == "writing" %}
+- **Writing Conventions**: Documentation style, commit messages, code comments
+  - See: domains/writing/core.md
+{%- endif %}
+{%- endfor %}
+
+## Global Conventions
+
+Always follow the universal conventions in global.md for:
+- Code organization
+- Error handling
+- General best practices
+
+{%- if cookiecutter.enable_learning_capture %}
+
+## Learning System
+
+This project captures and evolves conventions over time:
+- New learnings are staged in staging/learnings.md
+- Stable patterns are promoted to domain files
+- Use commands/capture-learning.py to capture new patterns
+
+{%- endif %}
+
+## Project Information
+
+- **Author**: {{ cookiecutter.author_name }}
+- **Conventions Path**: {{ cookiecutter.project_slug }}/
+
+---
+
+For more detailed conventions, explore the domains/ directory and refer to the modern .cursor/rules/ MDC files for enhanced Cursor support.

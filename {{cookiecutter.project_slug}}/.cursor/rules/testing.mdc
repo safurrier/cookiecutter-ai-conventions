@@ -1,0 +1,53 @@
+---
+description: Testing Conventions
+globs: ["**/test_*.py", "**/*_test.py", "**/tests/**", "**/conftest.py"]
+alwaysApply: false
+---
+
+# Testing Conventions
+
+Apply these patterns when writing or modifying tests.
+
+## Convention Source
+@domains/testing/core.md
+
+## Quick Reference
+
+### Test Organization
+- Use pytest, not unittest
+- Progressive testing: E2E → Smoke → Integration → Unit
+- One test file per source file
+- Group related tests in classes
+
+### Test Patterns
+```python
+def test_behavior_when_condition(self):
+    """Test that behavior occurs when condition is met."""
+    # Arrange
+    
+    # Act
+    
+    # Assert
+```
+
+### Fixtures
+- Use fixtures for setup, not setUp methods
+- Scope fixtures appropriately (function, class, module, session)
+- Name fixtures descriptively
+
+## Examples
+
+Good test:
+```python
+def test_user_creation_with_valid_email(db_session):
+    """Test that users can be created with valid email."""
+    # Arrange
+    email = "user@example.com"
+    
+    # Act
+    user = User.create(email=email)
+    
+    # Assert
+    assert user.id is not None
+    assert user.email == email
+```

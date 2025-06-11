@@ -64,6 +64,25 @@ def main():
     if community_domains.exists():
         shutil.rmtree(community_domains)
     
+    # Handle Cursor provider files
+    if providers and "cursor" not in providers:
+        # Remove Cursor files if not selected
+        cursorrules_file = Path(".cursorrules")
+        if cursorrules_file.exists():
+            cursorrules_file.unlink()
+        
+        cursor_dir = Path(".cursor")
+        if cursor_dir.exists():
+            shutil.rmtree(cursor_dir)
+    elif providers and "cursor" in providers:
+        # Clean up domain-specific MDC files not in selected domains
+        cursor_rules_dir = Path(".cursor/rules")
+        if cursor_rules_dir.exists():
+            # Remove domain MDC files for unselected domains
+            for mdc_file in cursor_rules_dir.glob("*.mdc"):
+                if mdc_file.stem not in ["main"] + selected_domains:
+                    mdc_file.unlink()
+    
     # Clean up learning capture commands if not enabled
     if not enable_learning:
         commands_dir = Path("commands")
@@ -105,8 +124,10 @@ def main():
         
         if "cursor" in providers:
             print("\nCursor setup:")
-            print("  1. Open Cursor settings")
-            print("  2. Add stdlib/ to your rules")
+            print("  Your conventions are configured in:")
+            print("  - .cursorrules (legacy format)")
+            print("  - .cursor/rules/ (modern MDC format)")
+            print("  Cursor will automatically load these rules!")
         
         if "windsurf" in providers:
             print("\nWindsurf setup:")
