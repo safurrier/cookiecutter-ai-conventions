@@ -195,7 +195,10 @@ def test_codex_creates_wrapper_script(cookies):
     # Check for codex wrapper script
     wrapper_script = result.project_path / "codex.sh"
     assert wrapper_script.exists()
-    assert wrapper_script.stat().st_mode & 0o111  # Is executable
+    # Check executable bit (skip on Windows)
+    import platform
+    if platform.system() != "Windows":
+        assert wrapper_script.stat().st_mode & 0o111  # Is executable
     
     content = wrapper_script.read_text()
     assert "codex" in content
