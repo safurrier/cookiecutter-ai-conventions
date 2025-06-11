@@ -1,0 +1,74 @@
+# AI Development Conventions for {{ cookiecutter.project_name }}
+
+This project follows structured AI development conventions to ensure consistent, high-quality code generation.
+
+## Project Configuration
+
+- **Project**: {{ cookiecutter.project_name }}
+- **Author**: {{ cookiecutter.author_name }}
+- **Conventions Path**: {{ cookiecutter.project_slug }}/
+
+## Active Convention Domains
+
+{%- set domains = cookiecutter.default_domains.split(',') %}
+{%- for domain in domains %}
+{%- if domain.strip() == "git" %}
+### Git Conventions
+Follow version control best practices including:
+- Conventional commit format: type(scope): description
+- Branch naming: feature/*, fix/*, docs/*
+- Pull request templates and descriptions
+See: domains/git/core.md
+
+{%- elif domain.strip() == "testing" %}
+### Testing Conventions
+Apply consistent testing patterns:
+- Use pytest framework, not unittest
+- Progressive testing approach (E2E → Integration → Unit)
+- Descriptive test names that explain behavior
+See: domains/testing/core.md
+
+{%- elif domain.strip() == "writing" %}
+### Writing Conventions
+Maintain clear documentation and communication:
+- Start with the problem, not the solution
+- Use concrete examples throughout
+- Active voice and clear language
+See: domains/writing/core.md
+
+{%- endif %}
+{%- endfor %}
+
+## Universal Conventions
+
+Always apply these global patterns from global.md:
+- Clear code organization
+- Consistent error handling
+- Meaningful variable and function names
+- Comprehensive documentation
+
+{%- if cookiecutter.enable_learning_capture %}
+
+## Learning System
+
+This project actively captures and evolves conventions:
+- New patterns are staged in staging/learnings.md
+- Use commands/capture-learning.py to capture insights
+- Review periodically with commands/review-learnings.py
+- Promote stable patterns to domain files
+
+{%- endif %}
+
+## Quick Reference
+
+When working on this codebase:
+1. Check relevant domain conventions first
+2. Apply universal patterns from global.md
+3. Follow project-specific guidelines
+{%- if cookiecutter.enable_learning_capture %}
+4. Capture new patterns when they emerge
+{%- endif %}
+
+---
+
+Note: For advanced rule configuration with globs and specific file patterns, see .windsurf/rules/ directory.
