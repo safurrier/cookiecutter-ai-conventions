@@ -61,7 +61,7 @@ format: ## Format code with ruff
 .PHONY: mypy
 mypy: ## Run type checking with mypy
 	@echo "$(BLUE)Running type checker...$(NC)"
-	@echo "$(YELLOW)Skipping mypy for now (needs configuration)$(NC)"
+	uv run mypy hooks tests
 
 .PHONY: check
 check: lint mypy test ## Run all checks (lint, type check, test)
