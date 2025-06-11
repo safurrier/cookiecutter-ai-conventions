@@ -6,6 +6,7 @@
     "selected_providers": ["claude", "cursor", "windsurf", "aider", "copilot", "codex"],
     "enable_learning_capture": true,
     "enable_context_canary": true,
+    "enable_domain_composition": true,
     "default_domains": "git,testing",
     "_copy_without_render": ["community-domains/*", "*.py", "*.prompt.md", "codex.sh", ".claude/*"]
 }

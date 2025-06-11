@@ -32,6 +32,7 @@ class ConventionsInstaller:
             "author_name": "{{ cookiecutter.author_name }}",
             "enable_learning_capture": {{ cookiecutter.enable_learning_capture | lower }},
             "enable_context_canary": {{ cookiecutter.enable_context_canary | lower }},
+            "enable_domain_composition": {{ cookiecutter.enable_domain_composition | lower }},
             "default_domains": "{{ cookiecutter.default_domains }}",
             "selected_providers": {{ cookiecutter.selected_providers | jsonify }}
         }
@@ -51,7 +52,7 @@ class ConventionsInstaller:
     
     def install_claude(self):
         """Install conventions to Claude."""
-        print("\n=' Installing to Claude...")
+        print("\n>> Installing to Claude...")
         
         claude_dir = Path.home() / ".claude"
         claude_dir.mkdir(parents=True, exist_ok=True)
@@ -85,14 +86,14 @@ class ConventionsInstaller:
         # Generate CLAUDE.md from template
         self._generate_claude_md(claude_dir)
         
-        print(f" Installed to {claude_dir}")
+        print(f"   Installed to {claude_dir}")
         
     def _generate_claude_md(self, claude_dir: Path):
         """Generate CLAUDE.md from template."""
         template_dir = self.project_root / "templates" / "claude"
         
         if not template_dir.exists():
-            print("   No CLAUDE.md template found")
+            print("Warning: No CLAUDE.md template found")
             return
             
         env = Environment(loader=FileSystemLoader(str(template_dir)))
@@ -109,7 +110,7 @@ class ConventionsInstaller:
         claude_md = claude_dir / "CLAUDE.md"
         claude_md.write_text(content, encoding="utf-8")
         
-        print(f"   Generated CLAUDE.md with canary: >œ-CONVENTIONS-ACTIVE-{self.timestamp}")
+        print(f"   Generated CLAUDE.md with canary: CONVENTIONS-ACTIVE-{self.timestamp}")
     
     def install_all(self):
         """Install to all configured providers."""
@@ -122,17 +123,17 @@ class ConventionsInstaller:
             if provider == "claude":
                 self.install_claude()
             else:
-                print(f"   {provider.capitalize()} installation not yet implemented")
+                print(f"Warning: {provider.capitalize()} installation not yet implemented")
     
     def run_interactive(self):
         """Run interactive installation."""
-        print("\n=€ AI Conventions Installer")
+        print("\n== AI Conventions Installer")
         print("=" * 40)
         
         # For now, just install all
         self.install_all()
         
-        print("\n( Installation complete!")
+        print("\n[OK] Installation complete!")
         print("\nNext steps:")
         print("  1. Restart your AI tools to load new conventions")
         print("  2. Test with 'canary' or 'check conventions' command")
