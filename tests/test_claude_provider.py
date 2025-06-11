@@ -26,9 +26,15 @@ def test_claude_commands_included_when_provider_selected(cookies):
     assert (claude_commands_dir / "capture-learning.md").exists()
     assert (claude_commands_dir / "review-learnings.md").exists()
     
-    # Check Python commands are removed
+    # Check Python commands are removed but directory still exists with .md files
     commands_dir = result.project_path / "commands"
-    assert not commands_dir.exists()
+    assert commands_dir.exists()
+    # Python scripts should be removed
+    assert not (commands_dir / "capture-learning.py").exists()
+    assert not (commands_dir / "review-learnings.py").exists()
+    # But .md files should remain
+    assert (commands_dir / "capture-learning.md").exists()
+    assert (commands_dir / "review-learnings.md").exists()
 
 
 def test_claude_commands_removed_when_provider_not_selected(cookies):
@@ -51,10 +57,15 @@ def test_claude_commands_removed_when_provider_not_selected(cookies):
     claude_dir = result.project_path / ".claude"
     assert not claude_dir.exists()
     
-    # Check Python commands still exist
+    # Check commands directory exists with .md files but no .py files
     commands_dir = result.project_path / "commands"
     assert commands_dir.exists()
-    assert (commands_dir / "capture-learning.py").exists()
+    # Python scripts should be removed
+    assert not (commands_dir / "capture-learning.py").exists()
+    assert not (commands_dir / "review-learnings.py").exists()
+    # But .md files should remain
+    assert (commands_dir / "capture-learning.md").exists()
+    assert (commands_dir / "review-learnings.md").exists()
 
 
 def test_all_commands_removed_when_learning_disabled(cookies):

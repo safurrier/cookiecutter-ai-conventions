@@ -88,8 +88,13 @@ class TestE2ECookiecutterGeneration:
         assert (generated_project / "staging").exists()
         assert (generated_project / ".claude" / "commands" / "capture-learning.md").exists()
         assert (generated_project / ".claude" / "commands" / "review-learnings.md").exists()
-        # Python commands should be removed
-        assert not (generated_project / "commands").exists()
+        # Python scripts should be removed but commands directory exists with .md files
+        commands_dir = generated_project / "commands"
+        assert commands_dir.exists()
+        assert not (commands_dir / "capture-learning.py").exists()
+        assert not (commands_dir / "review-learnings.py").exists()
+        assert (commands_dir / "capture-learning.md").exists()
+        assert (commands_dir / "review-learnings.md").exists()
 
     def test_learning_capture_disabled_removes_commands(self, tmp_path):
         """Test that learning capture disabled removes command directories."""
