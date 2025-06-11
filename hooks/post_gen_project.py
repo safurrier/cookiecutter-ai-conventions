@@ -83,6 +83,25 @@ def main():
                 if mdc_file.stem not in ["main"] + selected_domains:
                     mdc_file.unlink()
     
+    # Handle Windsurf provider files
+    if providers and "windsurf" not in providers:
+        # Remove Windsurf files if not selected
+        windsurfrules_file = Path(".windsurfrules")
+        if windsurfrules_file.exists():
+            windsurfrules_file.unlink()
+        
+        windsurf_dir = Path(".windsurf")
+        if windsurf_dir.exists():
+            shutil.rmtree(windsurf_dir)
+    elif providers and "windsurf" in providers:
+        # Clean up domain-specific rule files not in selected domains
+        windsurf_rules_dir = Path(".windsurf/rules")
+        if windsurf_rules_dir.exists():
+            # Remove domain rule files for unselected domains
+            for rule_file in windsurf_rules_dir.glob("*.md"):
+                if rule_file.stem not in ["main"] + selected_domains:
+                    rule_file.unlink()
+    
     # Clean up learning capture commands if not enabled
     if not enable_learning:
         commands_dir = Path("commands")
@@ -131,7 +150,10 @@ def main():
         
         if "windsurf" in providers:
             print("\nWindsurf setup:")
-            print("  Configure in .windsurf/rules")
+            print("  Your conventions are configured in:")
+            print("  - .windsurfrules (main rules file)")
+            print("  - .windsurf/rules/ (advanced rules with globs)")
+            print("  Windsurf will automatically load these rules!")
         
         if "aider" in providers:
             print("\nAider setup:")

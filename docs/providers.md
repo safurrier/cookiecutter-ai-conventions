@@ -80,21 +80,57 @@ your-project/
 
 ## Windsurf
 
-Windsurf integration is in development.
+Full Windsurf support with advanced rule system and glob patterns.
 
-### Planned Features
-- Global cascade files
-- Project-specific overrides  
-- Automatic convention loading
+### Installation
+When you select Windsurf as a provider, the template automatically creates:
+- `.windsurfrules` - Main rules file in project root
+- `.windsurf/rules/*.md` - Advanced rule files with glob patterns
 
-### Current Workaround
-1. Create `windsurf.cascade`:
-   ```bash
-   echo "# Windsurf Conventions" > windsurf.cascade
-   cat domains/*/core.md >> windsurf.cascade
-   ```
+### How It Works
 
-2. Import manually in Windsurf settings
+#### Root Rules (.windsurfrules)
+- Markdown file automatically loaded by Windsurf
+- Contains all conventions in one place
+- Simple and straightforward
+
+#### Advanced Rules (.windsurf/rules/)
+- Multiple markdown files for better organization
+- Glob pattern support for file-specific rules
+- Character limit aware (6k per file, 12k total)
+- Different activation modes
+
+### Features
+- ✅ Automatic loading
+- ✅ Glob pattern matching
+- ✅ Domain-specific rule files
+- ✅ Character limit compliance
+- ✅ Multiple activation modes
+- ✅ Cascade AI integration
+
+### File Structure
+```
+your-project/
+├── .windsurfrules            # Main rules file
+└── .windsurf/
+    └── rules/
+        ├── main.md           # Primary conventions
+        ├── git.md            # Git rules with globs
+        ├── testing.md        # Testing patterns
+        └── writing.md        # Documentation style
+```
+
+### Activation Modes
+- **Always On**: Rules always active
+- **Manual**: Activated by @mentioning
+- **Model Decision**: AI decides when to apply
+- **Glob**: Applied to matching files
+
+### Best Practices
+- Keep individual files under 6,000 characters
+- Use glob patterns for targeted rules
+- Reference detailed docs instead of duplicating
+- Monitor total character count (12k limit)
 
 ---
 
@@ -214,7 +250,7 @@ If you want to contribute a provider integration:
 |----------|---------------|-----------|------------|--------------|
 | Claude   | ✅ | ✅ | ✅ | 8K tokens |
 | Cursor   | ✅ | ✅ | ❌ | Per-file |
-| Windsurf | 🚧 | 🚧 | 🚧 | Unknown |
+| Windsurf | ✅ | ✅ | ❌ | 12K total |
 | Aider    | 🚧 | ❌ | ❌ | Unlimited |
 | Copilot  | ❌ | ❌ | ❌ | Limited |
 
