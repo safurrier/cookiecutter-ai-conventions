@@ -16,12 +16,13 @@ This is your AI Development Standard Library. It implements automatic domain loa
 
 | Context | Load Domain | Trigger Keywords/Actions |
 |---------|-------------|-------------------------|
-{%- for domain in cookiecutter.selected_domains %}
-{%- if domain == "git" %}
+{%- set domains = cookiecutter.default_domains.split(',') %}
+{%- for domain in domains %}
+{%- if domain.strip() == "git" %}
 | Git operations | @domains/git/core.md | git, commit, branch, merge, rebase |
-{%- elif domain == "testing" %}
+{%- elif domain.strip() == "testing" %}
 | Testing code | @domains/testing/core.md | test_, pytest, assert, fixture |
-{%- elif domain == "writing" %}
+{%- elif domain.strip() == "writing" %}
 | Writing docs/commits | @domains/writing/core.md | README, docs, commit message |
 {%- endif %}
 {%- endfor %}
@@ -33,8 +34,8 @@ This is your AI Development Standard Library. It implements automatic domain loa
 @global.md
 
 ### Domain Knowledge (Auto-loaded based on context)
-{%- for domain in cookiecutter.selected_domains %}
-@domains/{{ domain }}/core.md
+{%- for domain in domains %}
+@domains/{{ domain.strip() }}/core.md
 {%- endfor %}
 
 {%- if cookiecutter.enable_learning_capture %}
@@ -53,7 +54,7 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 
 ## Domain-Specific Loading Instructions
 
-{%- if "git" in cookiecutter.selected_domains %}
+{%- if "git" in cookiecutter.default_domains %}
 
 ### Git Domain
 **Auto-load @domains/git/core.md when:**
@@ -62,7 +63,7 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 - User asks about version control
 {%- endif %}
 
-{%- if "testing" in cookiecutter.selected_domains %}
+{%- if "testing" in cookiecutter.default_domains %}
 
 ### Testing Domain
 **Auto-load @domains/testing/core.md when:**
@@ -71,7 +72,7 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 - Writing test cases or assertions
 {%- endif %}
 
-{%- if "writing" in cookiecutter.selected_domains %}
+{%- if "writing" in cookiecutter.default_domains %}
 
 ### Writing Domain
 **Auto-load @domains/writing/core.md when:**
@@ -84,14 +85,14 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 
 ### Automatic Loading in Action
 ```
-{%- if "writing" in cookiecutter.selected_domains %}
+{%- if "writing" in cookiecutter.default_domains %}
 User: "Help me write a commit message for these changes"
 Claude: [IMMEDIATELY reads @domains/writing/commit-messages.md]
         [Applies natural language patterns, avoids LLM tells]
         "Add user authentication middleware"
 {%- endif %}
 
-{%- if "testing" in cookiecutter.selected_domains %}
+{%- if "testing" in cookiecutter.default_domains %}
 User: "Create tests for this function"
 Claude: [IMMEDIATELY reads @domains/testing/core.md]
         [Applies testing patterns and best practices]
@@ -113,12 +114,12 @@ Available commands:
 
 ## Available Domains
 
-{%- for domain in cookiecutter.selected_domains %}
-{%- if domain == "git" %}
+{%- for domain in domains %}
+{%- if domain.strip() == "git" %}
 - **git/**: Version control workflows and commit standards
-{%- elif domain == "testing" %}
+{%- elif domain.strip() == "testing" %}
 - **testing/**: Testing patterns and philosophy
-{%- elif domain == "writing" %}
+{%- elif domain.strip() == "writing" %}
 - **writing/**: Technical writing, commit messages, and documentation
 {%- endif %}
 {%- endfor %}

@@ -28,7 +28,7 @@ class TestSmokeTemplateStructure:
         assert "author_email" in config
         assert "selected_providers" in config
         assert "enable_learning_capture" in config
-        assert "selected_domains" in config
+        assert "default_domains" in config
 
     def test_essential_template_files_exist(self):
         """Test that essential template files are present."""

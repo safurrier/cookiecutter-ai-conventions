@@ -3,8 +3,8 @@
     "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
     "author_name": "Your Name",
     "author_email": "your.email@example.com",
-    "selected_providers": ["claude"],
+    "selected_providers": ["claude", "cursor", "windsurf", "aider"],
     "enable_learning_capture": true,
-    "selected_domains": ["git", "testing"],
+    "default_domains": "git,testing",
     "_copy_without_render": ["community-domains/*", "*.py"]
 }
