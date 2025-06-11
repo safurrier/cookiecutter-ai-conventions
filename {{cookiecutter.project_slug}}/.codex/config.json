@@ -1,0 +1,17 @@
+{
+  "project": "{{ cookiecutter.project_name }}",
+  "conventions": {
+    "source": "AGENTS.md",
+    "domains": {{ cookiecutter.default_domains.split(',') | tojson }}
+  },
+  "settings": {
+    "approvalMode": "Suggest",
+    "autoSave": true,
+    "contextAware": true
+  },
+  "features": {
+    "gitIntegration": true,
+    "testFirst": {% if "testing" in cookiecutter.default_domains.split(',') %}true{% else %}false{% endif %},
+    "learningCapture": {{ cookiecutter.enable_learning_capture | lower }}
+  }
+}
