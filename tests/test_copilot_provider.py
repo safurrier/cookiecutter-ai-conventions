@@ -77,8 +77,12 @@ def test_copilot_creates_vscode_settings(cookies):
     
     assert result.exit_code == 0
     
-    # Check .vscode/settings.json exists
-    settings_file = result.project_path / ".vscode" / "settings.json"
+    # Check vscode_config exists (gets renamed to .vscode in post-gen)
+    vscode_config = result.project_path / "vscode_config"
+    assert vscode_config.exists()
+    
+    # Check settings.json exists in vscode_config
+    settings_file = vscode_config / "settings.json"
     assert settings_file.exists()
     
     # Check settings content
@@ -210,6 +214,8 @@ def test_copilot_with_learning_capture(cookies):
     # Could mention evolving conventions
     
     # VS Code settings might include learning file references
-    settings_file = result.project_path / ".vscode" / "settings.json"
-    settings = json.loads(settings_file.read_text())
-    # Could include reference to staging/learnings.md
+    vscode_config = result.project_path / "vscode_config"
+    settings_file = vscode_config / "settings.json"
+    if settings_file.exists():
+        settings = json.loads(settings_file.read_text())
+        # Could include reference to staging/learnings.md

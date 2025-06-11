@@ -120,16 +120,36 @@ Choose from battle-tested conventions:
 ## Installation
 
 ### Quick Start (Recommended)
+
+One command, zero dependencies:
+
 ```bash
-curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions-experimental/main/bootstrap.sh | sh
+curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions/main/bootstrap.sh | sh
 ```
 
+This will:
+- ✅ Install `uv` if needed (cross-platform)
+- ✅ Run the cookiecutter template
+- ✅ Guide you through setup
+- ✅ Provide next steps
+
 ### Manual Installation
+
+If you prefer to install step by step:
+
 ```bash
-# Requires Python 3.9+ and uv
-uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions-experimental
+# 1. Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. Run cookiecutter
+uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions
+
+# 3. Install CLI tools
 cd my-ai-conventions
-./install.py
+uv tool install .
+
+# 4. Check installation
+ai-conventions status
 ```
 
 ## How It Works
