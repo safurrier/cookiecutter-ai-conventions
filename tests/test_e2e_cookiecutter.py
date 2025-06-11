@@ -83,10 +83,13 @@ class TestE2ECookiecutterGeneration:
 
         # Assert
         generated_project = Path(project_dir)
-        assert (generated_project / "commands").exists()
+        # With default claude provider, should have Claude commands
+        assert (generated_project / ".claude" / "commands").exists()
         assert (generated_project / "staging").exists()
-        assert (generated_project / "commands" / "capture-learning.py").exists()
-        assert (generated_project / "commands" / "review-learnings.py").exists()
+        assert (generated_project / ".claude" / "commands" / "capture-learning.md").exists()
+        assert (generated_project / ".claude" / "commands" / "review-learnings.md").exists()
+        # Python commands should be removed
+        assert not (generated_project / "commands").exists()
 
     def test_learning_capture_disabled_removes_commands(self, tmp_path):
         """Test that learning capture disabled removes command directories."""
@@ -107,6 +110,7 @@ class TestE2ECookiecutterGeneration:
         # Assert
         generated_project = Path(project_dir)
         assert not (generated_project / "commands").exists()
+        assert not (generated_project / ".claude").exists()
         assert not (generated_project / "staging").exists()
 
     def test_provider_selection_creates_config(self, tmp_path):
@@ -127,11 +131,12 @@ class TestE2ECookiecutterGeneration:
 
         # Assert
         generated_project = Path(project_dir)
-        providers_file = generated_project / ".selected_providers"
-        assert providers_file.exists()
-
-        content = providers_file.read_text()
-        assert "claude" in content
+        # Provider selection should configure the project correctly
+        # With Claude provider, should have Claude commands
+        assert (generated_project / ".claude").exists()
+        # Check that the README mentions Claude setup
+        readme_content = (generated_project / "README.md").read_text()
+        assert "Claude" in readme_content or "claude" in readme_content
 
     def test_all_domains_can_be_selected(self, tmp_path):
         """Test selecting all available domains."""
@@ -144,7 +149,7 @@ class TestE2ECookiecutterGeneration:
             str(Path.cwd()),
             no_input=True,
             extra_context={
-                "selected_domains": ["git", "testing"],  # Use default domains
+                "default_domains": "git,testing",  # Use default domains
             },
             output_dir=str(output_dir),
         )
