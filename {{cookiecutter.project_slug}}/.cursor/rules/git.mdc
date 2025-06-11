@@ -1,0 +1,46 @@
+---
+description: Git Conventions
+globs: ["*.git*", ".gitignore", "COMMIT_*"]
+alwaysApply: false
+---
+
+# Git Conventions
+
+Apply these patterns for all git-related operations.
+
+## Convention Source
+@domains/git/core.md
+
+## Quick Reference
+
+### Commit Messages
+- Use conventional commit format: `type(scope): description`
+- Types: feat, fix, docs, style, refactor, test, chore
+- Keep subject line under 50 characters
+- Use imperative mood
+
+### Branching
+- Feature branches: `feat/description`
+- Bug fixes: `fix/description`
+- Documentation: `docs/description`
+
+### Pull Requests
+- Clear, descriptive titles
+- Link related issues
+- Include test plan
+
+## Examples
+
+Good commit:
+```
+feat(auth): add OAuth2 integration
+
+- Implement Google OAuth provider
+- Add token refresh logic
+- Update user model with OAuth fields
+```
+
+Bad commit:
+```
+Updated stuff
+```

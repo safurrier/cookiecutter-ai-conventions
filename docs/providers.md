@@ -32,29 +32,49 @@ Claude should list your installed domains.
 
 ## Cursor
 
-Cursor support is coming soon. Currently, you can use `.cursorrules` as a workaround.
+Full Cursor support with both legacy and modern MDC format.
 
-### Temporary Setup
-1. Generate `.cursorrules` from your conventions:
-   ```bash
-   cat domains/*/core.md > .cursorrules
-   ```
+### Installation
+When you select Cursor as a provider, the template automatically creates:
+- `.cursorrules` - Legacy format for backwards compatibility
+- `.cursor/rules/*.mdc` - Modern MDC files with advanced features
 
-2. Place in your project root:
-   ```bash
-   cp .cursorrules ~/projects/myproject/
-   ```
+### How It Works
 
-### Limitations
-- Per-project, not global
-- No automatic updates
-- Limited context size
+#### Legacy Format (.cursorrules)
+- Plain text file in project root
+- Automatically loaded by Cursor
+- Contains all your conventions in one file
 
-### Coming Soon
-Native Cursor integration will provide:
-- Global conventions loading
-- Automatic updates
-- Full domain support
+#### Modern Format (.cursor/rules/)
+- MDC (Markdown Cursor) files
+- Supports metadata and file pattern matching
+- Better organization with domain-specific files
+
+### Features
+- ✅ Automatic loading
+- ✅ File pattern matching (MDC format)
+- ✅ Domain-specific rules
+- ✅ Works with existing projects
+- ✅ Learning capture integration
+
+### File Structure
+```
+your-project/
+├── .cursorrules              # Legacy format
+└── .cursor/
+    └── rules/
+        ├── main.mdc          # Main conventions
+        ├── git.mdc           # Git-specific rules
+        ├── testing.mdc       # Testing patterns
+        └── writing.mdc       # Documentation style
+```
+
+### Best Practices
+- Use MDC format for new rules (more powerful)
+- Keep individual MDC files focused
+- Use file globs to target specific file types
+- Set `alwaysApply: false` for domain-specific rules
 
 ---
 
@@ -193,7 +213,7 @@ If you want to contribute a provider integration:
 | Provider | Global Support | Auto-Load | Hot Reload | Context Size |
 |----------|---------------|-----------|------------|--------------|
 | Claude   | ✅ | ✅ | ✅ | 8K tokens |
-| Cursor   | 🚧 | 🚧 | ❌ | 4K tokens |
+| Cursor   | ✅ | ✅ | ❌ | Per-file |
 | Windsurf | 🚧 | 🚧 | 🚧 | Unknown |
 | Aider    | 🚧 | ❌ | ❌ | Unlimited |
 | Copilot  | ❌ | ❌ | ❌ | Limited |
