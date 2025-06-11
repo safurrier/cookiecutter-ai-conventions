@@ -16,12 +16,18 @@ dependencies = [
     "rich>=13.0",
     "PyYAML>=6.0",
     "textual>=0.47.0",
+    "pydantic>=2.0",
+    "tomli>=2.0; python_version < '3.11'",
+    "tomli-w>=1.0",
 ]
 
 [project.scripts]
 ai-conventions = "ai_conventions.cli:main"
+{%- if cookiecutter.enable_learning_capture %}
 capture-learning = "ai_conventions.capture:main"
+{%- endif %}
 sync-conventions = "ai_conventions.sync:main"
+conventions-config = "ai_conventions.config_cli:main"
 
 [tool.uv]
 dev-dependencies = [

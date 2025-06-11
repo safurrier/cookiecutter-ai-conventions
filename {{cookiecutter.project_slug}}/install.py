@@ -2,18 +2,15 @@
 """Install AI conventions to various providers."""
 
 import json
-import shutil
 import sys
-from datetime import datetime
 from pathlib import Path
 
 try:
-    from jinja2 import Environment, FileSystemLoader
+    from ai_conventions.providers import get_provider
+    from ai_conventions.config import ConfigManager
 except ImportError:
-    print("Installing required dependencies...")
-    import subprocess
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "jinja2"])
-    from jinja2 import Environment, FileSystemLoader
+    print("Error: ai_conventions module not found. Please run: uv tool install .")
+    sys.exit(1)
 
 
 class ConventionsInstaller:
@@ -21,96 +18,59 @@ class ConventionsInstaller:
     
     def __init__(self, project_root: Path = None):
         self.project_root = project_root or Path.cwd()
+        self.config_manager = ConfigManager(self.project_root)
         self.config = self._load_config()
-        self.timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         
     def _load_config(self) -> dict:
         """Load configuration from various sources."""
-        config = {
-            "project_name": "{{ cookiecutter.project_name }}",
-            "project_slug": "{{ cookiecutter.project_slug }}",
-            "author_name": "{{ cookiecutter.author_name }}",
-            "enable_learning_capture": {{ cookiecutter.enable_learning_capture | lower }},
-            "enable_context_canary": {{ cookiecutter.enable_context_canary | lower }},
-            "enable_domain_composition": {{ cookiecutter.enable_domain_composition | lower }},
-            "default_domains": "{{ cookiecutter.default_domains }}",
-            "selected_providers": {{ cookiecutter.selected_providers | jsonify }}
-        }
-        
-        # Try to load from .ai-conventions.yaml if it exists
-        config_file = self.project_root / ".ai-conventions.yaml"
-        if config_file.exists():
-            try:
-                import yaml
-                with open(config_file, "r", encoding="utf-8") as f:
-                    file_config = yaml.safe_load(f)
-                    config.update(file_config)
-            except ImportError:
-                pass
-                
-        return config
+        # Try to load from config file first
+        try:
+            config_obj = self.config_manager.load_config()
+            return config_obj.dict()
+        except Exception:
+            # Fall back to template defaults
+            config = {
+                "project_name": "{{ cookiecutter.project_name }}",
+                "project_slug": "{{ cookiecutter.project_slug }}",
+                "author_name": "{{ cookiecutter.author_name }}",
+                "enable_learning_capture": {{ cookiecutter.enable_learning_capture | lower }},
+                "enable_context_canary": {{ cookiecutter.enable_context_canary | lower }},
+                "enable_domain_composition": {{ cookiecutter.enable_domain_composition | lower }},
+                "default_domains": "{{ cookiecutter.default_domains }}",
+                "selected_providers": {{ cookiecutter.selected_providers | jsonify }}
+            }
+            return config
     
-    def install_claude(self):
-        """Install conventions to Claude."""
-        print("\n>> Installing to Claude...")
+    def install_provider(self, provider_name: str):
+        """Install conventions to a specific provider.
         
-        claude_dir = Path.home() / ".claude"
-        claude_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Copy domains, global.md, staging, etc.
-        items_to_copy = ["domains", "global.md", "staging", "projects"]
-        if self.config["enable_learning_capture"]:
-            # Copy Claude commands
-            claude_commands = self.project_root / ".claude" / "commands"
-            if claude_commands.exists():
-                dest = claude_dir / "commands"
-                if dest.exists():
-                    shutil.rmtree(dest)
-                shutil.copytree(claude_commands, dest)
-        
-        for item in items_to_copy:
-            source = self.project_root / item
-            if source.exists():
-                dest = claude_dir / item
-                if dest.exists():
-                    if dest.is_dir():
-                        shutil.rmtree(dest)
-                    else:
-                        dest.unlink()
-                
-                if source.is_dir():
-                    shutil.copytree(source, dest)
-                else:
-                    shutil.copy2(source, dest)
-        
-        # Generate CLAUDE.md from template
-        self._generate_claude_md(claude_dir)
-        
-        print(f"   Installed to {claude_dir}")
-        
-    def _generate_claude_md(self, claude_dir: Path):
-        """Generate CLAUDE.md from template."""
-        template_dir = self.project_root / "templates" / "claude"
-        
-        if not template_dir.exists():
-            print("Warning: No CLAUDE.md template found")
-            return
+        Args:
+            provider_name: Name of the provider to install
+        """
+        try:
+            provider = get_provider(provider_name, self.project_root, self.config)
             
-        env = Environment(loader=FileSystemLoader(str(template_dir)))
-        template = env.get_template("CLAUDE.md.j2")
-        
-        # Prepare context
-        context = {
-            "cookiecutter": self.config,
-            "canary_timestamp": self.timestamp
-        }
-        
-        # Render and save
-        content = template.render(**context)
-        claude_md = claude_dir / "CLAUDE.md"
-        claude_md.write_text(content, encoding="utf-8")
-        
-        print(f"   Generated CLAUDE.md with canary: CONVENTIONS-ACTIVE-{self.timestamp}")
+            print(f"\n>> Installing to {provider.name.capitalize()}...")
+            
+            # Show capabilities
+            caps = provider.capabilities
+            print(f"   Max context: {caps.max_context_tokens:,} tokens")
+            print(f"   Config format: {caps.config_format}")
+            
+            # Perform installation
+            result = provider.install()
+            
+            if result.success:
+                print(f"   {result.message}")
+                if result.mode != "in-place":
+                    print(f"   Mode: {result.mode}")
+            else:
+                print(f"   Warning: {result.message}")
+                
+        except ValueError as e:
+            print(f"   Error: {e}")
+        except Exception as e:
+            print(f"   Error installing {provider_name}: {e}")
     
     def install_all(self):
         """Install to all configured providers."""
@@ -119,11 +79,8 @@ class ConventionsInstaller:
         if isinstance(providers, str):
             providers = [providers]
             
-        for provider in providers:
-            if provider == "claude":
-                self.install_claude()
-            else:
-                print(f"Warning: {provider.capitalize()} installation not yet implemented")
+        for provider_name in providers:
+            self.install_provider(provider_name)
     
     def run_interactive(self):
         """Run interactive installation."""
@@ -144,8 +101,20 @@ def main():
     """Main entry point."""
     installer = ConventionsInstaller()
     
-    if len(sys.argv) > 1 and sys.argv[1] == "--all":
-        installer.install_all()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--all":
+            installer.install_all()
+        elif sys.argv[1] == "--tui":
+            # Run Textual TUI
+            try:
+                from ai_conventions.tui import run_tui
+                run_tui(installer.project_root, installer.config)
+            except ImportError:
+                print("Error: Textual not installed. Run: uv add textual")
+                sys.exit(1)
+        else:
+            # Install specific provider
+            installer.install_provider(sys.argv[1])
     else:
         installer.run_interactive()
 

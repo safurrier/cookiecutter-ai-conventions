@@ -121,6 +121,6 @@ class TestPostGenProjectHook:
 
         # Assert: File exists with correct content
         assert providers_file.exists()
-        content = providers_file.read_text()
+        content = providers_file.read_text(encoding='utf-8')
         assert "claude" in content
         assert "cursor" in content

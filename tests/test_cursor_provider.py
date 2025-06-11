@@ -25,7 +25,7 @@ def test_cursor_creates_legacy_cursorrules_file(cookies):
     assert cursorrules_file.exists()
     
     # Check content includes domain references
-    content = cursorrules_file.read_text()
+    content = cursorrules_file.read_text(encoding='utf-8')
     assert "# AI Development Conventions" in content
     assert "git" in content
     assert "testing" in content
@@ -56,7 +56,7 @@ def test_cursor_creates_modern_mdc_structure(cookies):
     assert main_rules.exists()
     
     # Check MDC content has proper format
-    content = main_rules.read_text()
+    content = main_rules.read_text(encoding='utf-8')
     assert "---" in content  # MDC metadata delimiter
     assert "description:" in content
     assert "# AI Development Conventions" in content
@@ -79,7 +79,7 @@ def test_cursor_mdc_files_have_correct_metadata(cookies):
     
     # Check main.mdc metadata
     main_rules = result.project_path / ".cursor" / "rules" / "main.mdc"
-    content = main_rules.read_text()
+    content = main_rules.read_text(encoding='utf-8')
     
     # Should have metadata section
     assert content.startswith("---")
@@ -129,9 +129,9 @@ def test_cursor_setup_documentation_created(cookies):
     # Check Cursor setup docs exist
     cursor_docs = result.project_path / "docs" / "cursor-setup.md"
     assert cursor_docs.exists()
-    assert "Cursor Setup Guide" in cursor_docs.read_text()
-    assert ".cursorrules" in cursor_docs.read_text()
-    assert ".cursor/rules" in cursor_docs.read_text()
+    assert "Cursor Setup Guide" in cursor_docs.read_text(encoding='utf-8')
+    assert ".cursorrules" in cursor_docs.read_text(encoding='utf-8')
+    assert ".cursor/rules" in cursor_docs.read_text(encoding='utf-8')
 
 
 def test_cursor_multiple_domains_creates_separate_mdc_files(cookies):
@@ -157,7 +157,7 @@ def test_cursor_multiple_domains_creates_separate_mdc_files(cookies):
     assert (cursor_rules_dir / "writing.mdc").exists()
     
     # Check git.mdc content
-    git_content = (cursor_rules_dir / "git.mdc").read_text()
+    git_content = (cursor_rules_dir / "git.mdc").read_text(encoding='utf-8')
     assert "Git Conventions" in git_content
     assert "@domains/git/core.md" in git_content
 
@@ -178,7 +178,7 @@ def test_cursor_cursorrules_without_learning_capture(cookies):
     assert result.exit_code == 0
     
     cursorrules_file = result.project_path / ".cursorrules"
-    content = cursorrules_file.read_text()
+    content = cursorrules_file.read_text(encoding='utf-8')
     
     # Should not mention learning capture
     assert "capture-learning" not in content

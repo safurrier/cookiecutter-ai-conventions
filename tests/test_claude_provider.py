@@ -110,4 +110,4 @@ def test_claude_setup_docs_created(cookies):
     # Check Claude setup docs exist
     claude_setup = result.project_path / "docs" / "claude-setup.md"
     assert claude_setup.exists()
-    assert "Claude Code Setup Guide" in claude_setup.read_text()
+    assert "Claude Code Setup Guide" in claude_setup.read_text(encoding='utf-8')
