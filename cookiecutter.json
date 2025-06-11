@@ -6,6 +6,6 @@
     "providers": ["claude", "cursor", "windsurf", "aider"],
     "selected_providers": ["claude"],
     "enable_learning_capture": true,
-    "selected_domains": [],
-    "_copy_without_render": ["community-domains/*"]
+    "selected_domains": ["git", "testing"],
+    "_copy_without_render": ["community-domains/*", "*.py"]
 }
