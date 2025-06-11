@@ -138,6 +138,17 @@ This system evolves through use:
 {%- endif %}
 
 The goal is building a comprehensive, maintainable knowledge base that improves AI assistance quality over time while keeping context manageable.
+{%- if cookiecutter.enable_context_canary %}
+
+## 🦜 Context Health Check
+
+CANARY_PHRASE: 🦜-CONVENTIONS-ACTIVE-{{ '{{' }} canary_timestamp {{ '}}' }}
+
+When asked to "check conventions", "convention check", "canary", or "conventions loaded?", respond with:
+"✓ Conventions loaded! Canary: 🦜-CONVENTIONS-ACTIVE-{{ '{{' }} canary_timestamp {{ '}}' }}"
+
+This helps verify conventions survived context compression.
+{%- endif %}
 
 ## Project Information
 
