@@ -266,6 +266,71 @@ your-project/
 
 ---
 
+## OpenAI Codex CLI
+
+Full OpenAI Codex support with AGENTS.md convention files.
+
+### Installation
+When you select Codex as a provider, the template automatically creates:
+- `AGENTS.md` - AI agent instructions (automatically loaded)
+- `.codex/config.json` - Codex configuration
+- `codex.sh` - Wrapper script for easy usage
+- `docs/codex-setup.md` - Complete setup guide
+
+### How It Works
+
+#### Convention Loading
+- Codex automatically reads `AGENTS.md` from your project root
+- Instructions guide the AI's behavior and code generation
+- No manual configuration required
+
+#### Git-Aware Context
+- Understands your repository structure
+- Follows your commit conventions
+- Can create branches and commits
+
+### Features
+- ✅ Automatic AGENTS.md loading
+- ✅ Git repository awareness
+- ✅ Multi-file editing support
+- ✅ Sandboxed code execution
+- ✅ Multiple approval modes
+- ✅ Test-first development support
+
+### File Structure
+```
+your-project/
+├── AGENTS.md          # AI agent instructions
+├── .codex/           # Configuration directory
+│   └── config.json   # Project settings
+├── codex.sh          # Wrapper script
+└── docs/
+    └── codex-setup.md # Setup guide
+```
+
+### Usage
+```bash
+# Install Codex CLI
+npm install -g @openai/codex
+
+# Set API key
+export OPENAI_API_KEY='your-key'
+
+# Run with wrapper
+./codex.sh
+
+# Or run directly
+codex
+```
+
+### Best Practices
+- Write clear, specific instructions
+- Update AGENTS.md as conventions evolve
+- Use approval mode for safety
+- Make incremental changes
+
+---
+
 ## JetBrains AI Assistant
 
 JetBrains IDEs (PyCharm, IntelliJ, etc.) have their own AI assistant.
@@ -332,6 +397,7 @@ If you want to contribute a provider integration:
 | Windsurf | ✅ | ✅ | ❌ | 12K total |
 | Aider    | ✅ | ✅ | ❌ | Unlimited |
 | Copilot  | ✅ | ✅ | ❌ | Per-chat |
+| Codex    | ✅ | ✅ | ❌ | Git repo |
 
 ---
 

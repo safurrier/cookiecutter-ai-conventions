@@ -156,6 +156,30 @@ def main():
                 if prompt_file.stat().st_size == 0:
                     prompt_file.unlink()
     
+    # Handle Codex provider files
+    if providers and "codex" not in providers:
+        # Remove Codex files if not selected
+        agents_file = Path("AGENTS.md")
+        if agents_file.exists():
+            agents_file.unlink()
+        
+        codex_dir = Path(".codex")
+        if codex_dir.exists():
+            shutil.rmtree(codex_dir)
+        
+        codex_script = Path("codex.sh")
+        if codex_script.exists():
+            codex_script.unlink()
+        
+        codex_docs = Path("docs/codex-setup.md")
+        if codex_docs.exists():
+            codex_docs.unlink()
+    elif providers and "codex" in providers:
+        # Make codex.sh executable
+        codex_script = Path("codex.sh")
+        if codex_script.exists():
+            codex_script.chmod(codex_script.stat().st_mode | 0o111)
+    
     # Clean up learning capture commands if not enabled
     if not enable_learning:
         commands_dir = Path("commands")
@@ -223,6 +247,15 @@ def main():
             print("  - .vscode/settings.json (VS Code configuration)")
             print("  - .github/prompts/ (domain-specific prompts)")
             print("  Copilot will automatically use your conventions!")
+        
+        if "codex" in providers:
+            print("\nOpenAI Codex setup:")
+            print("  Your conventions are configured in:")
+            print("  - AGENTS.md (automatically loaded)")
+            print("  - .codex/config.json (configuration)")
+            print("  - codex.sh (wrapper script)")
+            print("  Install with: npm install -g @openai/codex")
+            print("  Then run: ./codex.sh")
     
     print("\nNext steps:")
     print("  1. cd into your project directory")
