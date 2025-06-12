@@ -30,12 +30,16 @@ def main():
     enable_composition = {{ cookiecutter.enable_domain_composition }}  # noqa: F821
     
     # Get providers
-    providers = {{ cookiecutter.selected_providers | jsonify }}  # noqa: F821
+    providers = "{{ cookiecutter.selected_providers }}"  # noqa: F821
     
     
     # Ensure providers is a list
     if isinstance(providers, str):
-        providers = [providers]
+        # Handle comma-separated providers
+        if ',' in providers:
+            providers = [p.strip() for p in providers.split(',')]
+        else:
+            providers = [providers]
         
     # Ensure selected_domains is a list
     if isinstance(selected_domains, str):
@@ -222,6 +226,17 @@ def main():
             claude_commands_dir = Path(".claude/commands")
             if claude_commands_dir.exists():
                 shutil.rmtree(Path(".claude"))
+    
+    # Remove unselected provider modules
+    providers_dir = Path("ai_conventions/providers")
+    if providers_dir.exists():
+        all_providers = ["claude", "cursor", "windsurf", "aider", "copilot", "codex"]
+        for provider in all_providers:
+            if provider not in providers:
+                provider_module = providers_dir / f"{provider}.py"
+                if provider_module.exists():
+                    provider_module.unlink()
+                    print(f"  - Removed {provider} provider module")
     
     # Handle domain composition
     if not enable_composition:

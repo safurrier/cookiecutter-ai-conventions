@@ -137,7 +137,7 @@ def test_provider_registry(cookies):
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
-            "selected_providers": ["claude", "cursor", "windsurf"],
+            "selected_providers": "claude,cursor,windsurf",
         }
     )
     
@@ -147,15 +147,22 @@ def test_provider_registry(cookies):
     import sys
     sys.path.insert(0, str(result.project_path))
     
+    # Clear any previously imported provider modules to avoid caching issues
+    modules_to_remove = [key for key in sys.modules.keys() if key.startswith('ai_conventions')]
+    for module in modules_to_remove:
+        del sys.modules[module]
+    
     from ai_conventions.providers import PROVIDERS, get_provider
     
-    # Check all providers are registered
+    # Check selected providers are registered
     assert "claude" in PROVIDERS
     assert "cursor" in PROVIDERS
     assert "windsurf" in PROVIDERS
-    assert "aider" in PROVIDERS
-    assert "copilot" in PROVIDERS
-    assert "codex" in PROVIDERS
+    
+    # Check unselected providers are NOT registered
+    assert "aider" not in PROVIDERS
+    assert "copilot" not in PROVIDERS
+    assert "codex" not in PROVIDERS
     
     # Test get_provider function
     config = {}
@@ -224,7 +231,7 @@ def test_install_method_returns_result(cookies):
         "project_slug": "test-project",
         "author_name": "Test Author",
         "default_domains": "git,testing",
-        "selected_providers": ["claude"]
+        "selected_providers": "claude"
     }
     
     provider = ClaudeProvider(result.project_path, config)
@@ -245,7 +252,7 @@ def test_provider_abstraction_in_install_py(cookies):
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
-            "selected_providers": ["claude", "cursor"],
+            "selected_providers": "claude,cursor",
         }
     )
     

@@ -133,6 +133,11 @@ This will:
 - ✅ Guide you through setup
 - ✅ Provide next steps
 
+**Provider Selection:** When prompted, enter one or more providers separated by commas:
+- Single: `claude`
+- Multiple: `claude,cursor,windsurf`
+- All: `claude,cursor,windsurf,aider,copilot,codex`
+
 ### Manual Installation
 
 If you prefer to install step by step:

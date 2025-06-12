@@ -129,7 +129,7 @@ class TestE2ECookiecutterGeneration:
             str(Path.cwd()),
             no_input=True,
             extra_context={
-                "selected_providers": ["claude"],  # Single provider for now
+                "selected_providers": "claude",  # Single provider for now
             },
             output_dir=str(output_dir),
         )

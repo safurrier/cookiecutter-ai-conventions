@@ -29,22 +29,31 @@ def get_provider(name: str, source_dir: Path, config: dict) -> BaseProvider:
     return PROVIDERS[name](source_dir, config)
 
 
-# Import providers after registry is defined
-from .claude import ClaudeProvider
-from .cursor import CursorProvider
-from .windsurf import WindsurfProvider
-from .aider import AiderProvider
-from .copilot import CopilotProvider
-from .codex import CodexProvider
+# Import available providers dynamically
+AVAILABLE_PROVIDERS = ['claude', 'cursor', 'windsurf', 'aider', 'copilot', 'codex']
 
-# Populate registry
-PROVIDERS = {
-    'claude': ClaudeProvider,
-    'cursor': CursorProvider,
-    'windsurf': WindsurfProvider,
-    'aider': AiderProvider,
-    'copilot': CopilotProvider,
-    'codex': CodexProvider,
-}
+for provider_name in AVAILABLE_PROVIDERS:
+    try:
+        if provider_name == 'claude':
+            from .claude import ClaudeProvider
+            PROVIDERS['claude'] = ClaudeProvider
+        elif provider_name == 'cursor':
+            from .cursor import CursorProvider
+            PROVIDERS['cursor'] = CursorProvider
+        elif provider_name == 'windsurf':
+            from .windsurf import WindsurfProvider
+            PROVIDERS['windsurf'] = WindsurfProvider
+        elif provider_name == 'aider':
+            from .aider import AiderProvider
+            PROVIDERS['aider'] = AiderProvider
+        elif provider_name == 'copilot':
+            from .copilot import CopilotProvider
+            PROVIDERS['copilot'] = CopilotProvider
+        elif provider_name == 'codex':
+            from .codex import CodexProvider
+            PROVIDERS['codex'] = CodexProvider
+    except ImportError:
+        # Provider module not available (was removed)
+        pass
 
-__all__ = ['BaseProvider', 'get_provider', 'PROVIDERS']
+__all__ = ['BaseProvider', 'get_provider', 'PROVIDERS', 'AVAILABLE_PROVIDERS']

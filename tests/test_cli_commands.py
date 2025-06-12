@@ -133,7 +133,7 @@ def test_cli_status_command_execution(cookies):
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
-            "selected_providers": ["claude", "cursor"],
+            "selected_providers": "claude,cursor",
         }
     )
     
