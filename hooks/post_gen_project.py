@@ -46,7 +46,7 @@ def main():
     
     # Validate providers
     if not providers or len(providers) == 0:
-        print("\n⚠️  WARNING: No providers selected!")
+        print("\n[WARNING] No providers selected!")
         print("   Your project will have limited functionality without any AI tool providers.")
         print("   Consider re-running with at least one provider selected.")
         providers = []  # Ensure it's an empty list for consistency
@@ -80,7 +80,7 @@ def main():
         
         invalid_domains = [d for d in selected_domains if d not in available_domains]
         if invalid_domains:
-            print(f"\n⚠️  WARNING: The following domains were not found: {', '.join(invalid_domains)}")
+            print(f"\n[WARNING] The following domains were not found: {', '.join(invalid_domains)}")
             print(f"   Available domains: {', '.join(available_domains)}")
             # Filter out invalid domains
             selected_domains = [d for d in selected_domains if d in available_domains]

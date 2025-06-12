@@ -24,15 +24,15 @@ cd "$PROJECT_ROOT"
 
 # Check if AGENTS.md exists
 if [ ! -f "AGENTS.md" ]; then
-    echo "⚠️  AGENTS.md not found. AI will not have project conventions."
+    echo "[WARNING] AGENTS.md not found. AI will not have project conventions."
 fi
 
 # Print startup message
-echo "🚀 Starting Codex with {{ cookiecutter.project_name }} conventions..."
-echo "📁 Project root: $PROJECT_ROOT"
-echo "📋 Conventions: AGENTS.md"
+echo "[INFO] Starting Codex with {{ cookiecutter.project_name }} conventions..."
+echo "[INFO] Project root: $PROJECT_ROOT"
+echo "[INFO] Conventions: AGENTS.md"
 {%- if cookiecutter.enable_learning_capture %}
-echo "📝 Learning capture: Enabled"
+echo "[INFO] Learning capture: Enabled"
 {%- endif %}
 echo ""
 
