@@ -1,10 +1,18 @@
-# Stop Repeating Yourself to Your AI Assistant
+# 🤖 AI Conventions: Stop Teaching Your AI The Same Things Over and Over
 
-You know that moment when your AI suggests `import os` at the top of your function... again?
+**Make your AI coding assistant understand your team's conventions in 30 seconds.**
 
-Or formats a commit message like "Updated stuff" when your team uses conventional commits?
+[Quick Start](#make-your-ai-learn-your-style-in-2-minutes) • [Features](#-what-you-get) • [Examples](#real-examples-from-real-developers) • [Supported Tools](#-works-with-your-favorite-ai-tools) • [Migration Guide](docs/MIGRATION.md)
 
-What if your AI just... knew your preferences?
+---
+
+You know that moment when your AI suggests `import os` inside your function... again? 😤
+
+Or writes "Updated stuff" when your team uses conventional commits?
+
+Or forgets your API uses camelCase, not snake_case?
+
+**What if your AI just... knew your preferences?**
 
 ## See It In Action
 
@@ -40,8 +48,8 @@ def get_env_var(name: str, default: Optional[str] = None) -> Optional[str]:
 ## Make Your AI Learn Your Style in 2 Minutes
 
 ```bash
-# Install and generate your conventions (one-time setup)
-curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions-experimental/main/bootstrap.sh | sh
+# One command to teach your AI your style (30 seconds)
+curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions/main/bootstrap.sh | sh
 
 # That's it! Your AI now knows:
 # ✓ Your import style
@@ -50,12 +58,29 @@ curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventio
 # ✓ Your error handling patterns
 ```
 
-## What Just Happened?
+## 🎁 What You Get
 
-You created a personal conventions system that:
-1. **Loads automatically** when you use Claude, Cursor, or other AI tools
-2. **Grows with you** - capture new patterns as you discover them
-3. **Version controls** your preferences alongside your code
+After 30 seconds of setup, you'll have:
+
+📁 **Your Own Conventions Repository**
+```
+my-conventions/
+├── global.md              # Universal rules
+├── domains/               # Organized by context
+│   ├── git/              # Commit messages, workflows
+│   ├── testing/          # Test patterns, fixtures
+│   └── python/           # Language-specific rules
+├── templates/            # AI tool configurations
+└── install.py            # One-click updates
+```
+
+✨ **Features That Just Work**
+- 🔄 **Auto-Loading** - Conventions load automatically in your AI tools
+- 📝 **Learning Capture** - Save new patterns as you discover them
+- 🎯 **Context Aware** - Different rules for different situations
+- 👥 **Team Friendly** - Share via git, everyone stays in sync
+- 🔧 **Tool Agnostic** - Works with Claude, Cursor, Copilot, and more
+- 📈 **Living System** - Evolves with your codebase
 
 ## Real Examples from Real Developers
 
@@ -170,12 +195,36 @@ Your Code Editor → AI Assistant → Your Conventions → Better Suggestions
 3. **Use** your AI normally - conventions load automatically
 4. **Evolve** by capturing learnings when you spot patterns
 
-## Supported AI Tools
+## 🎯 Works With Your Favorite AI Tools
 
-- ✅ **Claude** - Full support via CLAUDE.md
-- 🚧 **Cursor** - Coming soon (currently via .cursorrules)
-- 🚧 **Windsurf** - Coming soon
-- 🚧 **Aider** - Coming soon
+<table>
+<tr>
+<td>✅ <b>Claude</b></td>
+<td>Auto-loads via CLAUDE.md, supports commands</td>
+</tr>
+<tr>
+<td>✅ <b>Cursor</b></td>
+<td>Legacy .cursorrules + modern MDC format</td>
+</tr>
+<tr>
+<td>✅ <b>Windsurf</b></td>
+<td>Character-aware rules with glob patterns</td>
+</tr>
+<tr>
+<td>✅ <b>Aider</b></td>
+<td>CONVENTIONS.md + .aider.conf.yml</td>
+</tr>
+<tr>
+<td>✅ <b>GitHub Copilot</b></td>
+<td>Instructions + prompt templates</td>
+</tr>
+<tr>
+<td>✅ <b>OpenAI Codex</b></td>
+<td>AGENTS.md + custom configuration</td>
+</tr>
+</table>
+
+Each tool gets optimized configuration for its specific features.
 
 ## Next Steps After Installation
 
