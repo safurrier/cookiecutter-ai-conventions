@@ -86,9 +86,14 @@ class InstallScreen(Screen):
         with Vertical(id="providers"):
             yield Label("Select AI Tool Providers:")
             for provider in AVAILABLE_PROVIDERS:
+                # Handle comma-separated string or list
+                selected = self.config.get("selected_providers", [])
+                if isinstance(selected, str):
+                    selected = [p.strip() for p in selected.split(',')] if ',' in selected else [selected]
+                
                 checkbox = Checkbox(
                     f" {provider.capitalize()}",
-                    value=provider in self.config.get("selected_providers", []),
+                    value=provider in selected,
                     id=f"provider_{provider}",
                     classes="checkbox"
                 )

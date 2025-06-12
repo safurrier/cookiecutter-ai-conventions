@@ -131,7 +131,7 @@ def test_sync_conventions_command_exists(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": ["claude", "cursor"]
+            "selected_providers": "claude,cursor"
         }
     )
     

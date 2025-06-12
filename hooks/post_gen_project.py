@@ -30,12 +30,26 @@ def main():
     enable_composition = {{ cookiecutter.enable_domain_composition }}  # noqa: F821
     
     # Get providers
-    providers = {{ cookiecutter.selected_providers | jsonify }}  # noqa: F821
+    providers = "{{ cookiecutter.selected_providers }}"  # noqa: F821
     
     
     # Ensure providers is a list
     if isinstance(providers, str):
-        providers = [providers]
+        # Handle comma-separated providers
+        if ',' in providers:
+            providers = [p.strip() for p in providers.split(',')]
+        else:
+            providers = [providers]
+    
+    # Filter out empty strings
+    providers = [p for p in providers if p]
+    
+    # Validate providers
+    if not providers or len(providers) == 0:
+        print("\n[WARNING] No providers selected!")
+        print("   Your project will have limited functionality without any AI tool providers.")
+        print("   Consider re-running with at least one provider selected.")
+        providers = []  # Ensure it's an empty list for consistency
         
     # Ensure selected_domains is a list
     if isinstance(selected_domains, str):
@@ -57,6 +71,19 @@ def main():
     
     # Create domains directory
     domains_dir.mkdir(exist_ok=True)
+    
+    # Validate selected domains exist
+    if selected_domains:
+        available_domains = []
+        if community_domains.exists():
+            available_domains = [d.name for d in community_domains.iterdir() if d.is_dir()]
+        
+        invalid_domains = [d for d in selected_domains if d not in available_domains]
+        if invalid_domains:
+            print(f"\n[WARNING] The following domains were not found: {', '.join(invalid_domains)}")
+            print(f"   Available domains: {', '.join(available_domains)}")
+            # Filter out invalid domains
+            selected_domains = [d for d in selected_domains if d in available_domains]
     
     # Copy selected domains
     print("\nSetting up convention domains...")
@@ -223,6 +250,17 @@ def main():
             if claude_commands_dir.exists():
                 shutil.rmtree(Path(".claude"))
     
+    # Remove unselected provider modules
+    providers_dir = Path("ai_conventions/providers")
+    if providers_dir.exists():
+        all_providers = ["claude", "cursor", "windsurf", "aider", "copilot", "codex"]
+        for provider in all_providers:
+            if provider not in providers:
+                provider_module = providers_dir / f"{provider}.py"
+                if provider_module.exists():
+                    provider_module.unlink()
+                    print(f"  - Removed {provider} provider module")
+    
     # Handle domain composition
     if not enable_composition:
         # Remove domain resolver module
@@ -287,6 +325,51 @@ def main():
     print("  2. Run 'uv tool install .' to install CLI commands")
     print("  3. Run 'ai-conventions status' to check installation")
     print("  4. Start coding with your AI assistant!")
+    
+    # Clean up empty directories
+    cleanup_empty_directories()
+
+
+def cleanup_empty_directories():
+    """Remove any empty directories left after selective file generation."""
+    dirs_to_check = [
+        "docs",
+        "ai_conventions/providers",
+        "ai_conventions",
+        ".cursor/rules",
+        ".cursor",
+        ".windsurf/rules", 
+        ".windsurf",
+        ".github/prompts",
+        ".github",
+        ".vscode",
+        ".codex",
+        ".claude/commands",
+        ".claude",
+        "templates/claude",
+        "templates/cursor/rules",
+        "templates/cursor",
+        "templates/windsurf/rules",
+        "templates/windsurf",
+        "templates/aider",
+        "templates/copilot/prompts",
+        "templates/copilot",
+        "templates/codex",
+        "templates",
+    ]
+    
+    # Check directories from deepest to shallowest
+    for dir_path in dirs_to_check:
+        path = Path(dir_path)
+        if path.exists() and path.is_dir():
+            try:
+                # Check if directory is empty
+                if not any(path.iterdir()):
+                    path.rmdir()
+                    print(f"  - Removed empty directory: {dir_path}")
+            except OSError:
+                # Directory not empty or permission issue
+                pass
 
 
 if __name__ == "__main__":

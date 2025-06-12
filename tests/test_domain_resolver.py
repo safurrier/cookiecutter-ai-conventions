@@ -14,7 +14,7 @@ def test_domain_resolver_module_created(cookies):
         extra_context={
             "project_slug": "my-project",
             "enable_domain_composition": True,
-            "selected_providers": ["claude"],
+            "selected_providers": "claude",
         }
     )
     
@@ -38,7 +38,7 @@ def test_domain_resolver_not_created_when_disabled(cookies):
         extra_context={
             "project_slug": "my-project",
             "enable_domain_composition": False,
-            "selected_providers": ["claude"],
+            "selected_providers": "claude",
         }
     )
     
@@ -56,7 +56,7 @@ def test_domain_inheritance_files_created(cookies):
             "project_slug": "my-project",
             "enable_domain_composition": True,
             "default_domains": "testing,git",
-            "selected_providers": ["claude"],
+            "selected_providers": "claude",
         }
     )
     
@@ -76,7 +76,7 @@ def test_domain_resolver_handles_yaml_frontmatter(cookies):
         extra_context={
             "project_slug": "my-project",
             "enable_domain_composition": True,
-            "selected_providers": ["claude"],
+            "selected_providers": "claude",
         }
     )
     
@@ -97,7 +97,7 @@ def test_circular_dependency_detection_code_exists(cookies):
         extra_context={
             "project_slug": "my-project",
             "enable_domain_composition": True,
-            "selected_providers": ["claude"],
+            "selected_providers": "claude",
         }
     )
     
@@ -118,7 +118,7 @@ def test_domain_resolver_caching_implemented(cookies):
         extra_context={
             "project_slug": "my-project",
             "enable_domain_composition": True,
-            "selected_providers": ["claude"],
+            "selected_providers": "claude",
         }
     )
     
@@ -138,7 +138,7 @@ def test_multiple_inheritance_support(cookies):
         extra_context={
             "project_slug": "my-project",
             "enable_domain_composition": True,
-            "selected_providers": ["claude"],
+            "selected_providers": "claude",
         }
     )
     
@@ -158,7 +158,7 @@ def test_claude_md_template_includes_composition_info(cookies):
         extra_context={
             "project_slug": "my-project",
             "enable_domain_composition": True,
-            "selected_providers": ["claude"],
+            "selected_providers": "claude",
         }
     )
     

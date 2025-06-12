@@ -61,7 +61,7 @@ def test_tui_provider_selection(cookies):
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
-            "selected_providers": ["claude", "cursor"],
+            "selected_providers": "claude,cursor",
         }
     )
     

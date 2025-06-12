@@ -141,7 +141,7 @@ def main(provider, sync_all):
         
         for provider_name in providers_to_sync:
             if provider_name not in PROVIDERS:
-                console.print(f"[yellow]⚠️  Unknown provider: {provider_name}[/yellow]")
+                console.print(f"[yellow][WARNING] Unknown provider: {provider_name}[/yellow]")
                 continue
             
             task = progress.add_task(f"Syncing to {provider_name.capitalize()}...", total=1)
