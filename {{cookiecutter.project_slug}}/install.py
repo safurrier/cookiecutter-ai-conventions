@@ -37,7 +37,7 @@ class ConventionsInstaller:
                 "enable_context_canary": {{ cookiecutter.enable_context_canary | lower }},
                 "enable_domain_composition": {{ cookiecutter.enable_domain_composition | lower }},
                 "default_domains": "{{ cookiecutter.default_domains }}",
-                "selected_providers": {{ cookiecutter.selected_providers | jsonify }}
+                "selected_providers": "{{ cookiecutter.selected_providers }}"
             }
             return config
     
@@ -77,7 +77,11 @@ class ConventionsInstaller:
         providers = self.config.get("selected_providers", [])
         
         if isinstance(providers, str):
-            providers = [providers]
+            # Handle comma-separated providers
+            if ',' in providers:
+                providers = [p.strip() for p in providers.split(',')]
+            else:
+                providers = [providers]
             
         for provider_name in providers:
             self.install_provider(provider_name)
