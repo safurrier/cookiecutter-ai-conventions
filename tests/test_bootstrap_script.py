@@ -39,18 +39,18 @@ def test_bootstrap_script_has_error_handling():
     assert "command -v" in content or "which" in content
 
 
-def test_bootstrap_script_supports_os_detection():
-    """Test that bootstrap.sh can detect different operating systems."""
+def test_bootstrap_script_is_simple():
+    """Test that bootstrap.sh is simple and focused."""
     bootstrap_script = Path("bootstrap.sh")
     content = bootstrap_script.read_text(encoding="utf-8")
     
-    # Should detect OS
-    assert "OSTYPE" in content or "uname" in content
+    # Should be a simple script
+    lines = content.strip().split('\n')
+    assert len(lines) < 30, "Bootstrap script should be simple and concise"
     
-    # Should handle different OS types
-    assert "linux" in content.lower()
-    assert "macos" in content.lower() or "darwin" in content.lower()
-    assert "windows" in content.lower() or "msys" in content.lower()
+    # Should not have complex OS detection
+    assert "OSTYPE" not in content
+    assert "detect_os" not in content
 
 
 def test_bootstrap_script_installs_uv():
@@ -59,14 +59,13 @@ def test_bootstrap_script_installs_uv():
     content = bootstrap_script.read_text(encoding="utf-8")
     
     # Should check for uv
-    assert "uv" in content
+    assert "command -v uv" in content
     
-    # Should have installation URLs
-    assert "https://astral.sh/uv" in content or "astral.sh" in content
+    # Should have installation URL
+    assert "https://astral.sh/uv/install.sh" in content
     
-    # Should handle both curl and wget
-    assert "curl" in content
-    assert "wget" in content
+    # Should use curl for installation
+    assert "curl -LsSf" in content
 
 
 def test_bootstrap_script_runs_cookiecutter():
@@ -82,30 +81,26 @@ def test_bootstrap_script_runs_cookiecutter():
     assert "safurrier/cookiecutter-ai-conventions" in content
 
 
-def test_bootstrap_script_supports_branch_parameter():
-    """Test that bootstrap.sh supports --branch parameter."""
+def test_bootstrap_script_passes_arguments():
+    """Test that bootstrap.sh passes all arguments to cookiecutter."""
     bootstrap_script = Path("bootstrap.sh")
     content = bootstrap_script.read_text(encoding="utf-8")
     
-    # Should parse branch parameter
-    assert "--branch" in content
-    assert "--checkout" in content
+    # Should pass all arguments using $@
+    assert '"$@"' in content
 
 
-def test_bootstrap_script_has_user_friendly_output():
-    """Test that bootstrap.sh has nice output formatting."""
+def test_bootstrap_script_has_clear_output():
+    """Test that bootstrap.sh has clear output messages."""
     bootstrap_script = Path("bootstrap.sh")
     content = bootstrap_script.read_text(encoding="utf-8")
     
-    # Should have colors
-    assert "033[" in content or "\\033[" in content
+    # Should have clear messages
+    assert "Installing uv package manager" in content
+    assert "Creating your AI conventions repository" in content
     
-    # Should have emojis
-    assert "🚀" in content or "✅" in content or "❌" in content
-    
-    # Should have clear success/failure messages
+    # Should have success message
     assert "Success" in content or "success" in content
-    assert "Failed" in content or "failed" in content or "Error" in content
 
 
 def test_bootstrap_script_provides_next_steps():

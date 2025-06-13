@@ -48,8 +48,12 @@ def get_env_var(name: str, default: Optional[str] = None) -> Optional[str]:
 ## Make Your AI Learn Your Style in 2 Minutes
 
 ```bash
-# One command to teach your AI your style (30 seconds)
+# One simple command to teach your AI your style (30 seconds)
 curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions/main/bootstrap.sh | sh
+
+# The bootstrap script simply:
+# 1. Installs uv if needed
+# 2. Runs cookiecutter to set up your conventions
 
 # That's it! Your AI now knows:
 # ✓ Your import style
@@ -152,16 +156,28 @@ One command, zero dependencies:
 curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions/main/bootstrap.sh | sh
 ```
 
-This will:
-- ✅ Install `uv` if needed (cross-platform)
-- ✅ Run the cookiecutter template
-- ✅ Guide you through setup
-- ✅ Provide next steps
+The bootstrap script is simple and straightforward - it just:
+- ✅ Installs `uv` if needed (the modern Python package manager)
+- ✅ Runs cookiecutter to generate your conventions repository
 
 **Provider Selection:** When prompted, enter one or more providers separated by commas:
 - Single: `claude`
 - Multiple: `claude,cursor,windsurf`
 - All: `claude,cursor,windsurf,aider,copilot,codex`
+
+### Windows Installation
+
+Windows users should use PowerShell:
+
+```powershell
+# Install uv first (see https://docs.astral.sh/uv/getting-started/installation/#windows)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Then run cookiecutter
+uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions
+```
+
+For detailed Windows installation options, see the [uv installation docs](https://docs.astral.sh/uv/getting-started/installation/#windows).
 
 ### Manual Installation
 
