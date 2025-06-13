@@ -7,6 +7,7 @@
     "enable_learning_capture": true,
     "enable_context_canary": true,
     "enable_domain_composition": true,
+    "include_install_tools": true,
     "default_domains": "git,testing",
     "_copy_without_render": ["community-domains/*", "*.py", "*.prompt.md", "codex.sh", ".claude/*"]
 }

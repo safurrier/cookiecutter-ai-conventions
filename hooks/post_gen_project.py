@@ -3,7 +3,83 @@
 
 import shutil
 import sys
+import yaml
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import List, Optional
+
+
+@dataclass
+class ProviderFiles:
+    """Structured data for provider-specific files."""
+    name: str
+    config_files: List[str] = field(default_factory=list)
+    template_dirs: List[str] = field(default_factory=list)
+    docs: List[str] = field(default_factory=list)
+    module: Optional[str] = None
+    domain_specific_patterns: List[str] = field(default_factory=list)
+    conditional_files: dict = field(default_factory=dict)  # Files that depend on features
+    
+    def all_paths(self) -> List[Path]:
+        """Get all file paths for this provider."""
+        paths: List[Path] = []
+        for file_list in [self.config_files, self.template_dirs, self.docs]:
+            paths.extend(Path(f) for f in file_list)
+        if self.module:
+            paths.append(Path(self.module))
+        return paths
+
+
+# Define all provider file mappings
+PROVIDER_REGISTRY = {
+    'claude': ProviderFiles(
+        name='claude',
+        config_files=['.claude/'],
+        template_dirs=['templates/claude/'],
+        docs=['docs/claude-setup.md'],
+        module='ai_conventions/providers/claude.py',
+        conditional_files={
+            'learning_capture': ['.claude/commands/', 'commands/']
+        }
+    ),
+    'cursor': ProviderFiles(
+        name='cursor',
+        config_files=['.cursorrules', '.cursor/'],
+        template_dirs=['templates/cursor/'],
+        docs=['docs/cursor-setup.md'],
+        module='ai_conventions/providers/cursor.py',
+        domain_specific_patterns=['.cursor/rules/*.mdc']
+    ),
+    'windsurf': ProviderFiles(
+        name='windsurf',
+        config_files=['.windsurfrules', '.windsurf/'],
+        template_dirs=['templates/windsurf/'],
+        docs=['docs/windsurf-setup.md'],
+        module='ai_conventions/providers/windsurf.py',
+        domain_specific_patterns=['.windsurf/rules/*.md']
+    ),
+    'aider': ProviderFiles(
+        name='aider',
+        config_files=['CONVENTIONS.md', '.aider.conf.yml'],
+        template_dirs=['templates/aider/'],
+        docs=['docs/aider-setup.md'],
+        module='ai_conventions/providers/aider.py'
+    ),
+    'copilot': ProviderFiles(
+        name='copilot',
+        config_files=['.github/copilot-instructions.md', '.github/prompts/', 'vscode_config/', '.vscode/'],
+        template_dirs=['templates/copilot/'],
+        docs=['docs/copilot-setup.md'],
+        module='ai_conventions/providers/copilot.py'
+    ),
+    'codex': ProviderFiles(
+        name='codex',
+        config_files=['AGENTS.md', '.codex/', 'codex.sh'],
+        template_dirs=['templates/codex/'],
+        docs=['docs/codex-setup.md'],
+        module='ai_conventions/providers/codex.py'
+    )
+}
 
 
 def copy_domain(domain, source_dir, target_dir):
@@ -18,6 +94,132 @@ def copy_domain(domain, source_dir, target_dir):
         print(f"  Warning: Domain '{domain}' not found in community domains")
 
 
+def create_config_file(providers, domains, config_data):
+    """Create a configuration file for the generated project."""
+    config = {
+        "project_name": config_data['project_name'],
+        "project_slug": config_data['project_slug'],
+        "author_name": config_data['author_name'],
+        "author_email": config_data.get('author_email'),
+        "selected_providers": providers,
+        "default_domains": domains,
+        "enable_learning_capture": config_data.get('enable_learning_capture', True),
+        "enable_context_canary": config_data.get('enable_context_canary', True),
+        "enable_domain_composition": config_data.get('enable_domain_composition', True),
+    }
+    
+    # Save as .ai-conventions.yaml
+    config_path = Path(".ai-conventions.yaml")
+    with open(config_path, 'w') as f:
+        yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+    
+    print(f"  Created configuration file: {config_path}")
+    return config_path
+
+
+def update_readme(providers, domains, include_tools):
+    """Update README to reflect what was actually included."""
+    readme_path = Path("README.md")
+    if not readme_path.exists():
+        return
+    
+    content = readme_path.read_text()
+    
+    # Add section about what's included
+    included_section = "\n## 📦 What's Included\n\n"
+    
+    if providers:
+        included_section += "### AI Providers\n"
+        for provider in providers:
+            included_section += f"- {provider.capitalize()}\n"
+        included_section += "\n"
+    
+    if domains:
+        included_section += "### Convention Domains\n"
+        for domain in domains:
+            included_section += f"- {domain.capitalize()}\n"
+        included_section += "\n"
+    
+    if include_tools:
+        included_section += "### Installation Tools\n"
+        included_section += "- Python module for automated installation\n"
+        included_section += "- Textual TUI for provider management\n"
+        included_section += "\n"
+    
+    # Insert after the first heading
+    lines = content.split('\n')
+    for i, line in enumerate(lines):
+        if line.startswith('# ') and i > 0:
+            lines.insert(i + 2, included_section)
+            break
+    
+    readme_path.write_text('\n'.join(lines))
+    print("  Updated README.md with included components")
+
+
+def remove_unselected_providers(selected_providers, enable_learning_capture=True):
+    """Remove all files for unselected providers."""
+    removed_count = 0
+    
+    for provider_name, provider_files in PROVIDER_REGISTRY.items():
+        if provider_name not in selected_providers:
+            print(f"\n  Removing {provider_name} files...")
+            
+            # Remove all standard paths
+            for path in provider_files.all_paths():
+                if path.exists():
+                    if path.is_dir():
+                        shutil.rmtree(path)
+                        print(f"    ✗ Removed directory: {path}")
+                    else:
+                        path.unlink()
+                        print(f"    ✗ Removed file: {path}")
+                    removed_count += 1
+            
+            # Handle conditional files
+            if not enable_learning_capture and 'learning_capture' in provider_files.conditional_files:
+                for path_str in provider_files.conditional_files['learning_capture']:
+                    path = Path(path_str)
+                    if path.exists():
+                        if path.is_dir():
+                            shutil.rmtree(path)
+                        else:
+                            path.unlink()
+                        print(f"    ✗ Removed conditional: {path}")
+                        removed_count += 1
+    
+    return removed_count
+
+
+def remove_install_tools():
+    """Remove Python installation tools if not wanted."""
+    tools_to_remove = [
+        'ai_conventions/',
+        'install.py',
+        'pyproject.toml',
+        'requirements.txt',
+        'setup.py',
+        'uv.lock',
+        '.python-version'
+    ]
+    
+    removed_count = 0
+    print("\n  Removing installation tools...")
+    
+    for tool in tools_to_remove:
+        path = Path(tool)
+        if path.exists():
+            if path.is_dir():
+                shutil.rmtree(path)
+                print(f"    ✗ Removed directory: {tool}")
+            else:
+                path.unlink()
+                print(f"    ✗ Removed file: {tool}")
+            removed_count += 1
+    
+    return removed_count
+
+
 def main():
     """Process the generated project."""
     # Get selected domains
@@ -28,6 +230,10 @@ def main():
     
     # Check if domain composition is enabled
     enable_composition = {{ cookiecutter.enable_domain_composition }}  # noqa: F821
+    
+    # Check if install tools should be included
+    include_tools_str = "{{ cookiecutter.include_install_tools }}"  # noqa: F821
+    include_tools = include_tools_str.lower() in ['true', 'yes', '1', 'y']
     
     # Get providers
     providers = "{{ cookiecutter.selected_providers }}"  # noqa: F821
@@ -94,132 +300,66 @@ def main():
     if community_domains.exists():
         shutil.rmtree(community_domains)
     
-    # Handle Cursor provider files
-    if providers and "cursor" not in providers:
-        # Remove Cursor files if not selected
-        cursorrules_file = Path(".cursorrules")
-        if cursorrules_file.exists():
-            cursorrules_file.unlink()
-        
-        cursor_dir = Path(".cursor")
-        if cursor_dir.exists():
-            shutil.rmtree(cursor_dir)
-    elif providers and "cursor" in providers:
-        # Clean up domain-specific MDC files not in selected domains
+    # Create configuration file early so it's available for tools
+    print("\nCreating configuration file...")
+    config_data = {
+        "project_name": "{{ cookiecutter.project_name }}",
+        "project_slug": "{{ cookiecutter.project_slug }}",
+        "author_name": "{{ cookiecutter.author_name }}",
+        "author_email": "{{ cookiecutter.author_email }}",
+        "enable_learning_capture": enable_learning,
+        "enable_context_canary": {{ cookiecutter.enable_context_canary }},
+        "enable_domain_composition": enable_composition,
+        "include_install_tools": include_tools,
+    }
+    create_config_file(providers, selected_domains, config_data)
+    
+    # Remove unselected providers using our comprehensive approach
+    print("\nCleaning up unselected providers...")
+    remove_unselected_providers(providers, enable_learning)
+    
+    # Remove installation tools if not wanted
+    if not include_tools:
+        remove_install_tools()
+    
+    # Update README with what's included
+    print("\nUpdating README...")
+    update_readme(providers, selected_domains, include_tools)
+    
+    # Handle special cases for selected providers
+    
+    # Cursor: Clean up domain-specific MDC files not in selected domains
+    if providers and "cursor" in providers:
         cursor_rules_dir = Path(".cursor/rules")
         if cursor_rules_dir.exists():
-            # Remove domain MDC files for unselected domains
             for mdc_file in cursor_rules_dir.glob("*.mdc"):
                 if mdc_file.stem not in ["main"] + selected_domains:
                     mdc_file.unlink()
+                    print(f"  Removed unselected domain file: {mdc_file.name}")
     
-    # Handle Windsurf provider files
-    if providers and "windsurf" not in providers:
-        # Remove Windsurf files if not selected
-        windsurfrules_file = Path(".windsurfrules")
-        if windsurfrules_file.exists():
-            windsurfrules_file.unlink()
-        
-        windsurf_dir = Path(".windsurf")
-        if windsurf_dir.exists():
-            shutil.rmtree(windsurf_dir)
-    elif providers and "windsurf" in providers:
-        # Clean up domain-specific rule files not in selected domains
+    # Windsurf: Clean up domain-specific rule files not in selected domains
+    if providers and "windsurf" in providers:
         windsurf_rules_dir = Path(".windsurf/rules")
         if windsurf_rules_dir.exists():
-            # Remove domain rule files for unselected domains
             for rule_file in windsurf_rules_dir.glob("*.md"):
                 if rule_file.stem not in ["main"] + selected_domains:
                     rule_file.unlink()
+                    print(f"  Removed unselected domain file: {rule_file.name}")
     
-    # Handle Aider provider files
-    if providers and "aider" not in providers:
-        # Remove Aider files if not selected
-        conventions_file = Path("CONVENTIONS.md")
-        if conventions_file.exists():
-            conventions_file.unlink()
-        
-        aider_conf_file = Path(".aider.conf.yml")
-        if aider_conf_file.exists():
-            aider_conf_file.unlink()
-        
-        aider_docs = Path("docs/aider-setup.md")
-        if aider_docs.exists():
-            aider_docs.unlink()
-    
-    # Handle Copilot provider files
+    # Copilot: Special handling for vscode_config rename
     if providers and "copilot" in providers:
-        # Rename vscode_config to .vscode if Copilot is selected
         vscode_config = Path("vscode_config")
         if vscode_config.exists():
             vscode_config.rename(".vscode")
+            print("  Renamed vscode_config to .vscode for Copilot")
     
-    if providers and "copilot" not in providers:
-        # Remove Copilot files if not selected
-        github_dir = Path(".github")
-        if github_dir.exists():
-            copilot_instructions = github_dir / "copilot-instructions.md"
-            if copilot_instructions.exists():
-                copilot_instructions.unlink()
-            
-            prompts_dir = github_dir / "prompts"
-            if prompts_dir.exists():
-                shutil.rmtree(prompts_dir)
-            
-            # Remove .github if empty
-            if not any(github_dir.iterdir()):
-                github_dir.rmdir()
-        
-        vscode_dir = Path(".vscode")
-        if vscode_dir.exists():
-            settings_file = vscode_dir / "settings.json"
-            if settings_file.exists():
-                settings_file.unlink()
-            
-            # Remove .vscode if empty
-            if not any(vscode_dir.iterdir()):
-                vscode_dir.rmdir()
-        
-        copilot_docs = Path("docs/copilot-setup.md")
-        if copilot_docs.exists():
-            copilot_docs.unlink()
-        
-        # Remove vscode_config if it wasn't renamed
-        vscode_config = Path("vscode_config")
-        if vscode_config.exists():
-            shutil.rmtree(vscode_config)
-    elif providers and "copilot" in providers:
-        # Clean up empty prompt files
-        prompts_dir = Path(".github/prompts")
-        if prompts_dir.exists():
-            for prompt_file in prompts_dir.glob("*.prompt.md"):
-                # Remove empty files (when domain not selected)
-                if prompt_file.stat().st_size == 0:
-                    prompt_file.unlink()
-    
-    # Handle Codex provider files
-    if providers and "codex" not in providers:
-        # Remove Codex files if not selected
-        agents_file = Path("AGENTS.md")
-        if agents_file.exists():
-            agents_file.unlink()
-        
-        codex_dir = Path(".codex")
-        if codex_dir.exists():
-            shutil.rmtree(codex_dir)
-        
-        codex_script = Path("codex.sh")
-        if codex_script.exists():
-            codex_script.unlink()
-        
-        codex_docs = Path("docs/codex-setup.md")
-        if codex_docs.exists():
-            codex_docs.unlink()
-    elif providers and "codex" in providers:
-        # Make codex.sh executable
+    # Codex: Make script executable
+    if providers and "codex" in providers:
         codex_script = Path("codex.sh")
         if codex_script.exists():
             codex_script.chmod(codex_script.stat().st_mode | 0o111)
+            print("  Made codex.sh executable")
+    
     
     # Clean up learning capture commands if not enabled
     if not enable_learning:
@@ -250,16 +390,7 @@ def main():
             if claude_commands_dir.exists():
                 shutil.rmtree(Path(".claude"))
     
-    # Remove unselected provider modules
-    providers_dir = Path("ai_conventions/providers")
-    if providers_dir.exists():
-        all_providers = ["claude", "cursor", "windsurf", "aider", "copilot", "codex"]
-        for provider in all_providers:
-            if provider not in providers:
-                provider_module = providers_dir / f"{provider}.py"
-                if provider_module.exists():
-                    provider_module.unlink()
-                    print(f"  - Removed {provider} provider module")
+    # Provider modules are already handled by remove_unselected_providers()
     
     # Handle domain composition
     if not enable_composition:
@@ -322,9 +453,15 @@ def main():
     
     print("\nNext steps:")
     print("  1. cd into your project directory")
-    print("  2. Run 'uv tool install .' to install CLI commands")
-    print("  3. Run 'ai-conventions status' to check installation")
-    print("  4. Start coding with your AI assistant!")
+    if include_tools:
+        print("  2. Run 'uv tool install .' to install CLI commands")
+        print("  3. Run 'ai-conventions status' to check installation")
+        print("  4. Start coding with your AI assistant!")
+    else:
+        print("  2. Your conventions are ready to use!")
+        print("  3. Start coding with your AI assistant!")
+        print("\n  Note: Installation tools were not included.")
+        print("  To manage conventions, edit files directly.")
     
     # Clean up empty directories
     cleanup_empty_directories()
