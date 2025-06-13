@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Post-generation hook for cookiecutter-ai-conventions."""
 
+import os
 import shutil
 import sys
 import yaml
@@ -209,25 +210,31 @@ def remove_unselected_providers(selected_providers, enable_learning_capture=True
             # Remove all standard paths
             for path in provider_files.all_paths():
                 if path.exists():
-                    if path.is_dir():
-                        shutil.rmtree(path)
-                        print(f"    ✗ Removed directory: {path}")
-                    else:
-                        path.unlink()
-                        print(f"    ✗ Removed file: {path}")
-                    removed_count += 1
+                    try:
+                        if path.is_dir():
+                            shutil.rmtree(path)
+                            print(f"    ✗ Removed directory: {path}")
+                        else:
+                            path.unlink()
+                            print(f"    ✗ Removed file: {path}")
+                        removed_count += 1
+                    except (OSError, PermissionError) as e:
+                        print(f"    Warning: Could not remove {path}: {e}")
             
             # Handle conditional files
             if not enable_learning_capture and 'learning_capture' in provider_files.conditional_files:
                 for path_str in provider_files.conditional_files['learning_capture']:
                     path = Path(path_str)
                     if path.exists():
-                        if path.is_dir():
-                            shutil.rmtree(path)
-                        else:
-                            path.unlink()
-                        print(f"    ✗ Removed conditional: {path}")
-                        removed_count += 1
+                        try:
+                            if path.is_dir():
+                                shutil.rmtree(path)
+                            else:
+                                path.unlink()
+                            print(f"    ✗ Removed conditional: {path}")
+                            removed_count += 1
+                        except (OSError, PermissionError) as e:
+                            print(f"    Warning: Could not remove conditional {path}: {e}")
     
     return removed_count
 
@@ -242,13 +249,16 @@ def remove_install_tools():
     for tool in tools_to_remove:
         path = Path(tool)
         if path.exists():
-            if path.is_dir():
-                shutil.rmtree(path)
-                print(f"    ✗ Removed directory: {tool}")
-            else:
-                path.unlink()
-                print(f"    ✗ Removed file: {tool}")
-            removed_count += 1
+            try:
+                if path.is_dir():
+                    shutil.rmtree(path)
+                    print(f"    ✗ Removed directory: {tool}")
+                else:
+                    path.unlink()
+                    print(f"    ✗ Removed file: {tool}")
+                removed_count += 1
+            except (OSError, PermissionError) as e:
+                print(f"    Warning: Could not remove {tool}: {e}")
     
     return removed_count
 
@@ -386,12 +396,15 @@ def main():
             vscode_config.rename(".vscode")
             print("  Renamed vscode_config to .vscode for Copilot")
     
-    # Codex: Make script executable
+    # Codex: Make script executable (Unix-like systems only)
     if providers and "codex" in providers:
         codex_script = Path("codex.sh")
-        if codex_script.exists():
-            codex_script.chmod(codex_script.stat().st_mode | 0o111)
-            print("  Made codex.sh executable")
+        if codex_script.exists() and os.name != 'nt':  # Skip chmod on Windows
+            try:
+                codex_script.chmod(codex_script.stat().st_mode | 0o111)
+                print("  Made codex.sh executable")
+            except (OSError, AttributeError):
+                print("  Warning: Could not make codex.sh executable")
     
     
     # Clean up learning capture commands if not enabled
