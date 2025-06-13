@@ -1,6 +1,7 @@
 """Test selective file generation improvements."""
 
 import pytest
+import yaml
 from pathlib import Path
 from cookiecutter.main import cookiecutter
 
@@ -197,3 +198,134 @@ class TestSelectiveFileGeneration:
         # Aider-specific files should exist
         assert (generated_project / "CONVENTIONS.md").exists()
         assert (generated_project / ".aider.conf.yml").exists()
+
+    def test_config_file_generation(self, tmp_path):
+        """Test that config file is generated with selections."""
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+        
+        project_dir = cookiecutter(
+            str(Path.cwd()),
+            no_input=True,
+            output_dir=str(output_dir),
+            extra_context={
+                "project_slug": "test-config-generation",
+                "project_name": "Test Config Project",
+                "author_name": "Test Author",
+                "author_email": "test@example.com",
+                "selected_providers": "claude,cursor",
+                "default_domains": "git,testing",
+                "enable_learning_capture": True,
+                "enable_context_canary": True,
+                "enable_domain_composition": True,
+            },
+        )
+        
+        generated_project = Path(project_dir)
+        
+        # Check config file exists
+        config_path = generated_project / ".ai-conventions.yaml"
+        assert config_path.exists()
+        
+        # Load and validate config
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+        
+        assert config["project_name"] == "Test Config Project"
+        assert config["project_slug"] == "test-config-generation"
+        assert config["author_name"] == "Test Author"
+        assert config["author_email"] == "test@example.com"
+        assert config["selected_providers"] == ["claude", "cursor"]
+        assert config["default_domains"] == ["git", "testing"]
+        assert config["enable_learning_capture"] is True
+        assert config["enable_context_canary"] is True
+        assert config["enable_domain_composition"] is True
+
+    def test_tools_removal_when_disabled(self, tmp_path):
+        """Test that install tools are removed when not selected."""
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+        
+        project_dir = cookiecutter(
+            str(Path.cwd()),
+            no_input=True,
+            output_dir=str(output_dir),
+            extra_context={
+                "project_slug": "test-no-tools",
+                "selected_providers": "claude",
+                "default_domains": "git",
+                "include_install_tools": "false",
+            },
+        )
+        
+        generated_project = Path(project_dir)
+        
+        # Check Python module is removed
+        assert not (generated_project / "ai_conventions").exists()
+        assert not (generated_project / "install.py").exists()
+        assert not (generated_project / "pyproject.toml").exists()
+        
+        # But convention files should remain
+        assert (generated_project / "README.md").exists()
+        assert (generated_project / "templates").exists()
+
+    def test_minimal_file_generation(self, tmp_path):
+        """Test that minimal selection produces < 10 files."""
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+        
+        project_dir = cookiecutter(
+            str(Path.cwd()),
+            no_input=True,
+            output_dir=str(output_dir),
+            extra_context={
+                "project_slug": "test-minimal",
+                "selected_providers": "claude",
+                "default_domains": "git",
+                "include_install_tools": "false",
+            },
+        )
+        
+        generated_project = Path(project_dir)
+        
+        # Count all files recursively
+        file_count = sum(1 for _ in generated_project.rglob("*") if _.is_file())
+        
+        # Should have significantly fewer files than default (35+)
+        # Expecting ~15-20 files for minimal setup with templates
+        assert file_count < 20, f"Too many files generated: {file_count}"
+        
+        # Essential files should still exist
+        assert (generated_project / "README.md").exists()
+        assert (generated_project / "templates" / "claude" / "CLAUDE.md.j2").exists()
+        assert (generated_project / "domains" / "git" / "core.md").exists()
+
+    def test_readme_updated_with_selections(self, tmp_path):
+        """Test that README is updated to reflect selections."""
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+        
+        project_dir = cookiecutter(
+            str(Path.cwd()),
+            no_input=True,
+            output_dir=str(output_dir),
+            extra_context={
+                "project_slug": "test-readme",
+                "selected_providers": "claude,cursor",
+                "default_domains": "git,testing",
+                "include_install_tools": "true",
+            },
+        )
+        
+        generated_project = Path(project_dir)
+        readme_content = (generated_project / "README.md").read_text()
+        
+        # Check for included components section
+        assert "## 📦 What's Included" in readme_content
+        assert "### AI Providers" in readme_content
+        assert "- Claude" in readme_content
+        assert "- Cursor" in readme_content
+        assert "### Convention Domains" in readme_content
+        assert "- Git" in readme_content
+        assert "- Testing" in readme_content
+        assert "### Installation Tools" in readme_content

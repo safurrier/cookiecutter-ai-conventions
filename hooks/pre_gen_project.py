@@ -6,15 +6,20 @@ import os
 import sys
 from pathlib import Path
 
+# Constants - defined inline for cookiecutter compatibility
+# (cookiecutter creates temporary files which breaks imports)
+DEFAULT_DOMAINS = ["git", "testing"]
+REGISTRY_LOCATIONS = [
+    Path.cwd() / "community-domains" / "registry.yaml",
+    Path(__file__).parent.parent / "community-domains" / "registry.yaml",
+    Path.home() / ".cookiecutters" / "cookiecutter-ai-conventions" / "community-domains" / "registry.yaml",
+]
+
 
 def load_domain_registry():
     """Load available domains from registry."""
     # Try multiple locations for the registry
-    possible_locations = [
-        Path.cwd() / "community-domains" / "registry.yaml",
-        Path(__file__).parent.parent / "community-domains" / "registry.yaml",
-        Path.home() / ".cookiecutters" / "cookiecutter-ai-conventions" / "community-domains" / "registry.yaml",
-    ]
+    possible_locations = REGISTRY_LOCATIONS
     
     for registry_path in possible_locations:
         if registry_path.exists():
@@ -72,7 +77,7 @@ def interactive_domain_selection():
         
         if not selected:
             console.print("[yellow]No domains selected, using defaults[/yellow]")
-            return ["git", "testing"]
+            return DEFAULT_DOMAINS
         
         return selected
         
@@ -86,7 +91,7 @@ def simple_domain_selection():
     registry = load_domain_registry()
     if not registry:
         print("Warning: Could not load domain registry, using defaults")
-        return ["git", "testing"]
+        return DEFAULT_DOMAINS
     
     domains = registry.get("domains", {})
     
@@ -115,9 +120,9 @@ def simple_domain_selection():
                 selected.append(domain_list[idx][0])
     except (ValueError, IndexError):
         print("Invalid selection, using defaults")
-        return ["git", "testing"]
+        return DEFAULT_DOMAINS
     
-    return selected if selected else ["git", "testing"]
+    return selected if selected else DEFAULT_DOMAINS
 
 
 def main():
@@ -125,7 +130,7 @@ def main():
     # Check if running in non-interactive mode
     if not sys.stdin.isatty() or os.environ.get("COOKIECUTTER_NO_INPUT"):
         print("Running in non-interactive mode, using default domain selection")
-        selected = ["git", "testing"]  # Default domains
+        selected = DEFAULT_DOMAINS  # Default domains
     else:
         # Interactive domain selection
         selected = interactive_domain_selection()
