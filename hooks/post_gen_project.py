@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import List, Optional
 
 
+# Data models and constants defined inline for cookiecutter compatibility
+# (cookiecutter creates temporary files which breaks imports)
+
 @dataclass
 class ProviderFiles:
     """Structured data for provider-specific files."""
@@ -80,6 +83,44 @@ PROVIDER_REGISTRY = {
         module='ai_conventions/providers/codex.py'
     )
 }
+
+# Installation tools that should be removed if not needed
+INSTALL_TOOLS = [
+    'ai_conventions/',
+    'install.py',
+    'pyproject.toml',
+    'requirements.txt',
+    'setup.py',
+    'uv.lock',
+    '.python-version'
+]
+
+# Directories to check for cleanup after selective file generation
+CLEANUP_DIRECTORIES = [
+    "docs",
+    "ai_conventions/providers",
+    "ai_conventions",
+    ".cursor/rules",
+    ".cursor",
+    ".windsurf/rules", 
+    ".windsurf",
+    ".github/prompts",
+    ".github",
+    ".vscode",
+    ".codex",
+    ".claude/commands",
+    ".claude",
+    "templates/claude",
+    "templates/cursor/rules",
+    "templates/cursor",
+    "templates/windsurf/rules",
+    "templates/windsurf",
+    "templates/aider",
+    "templates/copilot/prompts",
+    "templates/copilot",
+    "templates/codex",
+    "templates",
+]
 
 
 def copy_domain(domain, source_dir, target_dir):
@@ -193,15 +234,7 @@ def remove_unselected_providers(selected_providers, enable_learning_capture=True
 
 def remove_install_tools():
     """Remove Python installation tools if not wanted."""
-    tools_to_remove = [
-        'ai_conventions/',
-        'install.py',
-        'pyproject.toml',
-        'requirements.txt',
-        'setup.py',
-        'uv.lock',
-        '.python-version'
-    ]
+    tools_to_remove = INSTALL_TOOLS
     
     removed_count = 0
     print("\n  Removing installation tools...")
@@ -469,31 +502,7 @@ def main():
 
 def cleanup_empty_directories():
     """Remove any empty directories left after selective file generation."""
-    dirs_to_check = [
-        "docs",
-        "ai_conventions/providers",
-        "ai_conventions",
-        ".cursor/rules",
-        ".cursor",
-        ".windsurf/rules", 
-        ".windsurf",
-        ".github/prompts",
-        ".github",
-        ".vscode",
-        ".codex",
-        ".claude/commands",
-        ".claude",
-        "templates/claude",
-        "templates/cursor/rules",
-        "templates/cursor",
-        "templates/windsurf/rules",
-        "templates/windsurf",
-        "templates/aider",
-        "templates/copilot/prompts",
-        "templates/copilot",
-        "templates/codex",
-        "templates",
-    ]
+    dirs_to_check = CLEANUP_DIRECTORIES
     
     # Check directories from deepest to shallowest
     for dir_path in dirs_to_check:
