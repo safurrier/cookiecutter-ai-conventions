@@ -7,12 +7,12 @@ from ai_conventions.config import ConfigManager, ConventionsConfig
 
 
 @click.group()
-def config():
+def config_command():
     """Manage AI conventions configuration."""
     pass
 
 
-@config.command()
+@config_command.command()
 @click.option(
     "--format", "-f",
     type=click.Choice(["yaml", "toml", "json"]),
@@ -53,7 +53,7 @@ def show(format, path):
         click.echo(f"Error loading config: {e}", err=True)
 
 
-@config.command()
+@config_command.command()
 @click.option(
     "--path", "-p",
     type=click.Path(),
@@ -74,7 +74,7 @@ def validate(path):
             click.echo(f"  - {error}", err=True)
 
 
-@config.command()
+@config_command.command()
 @click.argument("source", type=click.Path(exists=True))
 @click.argument("target_format", type=click.Choice(["yaml", "toml", "json"]))
 @click.option(
@@ -96,7 +96,7 @@ def migrate(source, target_format, output):
         click.echo(f"✗ Migration failed: {e}", err=True)
 
 
-@config.command()
+@config_command.command()
 @click.option(
     "--format", "-f",
     type=click.Choice(["yaml", "toml", "json"]),
@@ -146,7 +146,7 @@ def init(format, path, project_name, author_name, providers):
 
 def main():
     """Run config CLI."""
-    config()
+    config_command()
 
 
 if __name__ == "__main__":

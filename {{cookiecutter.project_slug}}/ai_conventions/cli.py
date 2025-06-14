@@ -8,14 +8,17 @@ from rich.table import Table
 console = Console()
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(version="0.1.0", prog_name="ai-conventions")
-def main():
+@click.pass_context
+def main(ctx):
     """AI Conventions management tool.
     
     Manage your AI development conventions across multiple tools.
     """
-    pass
+    # Show help if no command provided
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 @main.command()
@@ -94,4 +97,36 @@ def list():
 
 
 if __name__ == "__main__":
+    # Import subcommands when running as main module
+    {%- if cookiecutter.enable_learning_capture %}
+    from .capture import capture_command
+    from .sync import sync_command
+    {%- else %}
+    from .sync import sync_command
+    {%- endif %}
+    from .config_cli import config_command
+    
+    # Add subcommands
+    {%- if cookiecutter.enable_learning_capture %}
+    main.add_command(capture_command, name="capture")
+    {%- endif %}
+    main.add_command(sync_command, name="sync")
+    main.add_command(config_command, name="config")
+    
     main()
+else:
+    # Import subcommands when imported as module
+    {%- if cookiecutter.enable_learning_capture %}
+    from .capture import capture_command
+    from .sync import sync_command
+    {%- else %}
+    from .sync import sync_command
+    {%- endif %}
+    from .config_cli import config_command
+    
+    # Add subcommands
+    {%- if cookiecutter.enable_learning_capture %}
+    main.add_command(capture_command, name="capture")
+    {%- endif %}
+    main.add_command(sync_command, name="sync")
+    main.add_command(config_command, name="config")
