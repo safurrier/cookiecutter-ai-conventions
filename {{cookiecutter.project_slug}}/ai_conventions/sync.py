@@ -162,5 +162,8 @@ def sync_command(provider, sync_all):
     console.print("\n✨ Sync complete!")
 
 
+# Export as main for consistency with other modules
+main = sync_command
+
 if __name__ == "__main__":
     sync_command()

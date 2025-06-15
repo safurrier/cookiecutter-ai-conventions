@@ -94,5 +94,8 @@ def capture_command(pattern, domain, file, category):
     console.print("   2. Promote to domain when ready")
 
 
+# Export as main for consistency with other modules
+main = capture_command
+
 if __name__ == "__main__":
     capture_command()

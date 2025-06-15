@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ai-conventions = "ai_conventions.cli:main"
+{{ cookiecutter.project_slug }} = "ai_conventions.cli:main"
 
 [tool.setuptools]
 packages = ["ai_conventions"]
