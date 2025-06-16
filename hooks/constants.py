@@ -10,7 +10,6 @@ and the inline definitions in the hook files when making changes.
 from pathlib import Path
 from typing import List
 
-
 # Installation tools that should be removed if not needed
 INSTALL_TOOLS: List[str] = [
     'ai_conventions/',
@@ -30,7 +29,7 @@ CLEANUP_DIRECTORIES: List[str] = [
     "ai_conventions",
     ".cursor/rules",
     ".cursor",
-    ".windsurf/rules", 
+    ".windsurf/rules",
     ".windsurf",
     ".github/prompts",
     ".github",

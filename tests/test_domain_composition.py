@@ -1,9 +1,5 @@
 import json
-import tempfile
 from pathlib import Path
-
-import pytest
-import yaml
 
 
 def test_domain_extends_syntax_in_yaml(cookies):
@@ -15,9 +11,9 @@ def test_domain_extends_syntax_in_yaml(cookies):
             "enable_domain_composition": True,
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Create a domain that extends another
     domain_path = result.project_path / "domains" / "pytest" / "core.md"
     domain_path.parent.mkdir(parents=True, exist_ok=True)
@@ -28,11 +24,11 @@ extends: testing
 
 This domain extends the base testing domain.
 """)
-    
+
     # Parse the frontmatter
     content = domain_path.read_text(encoding='utf-8')
     assert "extends: testing" in content
-    
+
 
 def test_domain_inheritance_chain(cookies):
     """Test that domains can form inheritance chains."""
@@ -43,9 +39,9 @@ def test_domain_inheritance_chain(cookies):
             "enable_domain_composition": True,
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Create base domain
     base_domain = result.project_path / "domains" / "testing" / "core.md"
     base_domain.parent.mkdir(parents=True, exist_ok=True)
@@ -53,7 +49,7 @@ def test_domain_inheritance_chain(cookies):
 
 Base testing principles.
 """)
-    
+
     # Create mid-level domain
     pytest_domain = result.project_path / "domains" / "pytest" / "core.md"
     pytest_domain.parent.mkdir(parents=True, exist_ok=True)
@@ -64,7 +60,7 @@ extends: testing
 
 Pytest-specific patterns.
 """)
-    
+
     # Create leaf domain
     fixtures_domain = result.project_path / "domains" / "pytest" / "fixtures.md"
     fixtures_domain.write_text("""---
@@ -74,7 +70,7 @@ extends: pytest
 
 Advanced fixture patterns.
 """)
-    
+
     # All files should exist
     assert base_domain.exists()
     assert pytest_domain.exists()
@@ -89,13 +85,13 @@ def test_circular_dependency_detection(cookies):
             "enable_domain_composition": True,
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Check that domain resolver exists
     resolver_path = result.project_path / "ai_conventions" / "domain_resolver.py"
     assert resolver_path.exists()
-    
+
     # The resolver should have circular dependency detection logic
     resolver_content = resolver_path.read_text(encoding='utf-8')
     assert "circular" in resolver_content.lower() or "cycle" in resolver_content.lower()
@@ -110,13 +106,13 @@ def test_claude_md_includes_inheritance_info(cookies):
             "default_domains": "testing,python",
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Check the CLAUDE.md template
     claude_template = result.project_path / "templates" / "claude" / "CLAUDE.md.j2"
     assert claude_template.exists()
-    
+
     content = claude_template.read_text(encoding='utf-8')
     # Should mention domain composition or inheritance
     assert "domain composition" in content.lower() or "domain inheritance" in content.lower()
@@ -131,9 +127,9 @@ def test_multiple_inheritance_supported(cookies):
             "enable_domain_composition": True,
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Create a domain that extends multiple parents
     domain_path = result.project_path / "domains" / "api-testing" / "core.md"
     domain_path.parent.mkdir(parents=True, exist_ok=True)
@@ -146,7 +142,7 @@ extends:
 
 Combines testing and API domains.
 """)
-    
+
     content = domain_path.read_text(encoding='utf-8')
     assert "extends:" in content
     assert "- testing" in content
@@ -161,13 +157,13 @@ def test_domain_resolver_module_created(cookies):
             "enable_domain_composition": True,
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Check domain resolver exists
     resolver = result.project_path / "ai_conventions" / "domain_resolver.py"
     assert resolver.exists()
-    
+
     # Check it has the necessary functions
     content = resolver.read_text(encoding='utf-8')
     assert "def resolve_domain" in content or "def load_domain" in content
@@ -179,6 +175,6 @@ def test_cookiecutter_json_has_composition_option(cookies):
     cookiecutter_json = Path("cookiecutter.json")
     with open(cookiecutter_json) as f:
         config = json.load(f)
-    
+
     assert "enable_domain_composition" in config
     assert isinstance(config["enable_domain_composition"], bool)

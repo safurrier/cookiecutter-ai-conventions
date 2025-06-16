@@ -166,3 +166,47 @@ class TestE2ECookiecutterGeneration:
         assert (domains_dir / "git" / "core.md").exists()
         assert (domains_dir / "testing" / "core.md").exists()
         # Note: For now we can only test default domains due to cookiecutter limitations
+
+    def test_python_files_are_processed_correctly(self, tmp_path):
+        """Test that Python files with Jinja2 syntax are processed correctly."""
+        # Arrange
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+
+        # Act
+        project_dir = cookiecutter(
+            str(Path.cwd()),
+            no_input=True,
+            extra_context={
+                "enable_learning_capture": True,
+            },
+            output_dir=str(output_dir),
+        )
+
+        # Assert: Verify Python files don't contain unprocessed Jinja2 syntax
+        generated_project = Path(project_dir)
+        
+        # Check cli.py - this file has conditional imports based on enable_learning_capture
+        cli_py = generated_project / "ai_conventions" / "cli.py"
+        assert cli_py.exists()
+        cli_content = cli_py.read_text(encoding="utf-8")
+        
+        # Should not contain any Jinja2 syntax
+        assert "{%" not in cli_content
+        assert "{{" not in cli_content
+        assert "cookiecutter." not in cli_content
+        
+        # Should contain the processed result
+        assert "from .capture import capture_command" in cli_content
+        
+        # Check install.py - this file has cookiecutter variables
+        install_py = generated_project / "install.py"
+        assert install_py.exists()
+        install_content = install_py.read_text(encoding="utf-8")
+        
+        # Should not contain any Jinja2 syntax
+        assert "{{" not in install_content
+        assert "cookiecutter." not in install_content
+        
+        # Should contain the processed values
+        assert '"project_name": "My AI Conventions"' in install_content
