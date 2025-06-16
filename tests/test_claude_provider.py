@@ -1,7 +1,5 @@
 """Test Claude provider integration."""
 
-import pytest
-from pathlib import Path
 
 
 def test_claude_commands_included_when_provider_selected(cookies):
@@ -16,16 +14,16 @@ def test_claude_commands_included_when_provider_selected(cookies):
             "selected_providers": "claude"
         }
     )
-    
+
     assert result.exit_code == 0
     assert result.exception is None
-    
+
     # Check Claude commands exist
     claude_commands_dir = result.project_path / ".claude" / "commands"
     assert claude_commands_dir.exists()
     assert (claude_commands_dir / "capture-learning.md").exists()
     assert (claude_commands_dir / "review-learnings.md").exists()
-    
+
     # Check Python commands are removed but directory still exists with .md files
     commands_dir = result.project_path / "commands"
     assert commands_dir.exists()
@@ -49,14 +47,14 @@ def test_claude_commands_removed_when_provider_not_selected(cookies):
             "selected_providers": "cursor"
         }
     )
-    
+
     assert result.exit_code == 0
     assert result.exception is None
-    
+
     # Check Claude commands don't exist
     claude_dir = result.project_path / ".claude"
     assert not claude_dir.exists()
-    
+
     # Check commands directory exists with .md files but no .py files
     commands_dir = result.project_path / "commands"
     assert commands_dir.exists()
@@ -80,10 +78,10 @@ def test_all_commands_removed_when_learning_disabled(cookies):
             "selected_providers": "claude"
         }
     )
-    
+
     assert result.exit_code == 0
     assert result.exception is None
-    
+
     # Check no command directories exist
     claude_dir = result.project_path / ".claude"
     commands_dir = result.project_path / "commands"
@@ -103,10 +101,10 @@ def test_claude_setup_docs_created(cookies):
             "selected_providers": "claude"
         }
     )
-    
+
     assert result.exit_code == 0
     assert result.exception is None
-    
+
     # Check Claude setup docs exist
     claude_setup = result.project_path / "docs" / "claude-setup.md"
     assert claude_setup.exists()

@@ -6,7 +6,7 @@ that could break after template processing.
 
 import ast
 import subprocess
-import tempfile
+import sys
 from pathlib import Path
 from textwrap import dedent
 
@@ -23,7 +23,7 @@ class TestPythonSyntaxValidation:
             def hello():
                 return "world"
         """)
-        
+
         # Invalid Python code
         invalid_code = dedent("""
             def hello():
@@ -31,7 +31,7 @@ class TestPythonSyntaxValidation:
                 return "world"
                 {%- endif %}
         """)
-        
+
         # Test validation
         assert self._is_valid_python(valid_code) is True
         assert self._is_valid_python(invalid_code) is False
@@ -47,7 +47,7 @@ class TestPythonSyntaxValidation:
             ('x = "{" + "}"', False),  # Not Jinja2
             ('comment = "Use {% tag %} for templates"', True),
         ]
-        
+
         for code, expected in test_cases:
             has_jinja2 = self._has_jinja2_syntax(code)
             assert has_jinja2 == expected, f"Failed for: {code}"
@@ -62,11 +62,11 @@ class TestPythonSyntaxValidation:
             import click
             from pathlib import Path
         """)
-        
+
         # Parse and extract imports
         tree = ast.parse(test_code)
         imports = []
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
@@ -75,7 +75,7 @@ class TestPythonSyntaxValidation:
                 module = node.module or ''
                 for alias in node.names:
                     imports.append(f"{module}.{alias.name}" if module else alias.name)
-        
+
         assert "click" in imports
         assert ".config.Config" in imports
         assert ".capture.capture_command" in imports
@@ -93,7 +93,7 @@ class TestPythonSyntaxValidation:
     def _has_jinja2_syntax(code: str) -> bool:
         """Check if code contains Jinja2 template syntax."""
         jinja2_patterns = [
-            "{{", "}}", 
+            "{{", "}}",
             "{%", "%}",
             "{#", "#}",
         ]
@@ -111,28 +111,28 @@ class TestConditionalCodeGeneration:
             {%- if cookiecutter.enable_learning_capture %}
             from .capture import capture_command
             {%- endif %}
-            
+
             @click.group()
             def cli():
                 pass
-            
+
             {%- if cookiecutter.enable_learning_capture %}
             cli.add_command(capture_command)
             {%- endif %}
         """)
-        
+
         # Test with learning capture enabled
         context = {"cookiecutter": {"enable_learning_capture": True}}
         processed = self._process_template(template, context)
-        
+
         assert "from .capture import capture_command" in processed
         assert "cli.add_command(capture_command)" in processed
         assert "{%" not in processed
-        
+
         # Test with learning capture disabled
         context = {"cookiecutter": {"enable_learning_capture": False}}
         processed = self._process_template(template, context)
-        
+
         assert "from .capture import capture_command" not in processed
         assert "cli.add_command(capture_command)" not in processed
 
@@ -148,14 +148,14 @@ class TestConditionalCodeGeneration:
                 {%- endif %}
             {%- endif %}
         """)
-        
+
         context = {
             "cookiecutter": {
                 "enable_learning_capture": True,
                 "selected_providers": "claude"
             }
         }
-        
+
         processed = self._process_template(template, context)
         assert 'return "claude"' in processed
         assert 'return "other"' not in processed
@@ -166,7 +166,7 @@ class TestConditionalCodeGeneration:
         # This is a simplified simulation for testing
         # In reality, cookiecutter uses Jinja2
         from jinja2 import Template
-        
+
         tmpl = Template(template)
         return tmpl.render(**context)
 
@@ -182,7 +182,7 @@ class TestImportStructureValidation:
             "module_b.py": "from .module_a import A\nclass B: pass",  # Circular!
             "module_c.py": "class C: pass",
         }
-        
+
         # Detect circular imports
         has_circular = self._has_circular_imports(project_structure)
         assert has_circular is True
@@ -198,8 +198,8 @@ class TestImportStructureValidation:
             ("from .module import Class", True),  # Valid
             ("from . import *", False),  # Discouraged
         ]
-        
-        for import_stmt, expected_valid in test_cases:
+
+        for import_stmt, _expected_valid in test_cases:
             # In a real test, we'd check this in context
             # For now, just verify the pattern
             is_relative = import_stmt.startswith("from .")
@@ -210,11 +210,11 @@ class TestImportStructureValidation:
         """Detect circular imports in project structure."""
         # Simplified detection - in reality would use AST
         imports = {}
-        
+
         for filename, content in project_structure.items():
             module_name = filename.replace('.py', '')
             imports[module_name] = []
-            
+
             # Extract imports (simplified)
             for line in content.split('\n'):
                 if line.startswith('from .'):
@@ -223,13 +223,13 @@ class TestImportStructureValidation:
                     if len(parts) >= 4:  # from .module import something
                         imported = parts[1].replace('.', '')
                         imports[module_name].append(imported)
-        
+
         # Check for cycles (simplified)
         for module, deps in imports.items():
             for dep in deps:
                 if dep in imports and module in imports.get(dep, []):
                     return True
-        
+
         return False
 
 
@@ -250,16 +250,16 @@ class TestCLIExecutionValidation:
             print(f"Python {sys.version}")
             sys.exit(0)
         """))
-        
+
         cli_script.chmod(0o755)
-        
+
         # Execute directly (using shebang)
         result = subprocess.run(
             [str(cli_script)],
             capture_output=True,
             text=True
         )
-        
+
         assert result.returncode == 0
         assert "Python" in result.stdout
 
@@ -269,7 +269,7 @@ class TestCLIExecutionValidation:
         cli_script = tmp_path / "cli_with_error.py"
         cli_script.write_text(dedent("""
             import sys
-            
+
             def main():
                 # Simulate different error conditions
                 if "--syntax-error" in sys.argv:
@@ -281,7 +281,7 @@ class TestCLIExecutionValidation:
                 else:
                     print("Success")
                     return 0
-            
+
             if __name__ == "__main__":
                 try:
                     sys.exit(main() or 0)
@@ -289,7 +289,7 @@ class TestCLIExecutionValidation:
                     print(f"Error: {e}", file=sys.stderr)
                     sys.exit(1)
         """))
-        
+
         # Test different error scenarios
         scenarios = [
             (["--syntax-error"], "SyntaxError"),
@@ -297,21 +297,21 @@ class TestCLIExecutionValidation:
             (["--runtime-error"], "Simulated runtime error"),
             ([], "Success"),
         ]
-        
+
         for args, expected_output in scenarios:
             result = subprocess.run(
                 [sys.executable, str(cli_script)] + args,
                 capture_output=True,
                 text=True
             )
-            
+
             if expected_output == "Success":
                 assert result.returncode == 0
                 assert expected_output in result.stdout
             else:
                 assert result.returncode == 1
                 # Error might be in stderr or stdout depending on handling
-                output = result.stdout + result.stderr
+                result.stdout + result.stderr
                 # Just check that it failed appropriately
                 assert result.returncode != 0
 
@@ -329,18 +329,18 @@ class TestEnvironmentCompatibility:
             ("path with spaces/file.txt", "paths with spaces"),
             ("path/to/../simplified/path", "path simplification"),
         ]
-        
-        for path_str, description in test_paths:
+
+        for path_str, _description in test_paths:
             path = Path(path_str)
-            
+
             # Test that Path handles these correctly
             if path_str.startswith("~"):
                 expanded = path.expanduser()
                 assert str(expanded) != path_str  # Should expand
-            
+
             # Test path operations
             assert path.parts  # Should be parseable
-            
+
             # For paths with spaces, ensure proper handling
             if " " in path_str:
                 # In subprocess calls, these need quoting
@@ -351,24 +351,24 @@ class TestEnvironmentCompatibility:
         """Test that files with different encodings are handled correctly."""
         # Create files with different encodings
         test_content = "Hello 世界 🌍"
-        
+
         encodings = ["utf-8", "utf-16", "latin-1"]
-        
+
         for encoding in encodings:
             try:
                 file_path = tmp_path / f"test_{encoding}.txt"
                 file_path.write_text(test_content, encoding=encoding)
-                
+
                 # Try to read it back
                 read_content = file_path.read_text(encoding=encoding)
-                
+
                 # For latin-1, non-ASCII characters will be lost
                 if encoding == "latin-1":
                     # Just check it doesn't crash
                     assert len(read_content) > 0
                 else:
                     assert test_content == read_content
-                    
+
             except (UnicodeEncodeError, UnicodeDecodeError):
                 # Expected for some encoding/content combinations
                 if encoding != "utf-8":
@@ -381,7 +381,7 @@ class TestEnvironmentCompatibility:
         content_unix = "line1\nline2\nline3"
         content_windows = "line1\r\nline2\r\nline3"
         content_mac = "line1\rline2\rline3"
-        
+
         for name, content in [
             ("unix.txt", content_unix),
             ("windows.txt", content_windows),
@@ -389,10 +389,10 @@ class TestEnvironmentCompatibility:
         ]:
             file_path = tmp_path / name
             file_path.write_bytes(content.encode())
-            
+
             # Read with universal newlines
             read_content = file_path.read_text()
-            
+
             # Should normalize to \n
             assert read_content.count('\n') >= 2
             assert '\r' not in read_content  # Should be normalized

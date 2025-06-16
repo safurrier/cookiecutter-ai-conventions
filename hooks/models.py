@@ -22,7 +22,7 @@ class ProviderFiles:
     module: Optional[str] = None
     domain_specific_patterns: List[str] = field(default_factory=list)
     conditional_files: dict = field(default_factory=dict)  # Files that depend on features
-    
+
     def all_paths(self) -> List[Path]:
         """Get all file paths for this provider."""
         paths: List[Path] = []

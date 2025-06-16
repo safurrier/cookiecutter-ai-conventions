@@ -40,9 +40,9 @@ class TestTemplateProcessing:
         # Assert: All Python files should be syntactically valid
         generated_project = Path(project_dir)
         python_files = list(generated_project.rglob("*.py"))
-        
+
         assert len(python_files) > 0, "No Python files found in generated project"
-        
+
         errors = []
         for py_file in python_files:
             try:
@@ -51,21 +51,21 @@ class TestTemplateProcessing:
                 if "{%" in content or "{{" in content:
                     errors.append(f"{py_file}: Contains unprocessed Jinja2 syntax")
                     continue
-                
+
                 # Try to compile the Python code
                 ast.parse(content, filename=str(py_file))
             except SyntaxError as e:
                 errors.append(f"{py_file}: {e}")
-        
+
         if errors:
-            pytest.fail(f"Python syntax errors found:\n" + "\n".join(errors))
+            pytest.fail("Python syntax errors found:\n" + "\n".join(errors))
 
     def test_conditional_imports_are_processed(self, tmp_path):
         """Test that conditional imports in cli.py are properly processed."""
         # Test case 1: With learning capture enabled
         output_dir = tmp_path / "with_capture"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -74,21 +74,21 @@ class TestTemplateProcessing:
             },
             output_dir=str(output_dir),
         )
-        
+
         cli_py = Path(project_dir) / "ai_conventions" / "cli.py"
         content = cli_py.read_text(encoding="utf-8")
-        
+
         # Should have capture imports
         assert "from .capture import capture_command" in content
         assert "main.add_command(capture_command, name=\"capture\")" in content
         # Should not have Jinja2 syntax
         assert "{%" not in content
         assert "cookiecutter" not in content
-        
+
         # Test case 2: With learning capture disabled
         output_dir2 = tmp_path / "without_capture"
         output_dir2.mkdir()
-        
+
         project_dir2 = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -97,10 +97,10 @@ class TestTemplateProcessing:
             },
             output_dir=str(output_dir2),
         )
-        
+
         cli_py2 = Path(project_dir2) / "ai_conventions" / "cli.py"
         content2 = cli_py2.read_text(encoding="utf-8")
-        
+
         # Should not have capture imports
         assert "from .capture import capture_command" not in content2
         assert "main.add_command(capture_command" not in content2
@@ -111,10 +111,10 @@ class TestTemplateProcessing:
         """Test that project metadata variables are replaced correctly."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         custom_name = "Test AI Conventions"
         custom_email = "test@example.com"
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -124,19 +124,19 @@ class TestTemplateProcessing:
             },
             output_dir=str(output_dir),
         )
-        
+
         # Check install.py
         install_py = Path(project_dir) / "install.py"
         install_content = install_py.read_text(encoding="utf-8")
-        
+
         assert f'"project_name": "{custom_name}"' in install_content
         assert f'"author_email": "{custom_email}"' in install_content
         assert "{{cookiecutter" not in install_content
-        
+
         # Check README.md
         readme = Path(project_dir) / "README.md"
         readme_content = readme.read_text(encoding="utf-8")
-        
+
         assert custom_name in readme_content
         assert "{{cookiecutter" not in readme_content
 
@@ -144,7 +144,7 @@ class TestTemplateProcessing:
         """Test that pyproject.toml is properly processed and valid."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -155,14 +155,14 @@ class TestTemplateProcessing:
             },
             output_dir=str(output_dir),
         )
-        
+
         pyproject = Path(project_dir) / "pyproject.toml"
         content = pyproject.read_text(encoding="utf-8")
-        
+
         # Should not have any template syntax
         assert "{{" not in content
         assert "{%" not in content
-        
+
         # Should have proper values
         assert 'name = "test-project"' in content
         assert 'authors = [{name = "Test Author", email = "test@example.com"}]' in content
@@ -171,13 +171,13 @@ class TestTemplateProcessing:
         """Test that files in _copy_without_render list are not processed."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
             output_dir=str(output_dir),
         )
-        
+
         # Check that community-domains files are copied as-is
         # These files might contain example Jinja2 syntax that should not be processed
         community_domains = Path(project_dir) / "community-domains"
@@ -202,7 +202,7 @@ class TestEndToEndUserJourney:
         # Arrange
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         # Act: Generate project
         project_dir = cookiecutter(
             str(Path.cwd()),
@@ -212,14 +212,14 @@ class TestEndToEndUserJourney:
             },
             output_dir=str(output_dir),
         )
-        
+
         generated_project = Path(project_dir)
-        
+
         # Assert: Project structure is correct
         assert (generated_project / "pyproject.toml").exists()
         assert (generated_project / "ai_conventions" / "__init__.py").exists()
         assert (generated_project / "ai_conventions" / "cli.py").exists()
-        
+
         # Act: Install with uv tool
         # First, ensure we have a clean environment
         subprocess.run(
@@ -227,7 +227,7 @@ class TestEndToEndUserJourney:
             capture_output=True,
             check=False  # OK if it wasn't installed
         )
-        
+
         # Install the generated project
         result = subprocess.run(
             ["uv", "tool", "install", str(generated_project)],
@@ -235,9 +235,9 @@ class TestEndToEndUserJourney:
             text=True,
             cwd=str(generated_project)
         )
-        
+
         assert result.returncode == 0, f"uv tool install failed: {result.stderr}"
-        
+
         # Act: Run the CLI
         result = subprocess.run(
             ["ai-conventions", "--version"],
@@ -245,10 +245,10 @@ class TestEndToEndUserJourney:
             text=True,
             shell=False  # Use direct execution, not shell
         )
-        
+
         assert result.returncode == 0, f"CLI execution failed: {result.stderr}"
         assert "0.1.0" in result.stdout
-        
+
         # Act: Run status command
         result = subprocess.run(
             ["ai-conventions", "status"],
@@ -257,10 +257,10 @@ class TestEndToEndUserJourney:
             cwd=str(generated_project),
             shell=False
         )
-        
+
         assert result.returncode == 0, f"Status command failed: {result.stderr}"
         assert "AI Conventions Status" in result.stdout
-        
+
         # Cleanup
         subprocess.run(
             ["uv", "tool", "uninstall", "my-ai-conventions"],
@@ -272,7 +272,7 @@ class TestEndToEndUserJourney:
         """Test that the generated package can be imported and used."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -281,23 +281,19 @@ class TestEndToEndUserJourney:
             },
             output_dir=str(output_dir),
         )
-        
+
         # Add the project to Python path
         sys.path.insert(0, str(project_dir))
-        
+
         try:
             # Should be able to import the package
-            import ai_conventions
-            import ai_conventions.cli
-            import ai_conventions.config
-            
+
             # With learning capture enabled, these should also work
-            import ai_conventions.capture
-            
+
             # The main CLI group should be accessible
             from ai_conventions.cli import main
             assert hasattr(main, 'commands')
-            
+
         finally:
             # Clean up sys.path
             sys.path.remove(str(project_dir))
@@ -314,23 +310,23 @@ class TestShellCompatibility:
         """Test that subprocess commands work in /bin/sh environment."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
             output_dir=str(output_dir),
         )
-        
+
         # Test that install.py works with /bin/sh
-        install_script = Path(project_dir) / "install.py"
-        
+        Path(project_dir) / "install.py"
+
         # Run with explicit /bin/sh shell
         result = subprocess.run(
             ["/bin/sh", "-c", f"cd {project_dir} && python install.py --help"],
             capture_output=True,
             text=True
         )
-        
+
         assert result.returncode == 0, f"install.py failed in sh: {result.stderr}"
         assert "Install AI conventions" in result.stdout
 
@@ -342,24 +338,24 @@ class TestShellCompatibility:
         """Test that generated scripts don't rely on shell-specific aliases."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
             output_dir=str(output_dir),
         )
-        
+
         # Check all Python files for subprocess calls
         for py_file in Path(project_dir).rglob("*.py"):
             content = py_file.read_text(encoding="utf-8")
-            
+
             # These patterns might indicate shell-specific usage
             problematic_patterns = [
                 "shell=True",  # Using shell can introduce compatibility issues
                 "~/",  # Shell expansion might not work consistently
                 "cd ",  # Direct cd commands in subprocess
             ]
-            
+
             for pattern in problematic_patterns:
                 if pattern in content:
                     # Some uses might be legitimate, check context

@@ -146,7 +146,7 @@ class TestE2EUVToolWorkflow:
     @pytest.mark.slow
     def test_uv_tool_command_execution(self, tmp_path):
         """Test that UV tool commands execute successfully.
-        
+
         This should FAIL initially because:
         1. CLI commands not properly configured
         2. Entry points missing or incorrect
@@ -213,7 +213,7 @@ class TestE2EUVToolWorkflow:
     @pytest.mark.slow
     def test_uv_tool_status_command(self, tmp_path):
         """Test that generated tool has working status command.
-        
+
         This should FAIL initially because:
         1. Status command not implemented
         2. CLI subcommands not configured
@@ -269,7 +269,7 @@ class TestE2EUVToolWorkflow:
 
     def test_cookiecutter_branch_checkout_support(self, tmp_path):
         """Test cookiecutter generation from specific branch.
-        
+
         This should FAIL initially because:
         1. Current branch might not exist for testing
         2. Branch-specific configuration not implemented
@@ -336,7 +336,7 @@ class TestE2EUVToolWorkflow:
     )
     def test_uv_tool_cross_platform_compatibility(self, tmp_path):
         """Test UV tool works across different platforms.
-        
+
         This should FAIL initially on some platforms because:
         1. Path handling differences between OS
         2. Script entry point format variations
@@ -398,7 +398,7 @@ class TestE2EUVToolWorkflow:
 
     def test_uv_environment_isolation(self, tmp_path):
         """Test that UV tool installation doesn't pollute global environment.
-        
+
         This should FAIL initially because:
         1. UV tool isolation not properly configured
         2. Dependencies might leak into global space
