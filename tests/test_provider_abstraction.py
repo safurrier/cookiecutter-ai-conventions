@@ -31,6 +31,7 @@ def test_base_provider_interface(cookies):
     assert "class InstallResult:" in content
 
 
+@pytest.mark.serial
 def test_provider_capabilities_dataclass(cookies):
     """Test that ProviderCapabilities has all required fields."""
     result = cookies.bake(
@@ -66,6 +67,7 @@ def test_provider_capabilities_dataclass(cookies):
     assert capabilities.config_format == "markdown"
 
 
+@pytest.mark.serial
 def test_install_result_dataclass(cookies):
     """Test that InstallResult has all required fields."""
     result = cookies.bake(
@@ -97,6 +99,7 @@ def test_install_result_dataclass(cookies):
     assert install_result.mode == "symlink"
 
 
+@pytest.mark.serial
 def test_claude_provider_implements_interface(cookies):
     """Test that Claude provider properly implements the base interface."""
     result = cookies.bake(
@@ -133,6 +136,7 @@ def test_claude_provider_implements_interface(cookies):
     assert provider.get_install_path() == Path.home() / ".claude"
 
 
+@pytest.mark.serial
 def test_provider_registry(cookies):
     """Test that provider registry works correctly."""
     result = cookies.bake(
@@ -171,6 +175,7 @@ def test_provider_registry(cookies):
         get_provider("unknown", result.project_path, config)
 
 
+@pytest.mark.serial
 def test_symlink_detection(cookies):
     """Test that symlink detection works correctly."""
     result = cookies.bake(
@@ -199,6 +204,7 @@ def test_symlink_detection(cookies):
         assert isinstance(can_symlink, bool)
 
 
+@pytest.mark.serial
 def test_install_method_returns_result(cookies):
     """Test that install method returns proper InstallResult."""
     result = cookies.bake(
