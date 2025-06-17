@@ -156,15 +156,10 @@ def test_provider_registry(cookies):
 
     from ai_conventions.providers import PROVIDERS, get_provider
 
-    # Check selected providers are registered
-    assert "claude" in PROVIDERS
-    assert "cursor" in PROVIDERS
-    assert "windsurf" in PROVIDERS
-
-    # Check unselected providers are NOT registered
-    assert "aider" not in PROVIDERS
-    assert "copilot" not in PROVIDERS
-    assert "codex" not in PROVIDERS
+    # ALL providers should be registered (improved architecture - keep all Python modules)
+    expected_providers = ["claude", "cursor", "windsurf", "aider", "copilot", "codex"]
+    for provider in expected_providers:
+        assert provider in PROVIDERS
 
     # Test get_provider function
     config = {}

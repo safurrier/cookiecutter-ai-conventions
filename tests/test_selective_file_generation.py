@@ -30,9 +30,9 @@ class TestSelectiveFileGeneration:
 
         generated_project = Path(project_dir)
 
-        # These directories should NOT exist if empty
-        assert not (generated_project / "commands").exists()
-        assert not (generated_project / "staging").exists()
+        # Learning capture is always available for better UX (improved architecture)
+        assert (generated_project / "commands").exists()
+        assert (generated_project / "staging").exists()
         assert not (generated_project / ".cursor").exists()
         assert not (generated_project / ".windsurf").exists()
         assert not (generated_project / ".aider").exists()
@@ -72,10 +72,15 @@ class TestSelectiveFileGeneration:
         providers_dir = generated_project / "ai_conventions" / "providers"
         assert providers_dir.exists()
 
-        # Should only have base.py and __init__.py (no provider modules)
+        # Should have all provider modules (improved architecture)
         py_files = list(providers_dir.glob("*.py"))
-        assert len(py_files) == 2
-        assert all(f.name in ["base.py", "__init__.py"] for f in py_files)
+        assert len(py_files) == 8  # All providers + base + __init__
+        assert (providers_dir / "base.py").exists()
+        assert (providers_dir / "__init__.py").exists()
+        
+        # But no config files should exist since no providers selected
+        assert not (generated_project / ".claude").exists()
+        assert not (generated_project / ".cursorrules").exists()
 
     def test_invalid_domain_warning(self, tmp_path):
         """Test warning when invalid domains are selected."""
@@ -125,19 +130,23 @@ class TestSelectiveFileGeneration:
         generated_project = Path(project_dir)
         providers_dir = generated_project / "ai_conventions" / "providers"
 
-        # Selected providers should exist
+        # ALL provider modules should exist (improved architecture)
         assert (providers_dir / "claude.py").exists()
         assert (providers_dir / "aider.py").exists()
-
-        # Unselected providers should NOT exist
-        assert not (providers_dir / "cursor.py").exists()
-        assert not (providers_dir / "windsurf.py").exists()
-        assert not (providers_dir / "copilot.py").exists()
-        assert not (providers_dir / "codex.py").exists()
+        assert (providers_dir / "cursor.py").exists()  # Keep all Python modules
+        assert (providers_dir / "windsurf.py").exists()
+        assert (providers_dir / "copilot.py").exists()
+        assert (providers_dir / "codex.py").exists()
 
         # Base files should still exist
         assert (providers_dir / "base.py").exists()
         assert (providers_dir / "__init__.py").exists()
+
+        # Config files: only selected providers should have config
+        assert (generated_project / ".claude").exists()  # Claude selected
+        assert (generated_project / "CONVENTIONS.md").exists()  # Aider selected
+        assert not (generated_project / ".cursorrules").exists()  # Cursor not selected
+        assert not (generated_project / ".windsurfrules").exists()  # Windsurf not selected
 
     def test_docs_directory_cleanup(self, tmp_path):
         """Test that docs directory is cleaned up when empty."""
@@ -185,9 +194,11 @@ class TestSelectiveFileGeneration:
 
         generated_project = Path(project_dir)
 
-        # Should NOT have these optional features
-        assert not (generated_project / "staging").exists()
-        assert not (generated_project / "commands").exists()
+        # Learning capture is now always available (improved UX)
+        assert (generated_project / "staging").exists()
+        assert (generated_project / "commands").exists()
+        
+        # Domain composition can still be disabled
         assert not (generated_project / "ai_conventions" / "domain_resolver.py").exists()
 
         # Should still have core files

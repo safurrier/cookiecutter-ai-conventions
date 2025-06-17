@@ -111,35 +111,23 @@ def list():
 
 if __name__ == "__main__":
     # Import subcommands when running as main module
-    {%- if cookiecutter.enable_learning_capture %}
     from .capture import capture_command
     from .sync import sync_command
-    {%- else %}
-    from .sync import sync_command
-    {%- endif %}
     from .config_cli import config_command
     
     # Add subcommands
-    {%- if cookiecutter.enable_learning_capture %}
     main.add_command(capture_command, name="capture")
-    {%- endif %}
     main.add_command(sync_command, name="sync")
     main.add_command(config_command, name="config")
     
     main()
 else:
     # Import subcommands when imported as module
-    {%- if cookiecutter.enable_learning_capture %}
     from .capture import capture_command
     from .sync import sync_command
-    {%- else %}
-    from .sync import sync_command
-    {%- endif %}
     from .config_cli import config_command
     
     # Add subcommands
-    {%- if cookiecutter.enable_learning_capture %}
     main.add_command(capture_command, name="capture")
-    {%- endif %}
     main.add_command(sync_command, name="sync")
     main.add_command(config_command, name="config")
