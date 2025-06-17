@@ -54,11 +54,14 @@ class TestE2EInstallation:
         assert not (generated_project / ".windsurfrules").exists()
         assert not (generated_project / "CONVENTIONS.md").exists()
 
-        # Verify provider modules
+        # Verify ALL provider modules exist (improved architecture)
         providers_dir = generated_project / "ai_conventions" / "providers"
         assert (providers_dir / "claude.py").exists()
-        assert not (providers_dir / "cursor.py").exists()
-        assert not (providers_dir / "windsurf.py").exists()
+        assert (providers_dir / "cursor.py").exists()  # Keep all Python modules
+        assert (providers_dir / "windsurf.py").exists()
+        assert (providers_dir / "aider.py").exists()
+        assert (providers_dir / "copilot.py").exists()
+        assert (providers_dir / "codex.py").exists()
 
     def test_multiple_provider_installation(self, tmp_path):
         """Test installation with multiple providers."""
@@ -92,13 +95,21 @@ class TestE2EInstallation:
         assert (domains_dir / "testing" / "core.md").exists()
         assert (domains_dir / "writing" / "core.md").exists()
 
-        # Verify provider modules
+        # Verify ALL provider modules exist (improved architecture - keep all Python modules)
         providers_dir = generated_project / "ai_conventions" / "providers"
         assert (providers_dir / "claude.py").exists()
         assert (providers_dir / "cursor.py").exists()
         assert (providers_dir / "windsurf.py").exists()
-        assert not (providers_dir / "aider.py").exists()
-        assert not (providers_dir / "copilot.py").exists()
+        assert (providers_dir / "aider.py").exists()  # Keep all Python modules
+        assert (providers_dir / "copilot.py").exists()
+        assert (providers_dir / "codex.py").exists()
+
+        # But config files for unselected providers should NOT exist
+        assert (generated_project / ".claude").exists()  # Claude selected
+        assert (generated_project / ".cursorrules").exists()  # Cursor selected
+        assert (generated_project / ".windsurfrules").exists()  # Windsurf selected
+        assert not (generated_project / "CONVENTIONS.md").exists()  # Aider not selected
+        assert not (generated_project / ".aider.conf.yml").exists()  # Aider not selected
 
     def test_minimal_installation(self, tmp_path):
         """Test minimal installation with all features disabled."""
@@ -127,9 +138,11 @@ class TestE2EInstallation:
         assert (generated_project / "global.md").exists()
         assert (generated_project / "templates" / "claude" / "CLAUDE.md.j2").exists()
 
-        # Verify disabled features are not present
-        assert not (generated_project / "staging").exists()
-        assert not (generated_project / "commands").exists()
+        # Verify learning capture is always available (improved UX)
+        assert (generated_project / "staging").exists()
+        assert (generated_project / "commands").exists()
+        
+        # Domain composition can still be disabled
         assert not (generated_project / "ai_conventions" / "domain_resolver.py").exists()
 
         # With canary disabled, the template should not include canary content
@@ -207,14 +220,14 @@ class TestE2EInstallation:
             # All providers should have install.py
             assert (generated_project / "install.py").exists()
 
-            # Verify only selected provider module exists
+            # Verify ALL provider modules exist (improved architecture)
             providers_dir = generated_project / "ai_conventions" / "providers"
-            assert (providers_dir / f"{provider}.py").exists()
-
-            # Verify other providers were removed
-            for other_provider in providers:
-                if other_provider != provider:
-                    assert not (providers_dir / f"{other_provider}.py").exists()
+            for check_provider in providers:
+                assert (providers_dir / f"{check_provider}.py").exists()
+            
+            # Also verify base modules always exist
+            assert (providers_dir / "base.py").exists()
+            assert (providers_dir / "__init__.py").exists()
 
     @pytest.mark.slow
     def test_full_installation_with_subprocess(self, tmp_path):
@@ -253,15 +266,16 @@ class TestE2EInstallation:
         assert (providers_dir / "claude.py").exists()
         assert (providers_dir / "cursor.py").exists()
 
-    def test_bootstrap_script_workflow(self, tmp_path):
-        """Test that bootstrap.sh would work correctly."""
-        # We can't actually run bootstrap.sh in tests, but we can verify it exists
-        # and has the right structure
-        bootstrap_path = Path("bootstrap.sh")
-        assert bootstrap_path.exists()
+    def test_uvx_installation_workflow(self, tmp_path):
+        """Test that uvx installation approach is documented in README."""
+        # We now use uvx instead of bootstrap.sh
+        readme_path = Path("README.md")
+        assert readme_path.exists()
 
-        content = bootstrap_path.read_text(encoding="utf-8")
-        assert content.startswith("#!/bin/bash") or content.startswith("#!/usr/bin/env bash")
+        content = readme_path.read_text(encoding="utf-8")
+        assert "uvx cookiecutter" in content
+        # Ensure we don't have any references to the old bootstrap method
+        assert "bootstrap.sh" not in content
         assert "cookiecutter" in content
         assert "uv" in content
 

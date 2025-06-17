@@ -96,8 +96,8 @@ class TestE2ECookiecutterGeneration:
         assert (commands_dir / "capture-learning.md").exists()
         assert (commands_dir / "review-learnings.md").exists()
 
-    def test_learning_capture_disabled_removes_commands(self, tmp_path):
-        """Test that learning capture disabled removes command directories."""
+    def test_learning_capture_always_available(self, tmp_path):
+        """Test that learning capture is always available for better UX."""
         # Arrange
         output_dir = tmp_path / "output"
         output_dir.mkdir()
@@ -107,16 +107,20 @@ class TestE2ECookiecutterGeneration:
             str(Path.cwd()),
             no_input=True,
             extra_context={
-                "enable_learning_capture": False,
+                "enable_learning_capture": False,  # Even when disabled, should be available
             },
             output_dir=str(output_dir),
         )
 
-        # Assert
+        # Assert: Learning capture should always be available for better UX
         generated_project = Path(project_dir)
-        assert not (generated_project / "commands").exists()
-        assert not (generated_project / ".claude").exists()
-        assert not (generated_project / "staging").exists()
+        assert (generated_project / "commands").exists()
+        assert (generated_project / ".claude").exists()  # Default provider is Claude
+        assert (generated_project / "staging").exists()
+        
+        # Verify specific learning capture files
+        assert (generated_project / "commands" / "capture-learning.md").exists()
+        assert (generated_project / ".claude" / "commands" / "capture-learning.md").exists()
 
     def test_provider_selection_creates_config(self, tmp_path):
         """Test that provider selection creates proper configuration."""

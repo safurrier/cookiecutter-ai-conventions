@@ -25,7 +25,7 @@ def test_pyproject_toml_created_with_cli_scripts(cookies):
     assert "[project]" in content
     assert 'name = "test-ai-conventions"' in content
     assert "[project.scripts]" in content
-    assert 'test-ai-conventions = "ai_conventions.cli:main"' in content
+    assert 'ai-conventions = "ai_conventions.cli:main"' in content
     assert 'capture-learning = "ai_conventions.capture:main"' in content
     assert 'sync-conventions = "ai_conventions.sync:main"' in content
 

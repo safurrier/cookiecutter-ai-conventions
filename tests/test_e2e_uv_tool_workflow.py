@@ -170,9 +170,9 @@ class TestE2EUVToolWorkflow:
         # Track tool for cleanup
         uv_tool_cleanup.add(tool_name)
 
-        # Act & Assert: Test --help command
+        # Act & Assert: Test --help command (CLI name is always 'ai-conventions')
         help_result = subprocess.run(
-            [tool_name, "--help"],
+            ["ai-conventions", "--help"],
             capture_output=True,
             text=True,
             timeout=30,
@@ -183,7 +183,7 @@ class TestE2EUVToolWorkflow:
 
         # Act & Assert: Test --version command
         version_result = subprocess.run(
-            [tool_name, "--version"],
+            ["ai-conventions", "--version"],
             capture_output=True,
             text=True,
             timeout=30,
@@ -228,9 +228,9 @@ class TestE2EUVToolWorkflow:
                 check=True,
             )
 
-            # Act: Execute status command
+            # Act: Execute status command (CLI name is always 'ai-conventions')
             status_result = subprocess.run(
-                [tool_name, "status"],
+                ["ai-conventions", "status"],
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -355,9 +355,9 @@ class TestE2EUVToolWorkflow:
                 check=True,
             )
 
-            # Test that tool is in PATH and executable
+            # Test that the CLI command is in PATH and executable
             which_result = subprocess.run(
-                ["which", tool_name],
+                ["which", "ai-conventions"],
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -365,9 +365,9 @@ class TestE2EUVToolWorkflow:
 
             assert which_result.returncode == 0, f"Tool not found in PATH: {which_result.stderr}"
 
-            # Test execution
+            # Test execution (CLI name is always 'ai-conventions')
             exec_result = subprocess.run(
-                [tool_name, "--help"],
+                ["ai-conventions", "--help"],
                 capture_output=True,
                 text=True,
                 timeout=30,

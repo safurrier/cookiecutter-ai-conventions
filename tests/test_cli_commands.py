@@ -19,7 +19,7 @@ def test_cli_commands_available_after_install(cookies):
     content = pyproject.read_text(encoding="utf-8")
 
     assert "[project.scripts]" in content
-    assert 'my-project = "ai_conventions.cli:main"' in content
+    assert 'ai-conventions = "ai_conventions.cli:main"' in content
     assert 'capture-learning = "ai_conventions.capture:main"' in content
     assert 'sync-conventions = "ai_conventions.sync:main"' in content
 
@@ -176,26 +176,27 @@ def test_cli_list_command_execution(cookies):
     assert "git" in result.output or "testing" in result.output or "domain" in result.output.lower()
 
 
-def test_commands_removed_when_learning_disabled(cookies):
-    """Test that learning commands are removed when disabled."""
+def test_learning_capture_always_available(cookies):
+    """Test that learning capture commands are always available (improved UX)."""
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
-            "enable_learning_capture": False,
+            "enable_learning_capture": False,  # Even when disabled, commands should be available
         }
     )
 
     assert result.exit_code == 0
 
-    # Check that capture-learning command is not in pyproject.toml
+    # Check that CLI commands are consistently named and always available
     pyproject = result.project_path / "pyproject.toml"
     content = pyproject.read_text(encoding="utf-8")
 
-    # Main CLI should still be there
-    assert 'my-project = "ai_conventions.cli:main"' in content
+    # CLI should use consistent naming (ai-conventions, not project slug)
+    assert 'ai-conventions = "ai_conventions.cli:main"' in content
 
-    # But capture-learning should not be there
-    assert "capture-learning" not in content
+    # Learning capture commands should always be available for better UX
+    assert "capture-learning" in content
+    assert "sync-conventions" in content
 
 
 def test_cli_shell_completion_support(cookies):

@@ -28,7 +28,7 @@ def safe_uv_tool_cleanup(unique_tool_name):
     """Ensure UV tool cleanup after test."""
     yield unique_tool_name
 
-    # Cleanup after test
+    # Cleanup after test - uninstall by package name (which is the tool_name/project_slug)
     try:
         subprocess.run(
             ["uv", "tool", "uninstall", unique_tool_name],
@@ -84,8 +84,8 @@ class TestTemplateProcessing:
         if errors:
             pytest.fail("Python syntax errors found:\n" + "\n".join(errors))
 
-    def test_conditional_imports_are_processed(self, tmp_path):
-        """Test that conditional imports in cli.py are properly processed."""
+    def test_all_imports_always_processed(self, tmp_path):
+        """Test that all CLI imports are always available (improved architecture)."""
         # Test case 1: With learning capture enabled
         output_dir = tmp_path / "with_capture"
         output_dir.mkdir()
@@ -102,14 +102,15 @@ class TestTemplateProcessing:
         cli_py = Path(project_dir) / "ai_conventions" / "cli.py"
         content = cli_py.read_text(encoding="utf-8")
 
-        # Should have capture imports
+        # Should have all imports (better architecture)
         assert "from .capture import capture_command" in content
+        assert "from .sync import sync_command" in content
         assert 'main.add_command(capture_command, name="capture")' in content
         # Should not have Jinja2 syntax
         assert "{%" not in content
         assert "cookiecutter" not in content
 
-        # Test case 2: With learning capture disabled
+        # Test case 2: Even with learning capture "disabled", all imports should be available
         output_dir2 = tmp_path / "without_capture"
         output_dir2.mkdir()
 
@@ -117,7 +118,7 @@ class TestTemplateProcessing:
             str(Path.cwd()),
             no_input=True,
             extra_context={
-                "enable_learning_capture": False,
+                "enable_learning_capture": False,  # Architecture improvement: always available
             },
             output_dir=str(output_dir2),
         )
@@ -125,11 +126,13 @@ class TestTemplateProcessing:
         cli_py2 = Path(project_dir2) / "ai_conventions" / "cli.py"
         content2 = cli_py2.read_text(encoding="utf-8")
 
-        # Should not have capture imports
-        assert "from .capture import capture_command" not in content2
-        assert "main.add_command(capture_command" not in content2
-        # Should still have sync imports
+        # Should have all imports (no conditional removal)
+        assert "from .capture import capture_command" in content2
+        assert "main.add_command(capture_command" in content2
         assert "from .sync import sync_command" in content2
+        # Should not have Jinja2 syntax
+        assert "{%" not in content2
+        assert "cookiecutter" not in content2
 
     def test_project_metadata_is_replaced(self, tmp_path):
         """Test that project metadata variables are replaced correctly."""
@@ -256,9 +259,9 @@ class TestEndToEndUserJourney:
 
         assert result.returncode == 0, f"uv tool install failed: {result.stderr}"
 
-        # Act: Run the CLI with unique tool name
+        # Act: Run the CLI (command is always 'ai-conventions' regardless of project slug)
         result = subprocess.run(
-            [tool_name, "--version"],
+            ["ai-conventions", "--version"],
             capture_output=True,
             text=True,
             shell=False,
@@ -269,7 +272,7 @@ class TestEndToEndUserJourney:
 
         # Act: Run status command
         result = subprocess.run(
-            [tool_name, "status"],
+            ["ai-conventions", "status"],
             capture_output=True,
             text=True,
             cwd=str(generated_project),

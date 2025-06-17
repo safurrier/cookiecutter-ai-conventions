@@ -148,7 +148,7 @@ def create_config_file(providers, domains, config_data):
         "author_name": config_data["author_name"],
         "author_email": config_data.get("author_email"),
         "selected_providers": providers,
-        "default_domains": domains,
+        "default_domains": ",".join(domains) if isinstance(domains, list) else domains,
         "enable_learning_capture": config_data.get("enable_learning_capture", True),
         "enable_context_canary": config_data.get("enable_context_canary", True),
         "enable_domain_composition": config_data.get("enable_domain_composition", True),
@@ -204,15 +204,23 @@ def update_readme(providers, domains, include_tools):
 
 
 def remove_unselected_providers(selected_providers, enable_learning_capture=True):
-    """Remove all files for unselected providers."""
+    """Remove config files and docs for unselected providers, but keep all Python modules."""
     removed_count = 0
 
     for provider_name, provider_files in PROVIDER_REGISTRY.items():
         if provider_name not in selected_providers:
-            print(f"\n  Removing {provider_name} files...")
+            print(f"\n  Removing {provider_name} config files...")
 
-            # Remove all standard paths
-            for path in provider_files.all_paths():
+            # Remove only config files, templates, and docs - NOT Python modules
+            paths_to_remove = []
+            
+            # Add config files and template dirs
+            for file_list in [provider_files.config_files, provider_files.template_dirs, provider_files.docs]:
+                paths_to_remove.extend(Path(f) for f in file_list)
+            
+            # Note: We explicitly do NOT remove provider_files.module (the Python file)
+            
+            for path in paths_to_remove:
                 if path.exists():
                     try:
                         if path.is_dir():
@@ -225,23 +233,7 @@ def remove_unselected_providers(selected_providers, enable_learning_capture=True
                     except (OSError, PermissionError) as e:
                         print(f"    Warning: Could not remove {path}: {e}")
 
-            # Handle conditional files
-            if (
-                not enable_learning_capture
-                and "learning_capture" in provider_files.conditional_files
-            ):
-                for path_str in provider_files.conditional_files["learning_capture"]:
-                    path = Path(path_str)
-                    if path.exists():
-                        try:
-                            if path.is_dir():
-                                shutil.rmtree(path)
-                            else:
-                                path.unlink()
-                            print(f"    ✗ Removed conditional: {path}")
-                            removed_count += 1
-                        except (OSError, PermissionError) as e:
-                            print(f"    Warning: Could not remove conditional {path}: {e}")
+    # Note: Learning capture is now always enabled - no conditional removal
 
     return removed_count
 
@@ -419,34 +411,19 @@ def main():
             except (OSError, AttributeError):
                 print("  Warning: Could not make codex.sh executable")
 
-    # Clean up learning capture commands if not enabled
-    if not enable_learning:
-        commands_dir = Path("commands")
-        if commands_dir.exists():
-            shutil.rmtree(commands_dir)
+    # Learning capture is now always enabled for all users
+    # Remove legacy Python scripts since we have CLI commands now
+    commands_dir = Path("commands")
+    if commands_dir.exists():
+        # Remove .py files but keep .md files
+        for py_file in commands_dir.glob("*.py"):
+            py_file.unlink()
 
-        # Clean up Claude commands directory if not using Claude
+    # Clean up Claude commands if not using Claude
+    if providers and "claude" not in providers:
         claude_commands_dir = Path(".claude/commands")
         if claude_commands_dir.exists():
             shutil.rmtree(Path(".claude"))
-
-        # Clean up staging directory
-        staging_dir = Path("staging")
-        if staging_dir.exists():
-            shutil.rmtree(staging_dir)
-    else:
-        # Remove legacy Python scripts since we have CLI commands now
-        commands_dir = Path("commands")
-        if commands_dir.exists():
-            # Remove .py files but keep .md files
-            for py_file in commands_dir.glob("*.py"):
-                py_file.unlink()
-
-        # Clean up Claude commands if not using Claude
-        if providers and "claude" not in providers:
-            claude_commands_dir = Path(".claude/commands")
-            if claude_commands_dir.exists():
-                shutil.rmtree(Path(".claude"))
 
     # Provider modules are already handled by remove_unselected_providers()
 
