@@ -28,7 +28,7 @@ def safe_uv_tool_cleanup(unique_tool_name):
     """Ensure UV tool cleanup after test."""
     yield unique_tool_name
 
-    # Cleanup after test
+    # Cleanup after test - uninstall by package name (which is the tool_name/project_slug)
     try:
         subprocess.run(
             ["uv", "tool", "uninstall", unique_tool_name],
@@ -259,9 +259,9 @@ class TestEndToEndUserJourney:
 
         assert result.returncode == 0, f"uv tool install failed: {result.stderr}"
 
-        # Act: Run the CLI with unique tool name
+        # Act: Run the CLI (command is always 'ai-conventions' regardless of project slug)
         result = subprocess.run(
-            [tool_name, "--version"],
+            ["ai-conventions", "--version"],
             capture_output=True,
             text=True,
             shell=False,
@@ -272,7 +272,7 @@ class TestEndToEndUserJourney:
 
         # Act: Run status command
         result = subprocess.run(
-            [tool_name, "status"],
+            ["ai-conventions", "status"],
             capture_output=True,
             text=True,
             cwd=str(generated_project),
