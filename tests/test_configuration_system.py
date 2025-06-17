@@ -148,7 +148,8 @@ def test_config_validation_with_pydantic(cookies):
     config_path = result.project_path / "ai_conventions" / "config.py"
     content = config_path.read_text(encoding="utf-8")
 
-    assert "from pydantic import BaseModel" in content
-    assert "@validator" in content
+    # Check for Pydantic v2 syntax (with fallback support)
+    assert "from pydantic import BaseModel" in content or "PYDANTIC_AVAILABLE" in content
+    assert "@field_validator" in content or "@validator" in content  # Support both v1 and v2
     assert "validate_providers" in content
     assert "validate_slug" in content

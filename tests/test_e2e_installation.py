@@ -253,15 +253,16 @@ class TestE2EInstallation:
         assert (providers_dir / "claude.py").exists()
         assert (providers_dir / "cursor.py").exists()
 
-    def test_bootstrap_script_workflow(self, tmp_path):
-        """Test that bootstrap.sh would work correctly."""
-        # We can't actually run bootstrap.sh in tests, but we can verify it exists
-        # and has the right structure
-        bootstrap_path = Path("bootstrap.sh")
-        assert bootstrap_path.exists()
+    def test_uvx_installation_workflow(self, tmp_path):
+        """Test that uvx installation approach is documented in README."""
+        # We now use uvx instead of bootstrap.sh
+        readme_path = Path("README.md")
+        assert readme_path.exists()
 
-        content = bootstrap_path.read_text(encoding="utf-8")
-        assert content.startswith("#!/bin/bash") or content.startswith("#!/usr/bin/env bash")
+        content = readme_path.read_text(encoding="utf-8")
+        assert "uvx cookiecutter" in content
+        # Ensure we don't have any references to the old bootstrap method
+        assert "bootstrap.sh" not in content
         assert "cookiecutter" in content
         assert "uv" in content
 

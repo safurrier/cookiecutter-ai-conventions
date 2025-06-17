@@ -236,7 +236,7 @@ class TestSelectiveFileGeneration:
         assert config["author_name"] == "Test Author"
         assert config["author_email"] == "test@example.com"
         assert config["selected_providers"] == ["claude", "cursor"]
-        assert config["default_domains"] == ["git", "testing"]
+        assert config["default_domains"] == "git,testing"
         assert config["enable_learning_capture"] is True
         assert config["enable_context_canary"] is True
         assert config["enable_domain_composition"] is True

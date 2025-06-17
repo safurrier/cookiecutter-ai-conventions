@@ -148,7 +148,7 @@ def create_config_file(providers, domains, config_data):
         "author_name": config_data["author_name"],
         "author_email": config_data.get("author_email"),
         "selected_providers": providers,
-        "default_domains": domains,
+        "default_domains": ",".join(domains) if isinstance(domains, list) else domains,
         "enable_learning_capture": config_data.get("enable_learning_capture", True),
         "enable_context_canary": config_data.get("enable_context_canary", True),
         "enable_domain_composition": config_data.get("enable_domain_composition", True),

@@ -46,12 +46,12 @@ class TestE2ECLIInstallation:
             # These imports should work
             from ai_conventions.cli import main
             from ai_conventions.sync import main as sync_main
-            from ai_conventions.config_cli import config
+            from ai_conventions.config_cli import config_command
             
             # Verify they are callable
             assert callable(main)
             assert callable(sync_main)
-            assert callable(config)
+            assert callable(config_command)
             
         except ImportError as e:
             assert False, f"CLI modules should be importable: {e}"

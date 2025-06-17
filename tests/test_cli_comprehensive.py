@@ -1,6 +1,7 @@
 """Comprehensive CLI testing using table-driven patterns (2025 best practices)."""
 
 import unittest
+import pytest
 from dataclasses import dataclass
 from pathlib import Path
 import sys
@@ -20,6 +21,7 @@ class CLITestCase:
     cli_function: str = "main"
 
 
+@pytest.mark.serial
 class TestCLIComprehensive(unittest.TestCase):
     """Comprehensive CLI testing using 2025 table-driven patterns."""
     
@@ -28,8 +30,12 @@ class TestCLIComprehensive(unittest.TestCase):
         """Set up test environment once for all tests."""
         # Create a test project
         from cookiecutter.main import cookiecutter
+        import shutil
         
         cls.test_dir = Path(__file__).parent.parent / "test-output-cli"
+        # Clean up any existing test directory
+        if cls.test_dir.exists():
+            shutil.rmtree(cls.test_dir)
         cls.test_dir.mkdir(exist_ok=True)
         
         cls.project_dir = cookiecutter(
@@ -56,7 +62,10 @@ class TestCLIComprehensive(unittest.TestCase):
         if str(cls.project_path) in sys.path:
             sys.path.remove(str(cls.project_path))
             
-        # Note: Leave test directory for debugging - could add cleanup flag
+        # Clean up test directory
+        import shutil
+        if cls.test_dir.exists():
+            shutil.rmtree(cls.test_dir)
         
     def test_all_main_cli_commands(self):
         """Test all main CLI commands using table-driven approach."""
@@ -161,13 +170,13 @@ class TestCLIComprehensive(unittest.TestCase):
         ]
         
         from click.testing import CliRunner
-        from ai_conventions.config_cli import config
+        from ai_conventions.config_cli import config_command
         
         runner = CliRunner()
         
         for case in test_cases:
             with self.subTest(case=case):
-                result = runner.invoke(config, case.command_args)
+                result = runner.invoke(config_command, case.command_args)
                 
                 self.assertEqual(
                     result.exit_code, 
