@@ -10,57 +10,102 @@ except ImportError:
     import tomli as tomllib
 
 import yaml
-from pydantic import BaseModel, Field, validator
+
+try:
+    from pydantic import BaseModel, Field, field_validator
+    PYDANTIC_AVAILABLE = True
+except ImportError:
+    # Fallback for when pydantic is not available
+    PYDANTIC_AVAILABLE = False
+    BaseModel = object
+    Field = lambda *args, **kwargs: None
+    field_validator = lambda *args, **kwargs: lambda func: func
 
 
-class ConventionsConfig(BaseModel):
-    """Configuration model for AI conventions."""
-    
-    project_name: str = Field(..., description="Name of the project")
-    project_slug: str = Field(..., description="Slugified project name")
-    author_name: str = Field(..., description="Author's name")
-    author_email: Optional[str] = Field(None, description="Author's email")
-    selected_providers: list[str] = Field(
-        default_factory=lambda: ["claude"],
-        description="List of AI tool providers to configure"
-    )
-    enable_learning_capture: bool = Field(
-        True,
-        description="Enable learning capture commands"
-    )
-    enable_context_canary: bool = Field(
-        True,
-        description="Enable context canary for health checks"
-    )
-    enable_domain_composition: bool = Field(
-        True,
-        description="Enable domain inheritance and composition"
-    )
-    default_domains: str = Field(
-        "git,testing",
-        description="Comma-separated list of default domains"
-    )
-    
-    @validator("selected_providers")
-    def validate_providers(cls, v):
-        """Ensure selected providers are valid."""
-        from ai_conventions.providers import AVAILABLE_PROVIDERS
+if PYDANTIC_AVAILABLE:
+    class ConventionsConfig(BaseModel):
+        """Configuration model for AI conventions."""
         
-        invalid = [p for p in v if p not in AVAILABLE_PROVIDERS]
-        if invalid:
-            raise ValueError(f"Invalid providers: {invalid}")
-        return v
-    
-    @validator("project_slug")
-    def validate_slug(cls, v, values):
-        """Auto-generate slug from project name if not provided."""
-        if not v and "project_name" in values:
-            return values["project_name"].lower().replace(" ", "-").replace("_", "-")
-        return v
-    
-    class Config:
-        """Pydantic config."""
-        extra = "allow"  # Allow extra fields for future compatibility
+        project_name: str = Field(..., description="Name of the project")
+        project_slug: str = Field(..., description="Slugified project name")
+        author_name: str = Field(..., description="Author's name")
+        author_email: Optional[str] = Field(None, description="Author's email")
+        selected_providers: list[str] = Field(
+            default_factory=lambda: ["claude"],
+            description="List of AI tool providers to configure"
+        )
+        enable_learning_capture: bool = Field(
+            True,
+            description="Enable learning capture commands"
+        )
+        enable_context_canary: bool = Field(
+            True,
+            description="Enable context canary for health checks"
+        )
+        enable_domain_composition: bool = Field(
+            True,
+            description="Enable domain inheritance and composition"
+        )
+        default_domains: str = Field(
+            "git,testing",
+            description="Comma-separated list of default domains"
+        )
+        
+        @field_validator("selected_providers")
+        @classmethod
+        def validate_providers(cls, v):
+            """Ensure selected providers are valid."""
+            from ai_conventions.providers import AVAILABLE_PROVIDERS
+            
+            invalid = [p for p in v if p not in AVAILABLE_PROVIDERS]
+            if invalid:
+                raise ValueError(f"Invalid providers: {invalid}")
+            return v
+        
+        @field_validator("project_slug")
+        @classmethod
+        def validate_slug(cls, v, info):
+            """Auto-generate slug from project name if not provided."""
+            if not v and info.data and "project_name" in info.data:
+                return info.data["project_name"].lower().replace(" ", "-").replace("_", "-")
+            return v
+        
+        model_config = {"extra": "allow"}  # Allow extra fields for future compatibility
+        
+        def model_dump(self, **kwargs):
+            """Compatibility method for dict access."""
+            if hasattr(super(), 'model_dump'):
+                return super().model_dump(**kwargs)
+            return self.__dict__
+            
+else:
+    class ConventionsConfig:
+        """Fallback configuration class when Pydantic is not available."""
+        
+        def __init__(self, **kwargs):
+            self.project_name = kwargs.get("project_name", "My AI Conventions")
+            self.project_slug = kwargs.get("project_slug", "my-ai-conventions")
+            self.author_name = kwargs.get("author_name", "Your Name")
+            self.author_email = kwargs.get("author_email")
+            self.selected_providers = kwargs.get("selected_providers", ["claude"])
+            self.enable_learning_capture = kwargs.get("enable_learning_capture", True)
+            self.enable_context_canary = kwargs.get("enable_context_canary", True)
+            self.enable_domain_composition = kwargs.get("enable_domain_composition", True)
+            self.default_domains = kwargs.get("default_domains", "git,testing")
+            
+            # Store any extra fields
+            for key, value in kwargs.items():
+                if not hasattr(self, key):
+                    setattr(self, key, value)
+        
+        def model_dump(self, **kwargs):
+            """Compatibility method for dict access."""
+            exclude_unset = kwargs.get('exclude_unset', False)
+            result = {}
+            for key, value in self.__dict__.items():
+                if not exclude_unset or value is not None:
+                    result[key] = value
+            return result
 
 
 class ConfigManager:
@@ -174,7 +219,7 @@ class ConfigManager:
             ext = path.suffix
             format_type = self.CONFIG_FORMATS.get(ext, "yaml")
             
-        config_dict = config.dict(exclude_unset=True)
+        config_dict = config.model_dump(exclude_unset=True)
         
         if format_type == "yaml":
             self._save_yaml(config_dict, path)
@@ -254,5 +299,5 @@ class ConfigManager:
                 setattr(config, key, value)
                 
         # Revalidate
-        self._config = ConventionsConfig(**config.dict())
+        self._config = ConventionsConfig(**config.model_dump())
         return self._config

@@ -54,15 +54,12 @@ def status():
     console.print(table)
     
     # Check for conventions repo
-    import pathlib
     try:
-        domains_path = pathlib.Path("domains")
+        domains_path = Path("domains")
         if domains_path.exists():
             console.print("\n✅ Conventions repository detected")
-            # Use os.listdir to avoid potential Path/Click conflicts
-            import os
-            domain_items = [f for f in os.listdir("domains") if os.path.isdir(os.path.join("domains", f))]
-            domain_count = len(domain_items)
+            # Use sum() to count domains without creating a list
+            domain_count = sum(1 for _ in domains_path.glob("*") if _.is_dir())
             console.print(f"   Found {domain_count} domain(s)")
         else:
             console.print("\n❌ Not in a conventions repository")
@@ -96,12 +93,20 @@ def list():
     
     console.print("\n[bold]Available Domains:[/bold]\n")
     
-    domains = sorted(domains_dir.glob("*"))
+    domains = sorted([d for d in domains_dir.glob("*") if d.is_dir()])
+    
+    if not domains:
+        console.print("  [yellow]No domains found in the domains directory.[/yellow]")
+        return
+    
     for domain in domains:
-        if domain.is_dir():
-            # Count files in domain
-            file_count = len(list(domain.glob("*.md")))
+        # Count files in domain
+        try:
+            # Use sum() to count files without creating a list
+            file_count = sum(1 for _ in domain.glob("*.md"))
             console.print(f"  • [cyan]{domain.name}[/cyan] ({file_count} files)")
+        except Exception as e:
+            console.print(f"  • [cyan]{domain.name}[/cyan] (error counting files: {e})")
 
 
 if __name__ == "__main__":

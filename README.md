@@ -49,11 +49,7 @@ def get_env_var(name: str, default: Optional[str] = None) -> Optional[str]:
 
 ```bash
 # One simple command to teach your AI your style (30 seconds)
-curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions/main/bootstrap.sh | sh
-
-# The bootstrap script simply:
-# 1. Installs uv if needed
-# 2. Runs cookiecutter to set up your conventions
+uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions
 
 # That's it! Your AI now knows:
 # ✓ Your import style
@@ -153,12 +149,13 @@ Choose from battle-tested conventions:
 One command, zero dependencies:
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions/main/bootstrap.sh | sh
+uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions
 ```
 
-The bootstrap script is simple and straightforward - it just:
-- ✅ Installs `uv` if needed (the modern Python package manager)
-- ✅ Runs cookiecutter to generate your conventions repository
+This command uses `uvx` (comes with uv) to:
+- ✅ Temporarily run cookiecutter without permanent installation
+- ✅ Generate your conventions repository with your preferences
+- ✅ Set up all your chosen AI tool providers
 
 **Provider Selection:** When prompted, enter one or more providers separated by commas:
 - Single: `claude`

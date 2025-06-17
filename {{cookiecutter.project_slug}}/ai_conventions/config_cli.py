@@ -37,17 +37,17 @@ def show(format, path):
         
         if format == "json":
             import json
-            click.echo(json.dumps(config.dict(), indent=2))
+            click.echo(json.dumps(config.model_dump(), indent=2))
         elif format == "toml":
             try:
                 import tomli_w
-                click.echo(tomli_w.dumps(config.dict()))
+                click.echo(tomli_w.dumps(config.model_dump()))
             except ImportError:
                 click.echo("Error: tomli-w required for TOML output", err=True)
         else:
             # Default to YAML
             import yaml
-            click.echo(yaml.safe_dump(config.dict(), default_flow_style=False))
+            click.echo(yaml.safe_dump(config.model_dump(), default_flow_style=False))
             
     except Exception as e:
         click.echo(f"Error loading config: {e}", err=True)
