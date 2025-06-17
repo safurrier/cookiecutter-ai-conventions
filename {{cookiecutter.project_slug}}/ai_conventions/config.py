@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import yaml
-from pydantic import BaseModel, Field, validator
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class ConventionsConfig(BaseModel):
@@ -35,7 +36,8 @@ class ConventionsConfig(BaseModel):
         description="Comma-separated list of default domains"
     )
     
-    @validator("selected_providers")
+    @field_validator("selected_providers")
+    @classmethod
     def validate_providers(cls, v):
         """Ensure selected providers are valid."""
         from ai_conventions.providers import AVAILABLE_PROVIDERS
@@ -45,16 +47,15 @@ class ConventionsConfig(BaseModel):
             raise ValueError(f"Invalid providers: {invalid}")
         return v
     
-    @validator("project_slug")
-    def validate_slug(cls, v, values):
+    @field_validator("project_slug")
+    @classmethod
+    def validate_slug(cls, v, info):
         """Auto-generate slug from project name if not provided."""
-        if not v and "project_name" in values:
-            return values["project_name"].lower().replace(" ", "-").replace("_", "-")
+        if not v and info.data and "project_name" in info.data:
+            return info.data["project_name"].lower().replace(" ", "-").replace("_", "-")
         return v
     
-    class Config:
-        """Pydantic config."""
-        extra = "allow"  # Allow extra fields for future compatibility
+    model_config = {"extra": "allow"}  # Allow extra fields for future compatibility
 
 
 class ConfigManager:
@@ -127,7 +128,7 @@ class ConfigManager:
             # Change extension to .yaml
             path = path.with_suffix(".yaml")
             
-        config_dict = config.dict(exclude_unset=True)
+        config_dict = config.model_dump(exclude_unset=True)
         self._save_yaml(config_dict, path)
         return path
     
@@ -156,7 +157,7 @@ class ConfigManager:
         
         try:
             config = self.load_config(config_path)
-            # Pydantic validation happens automatically
+            # Pydantic validation happens automatically during instantiation
             return True, []
         except Exception as e:
             errors.append(str(e))
@@ -178,5 +179,5 @@ class ConfigManager:
                 setattr(config, key, value)
                 
         # Revalidate
-        self._config = ConventionsConfig(**config.dict())
+        self._config = ConventionsConfig(**config.model_dump())
         return self._config

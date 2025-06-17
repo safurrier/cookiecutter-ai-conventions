@@ -1,8 +1,8 @@
 """Test selective file generation improvements."""
 
-import pytest
-import yaml
 from pathlib import Path
+
+import yaml
 from cookiecutter.main import cookiecutter
 
 
@@ -13,7 +13,7 @@ class TestSelectiveFileGeneration:
         """Test that empty directories are removed after generation."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         # Generate with minimal selections
         project_dir = cookiecutter(
             str(Path.cwd()),
@@ -27,19 +27,19 @@ class TestSelectiveFileGeneration:
                 "enable_domain_composition": False,
             },
         )
-        
+
         generated_project = Path(project_dir)
-        
-        # These directories should NOT exist if empty
-        assert not (generated_project / "commands").exists()
-        assert not (generated_project / "staging").exists()
+
+        # Learning capture is always available for better UX (improved architecture)
+        assert (generated_project / "commands").exists()
+        assert (generated_project / "staging").exists()
         assert not (generated_project / ".cursor").exists()
         assert not (generated_project / ".windsurf").exists()
         assert not (generated_project / ".aider").exists()
         assert not (generated_project / ".github").exists()
         assert not (generated_project / ".vscode").exists()
         assert not (generated_project / ".codex").exists()
-        
+
         # These should exist
         assert (generated_project / "ai_conventions").exists()
         assert (generated_project / "ai_conventions" / "providers").exists()
@@ -49,7 +49,7 @@ class TestSelectiveFileGeneration:
         """Test that project generates correctly with no providers."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         # Note: We can't capture the warning from cookiecutter subprocess,
         # but we can verify the behavior is correct
         project_dir = cookiecutter(
@@ -62,26 +62,31 @@ class TestSelectiveFileGeneration:
                 "default_domains": "git",
             },
         )
-        
+
         generated_project = Path(project_dir)
         # Should still generate basic structure
         assert generated_project.exists()
         assert (generated_project / "global.md").exists()
-        
+
         # Provider modules directory should exist but with minimal files
         providers_dir = generated_project / "ai_conventions" / "providers"
         assert providers_dir.exists()
-        
-        # Should only have base.py and __init__.py (no provider modules)
+
+        # Should have all provider modules (improved architecture)
         py_files = list(providers_dir.glob("*.py"))
-        assert len(py_files) == 2
-        assert all(f.name in ["base.py", "__init__.py"] for f in py_files)
+        assert len(py_files) == 8  # All providers + base + __init__
+        assert (providers_dir / "base.py").exists()
+        assert (providers_dir / "__init__.py").exists()
+        
+        # But no config files should exist since no providers selected
+        assert not (generated_project / ".claude").exists()
+        assert not (generated_project / ".cursorrules").exists()
 
     def test_invalid_domain_warning(self, tmp_path):
         """Test warning when invalid domains are selected."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -92,16 +97,16 @@ class TestSelectiveFileGeneration:
                 "default_domains": "git,invalid_domain,testing",  # Mix of valid and invalid
             },
         )
-        
+
         # Note: We can't capture the warning from cookiecutter subprocess
-        
+
         generated_project = Path(project_dir)
         domains_dir = generated_project / "domains"
-        
+
         # Valid domains should exist
         assert (domains_dir / "git" / "core.md").exists()
         assert (domains_dir / "testing" / "core.md").exists()
-        
+
         # Invalid domain should not exist
         assert not (domains_dir / "invalid_domain").exists()
 
@@ -109,7 +114,7 @@ class TestSelectiveFileGeneration:
         """Test that only selected provider files are kept."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         # Test with specific providers
         project_dir = cookiecutter(
             str(Path.cwd()),
@@ -121,29 +126,33 @@ class TestSelectiveFileGeneration:
                 "default_domains": "git",
             },
         )
-        
+
         generated_project = Path(project_dir)
         providers_dir = generated_project / "ai_conventions" / "providers"
-        
-        # Selected providers should exist
+
+        # ALL provider modules should exist (improved architecture)
         assert (providers_dir / "claude.py").exists()
         assert (providers_dir / "aider.py").exists()
-        
-        # Unselected providers should NOT exist
-        assert not (providers_dir / "cursor.py").exists()
-        assert not (providers_dir / "windsurf.py").exists()
-        assert not (providers_dir / "copilot.py").exists()
-        assert not (providers_dir / "codex.py").exists()
-        
+        assert (providers_dir / "cursor.py").exists()  # Keep all Python modules
+        assert (providers_dir / "windsurf.py").exists()
+        assert (providers_dir / "copilot.py").exists()
+        assert (providers_dir / "codex.py").exists()
+
         # Base files should still exist
         assert (providers_dir / "base.py").exists()
         assert (providers_dir / "__init__.py").exists()
+
+        # Config files: only selected providers should have config
+        assert (generated_project / ".claude").exists()  # Claude selected
+        assert (generated_project / "CONVENTIONS.md").exists()  # Aider selected
+        assert not (generated_project / ".cursorrules").exists()  # Cursor not selected
+        assert not (generated_project / ".windsurfrules").exists()  # Windsurf not selected
 
     def test_docs_directory_cleanup(self, tmp_path):
         """Test that docs directory is cleaned up when empty."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         # Generate with providers that don't create docs
         project_dir = cookiecutter(
             str(Path.cwd()),
@@ -155,10 +164,10 @@ class TestSelectiveFileGeneration:
                 "default_domains": "git",
             },
         )
-        
+
         generated_project = Path(project_dir)
         docs_dir = generated_project / "docs"
-        
+
         # If docs directory exists, it should have content
         # If it's empty, it should have been removed
         if docs_dir.exists():
@@ -168,7 +177,7 @@ class TestSelectiveFileGeneration:
         """Test cleanup when all optional features are disabled."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -182,19 +191,21 @@ class TestSelectiveFileGeneration:
                 "enable_domain_composition": False,
             },
         )
-        
+
         generated_project = Path(project_dir)
+
+        # Learning capture is now always available (improved UX)
+        assert (generated_project / "staging").exists()
+        assert (generated_project / "commands").exists()
         
-        # Should NOT have these optional features
-        assert not (generated_project / "staging").exists()
-        assert not (generated_project / "commands").exists()
+        # Domain composition can still be disabled
         assert not (generated_project / "ai_conventions" / "domain_resolver.py").exists()
-        
+
         # Should still have core files
         assert (generated_project / "global.md").exists()
         assert (generated_project / "install.py").exists()
         assert (generated_project / "README.md").exists()
-        
+
         # Aider-specific files should exist
         assert (generated_project / "CONVENTIONS.md").exists()
         assert (generated_project / ".aider.conf.yml").exists()
@@ -203,7 +214,7 @@ class TestSelectiveFileGeneration:
         """Test that config file is generated with selections."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -220,23 +231,23 @@ class TestSelectiveFileGeneration:
                 "enable_domain_composition": True,
             },
         )
-        
+
         generated_project = Path(project_dir)
-        
+
         # Check config file exists
         config_path = generated_project / ".ai-conventions.yaml"
         assert config_path.exists()
-        
+
         # Load and validate config
         with open(config_path) as f:
             config = yaml.safe_load(f)
-        
+
         assert config["project_name"] == "Test Config Project"
         assert config["project_slug"] == "test-config-generation"
         assert config["author_name"] == "Test Author"
         assert config["author_email"] == "test@example.com"
         assert config["selected_providers"] == ["claude", "cursor"]
-        assert config["default_domains"] == ["git", "testing"]
+        assert config["default_domains"] == "git,testing"
         assert config["enable_learning_capture"] is True
         assert config["enable_context_canary"] is True
         assert config["enable_domain_composition"] is True
@@ -245,7 +256,7 @@ class TestSelectiveFileGeneration:
         """Test that install tools are removed when not selected."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -257,14 +268,14 @@ class TestSelectiveFileGeneration:
                 "include_install_tools": "false",
             },
         )
-        
+
         generated_project = Path(project_dir)
-        
+
         # Check Python module is removed
         assert not (generated_project / "ai_conventions").exists()
         assert not (generated_project / "install.py").exists()
         assert not (generated_project / "pyproject.toml").exists()
-        
+
         # But convention files should remain
         assert (generated_project / "README.md").exists()
         assert (generated_project / "templates").exists()
@@ -273,7 +284,7 @@ class TestSelectiveFileGeneration:
         """Test that minimal selection produces < 10 files."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -285,16 +296,16 @@ class TestSelectiveFileGeneration:
                 "include_install_tools": "false",
             },
         )
-        
+
         generated_project = Path(project_dir)
-        
+
         # Count all files recursively
         file_count = sum(1 for _ in generated_project.rglob("*") if _.is_file())
-        
+
         # Should have significantly fewer files than default (35+)
         # Expecting ~15-20 files for minimal setup with templates
         assert file_count < 20, f"Too many files generated: {file_count}"
-        
+
         # Essential files should still exist
         assert (generated_project / "README.md").exists()
         assert (generated_project / "templates" / "claude" / "CLAUDE.md.j2").exists()
@@ -304,7 +315,7 @@ class TestSelectiveFileGeneration:
         """Test that README is updated to reflect selections."""
         output_dir = tmp_path / "output"
         output_dir.mkdir()
-        
+
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
@@ -316,10 +327,10 @@ class TestSelectiveFileGeneration:
                 "include_install_tools": "true",
             },
         )
-        
+
         generated_project = Path(project_dir)
         readme_content = (generated_project / "README.md").read_text()
-        
+
         # Check for included components section
         assert "## 📦 What's Included" in readme_content
         assert "### AI Providers" in readme_content

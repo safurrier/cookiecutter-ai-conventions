@@ -7,12 +7,12 @@ from ai_conventions.config import ConfigManager, ConventionsConfig
 
 
 @click.group()
-def config():
+def config_command():
     """Manage AI conventions configuration."""
     pass
 
 
-@config.command()
+@config_command.command()
 @click.option(
     "--path", "-p",
     type=click.Path(),
@@ -32,13 +32,13 @@ def show(path):
         
         # Always output YAML
         import yaml
-        click.echo(yaml.safe_dump(config.dict(), default_flow_style=False))
+        click.echo(yaml.safe_dump(config.model_dump(), default_flow_style=False))
             
     except Exception as e:
         click.echo(f"Error loading config: {e}", err=True)
 
 
-@config.command()
+@config_command.command()
 @click.option(
     "--path", "-p",
     type=click.Path(),
@@ -60,7 +60,7 @@ def validate(path):
 
 
 
-@config.command()
+@config_command.command()
 @click.option(
     "--path", "-p", 
     type=click.Path(),
@@ -103,7 +103,7 @@ def init(path, project_name, author_name, providers):
 
 def main():
     """Run config CLI."""
-    config()
+    config_command()
 
 
 if __name__ == "__main__":

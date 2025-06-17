@@ -8,14 +8,17 @@ from rich.table import Table
 console = Console()
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(version="0.1.0", prog_name="ai-conventions")
-def main():
+@click.pass_context
+def main(ctx):
     """AI Conventions management tool.
     
     Manage your AI development conventions across multiple tools.
     """
-    pass
+    # Show help if no command provided
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 @main.command()
@@ -51,13 +54,18 @@ def status():
     console.print(table)
     
     # Check for conventions repo
-    if Path("domains").exists():
-        console.print("\n✅ Conventions repository detected")
-        domain_count = len(list(Path("domains").glob("*")))
-        console.print(f"   Found {domain_count} domain(s)")
-    else:
-        console.print("\n❌ Not in a conventions repository")
-        console.print("   Run this command from your conventions project")
+    try:
+        domains_path = Path("domains")
+        if domains_path.exists():
+            console.print("\n✅ Conventions repository detected")
+            # Use sum() to count domains without creating a list
+            domain_count = sum(1 for _ in domains_path.glob("*") if _.is_dir())
+            console.print(f"   Found {domain_count} domain(s)")
+        else:
+            console.print("\n❌ Not in a conventions repository")
+            console.print("   Run this command from your conventions project")
+    except Exception as e:
+        console.print(f"\n❌ Error checking conventions repository: {e}")
 
 
 @main.command()
@@ -170,13 +178,41 @@ def list():
     
     console.print("\n[bold]Available Domains:[/bold]\n")
     
-    domains = sorted(domains_dir.glob("*"))
+    domains = sorted([d for d in domains_dir.glob("*") if d.is_dir()])
+    
+    if not domains:
+        console.print("  [yellow]No domains found in the domains directory.[/yellow]")
+        return
+    
     for domain in domains:
-        if domain.is_dir():
-            # Count files in domain
-            file_count = len(list(domain.glob("*.md")))
+        # Count files in domain
+        try:
+            # Use sum() to count files without creating a list
+            file_count = sum(1 for _ in domain.glob("*.md"))
             console.print(f"  • [cyan]{domain.name}[/cyan] ({file_count} files)")
+        except Exception as e:
+            console.print(f"  • [cyan]{domain.name}[/cyan] (error counting files: {e})")
 
 
 if __name__ == "__main__":
+    # Import subcommands when running as main module
+    from .capture import capture_command
+    from .sync import sync_command
+    from .config_cli import config_command
+    
+    # Add subcommands
+    main.add_command(capture_command, name="capture")
+    main.add_command(sync_command, name="sync")
+    main.add_command(config_command, name="config")
+    
     main()
+else:
+    # Import subcommands when imported as module
+    from .capture import capture_command
+    from .sync import sync_command
+    from .config_cli import config_command
+    
+    # Add subcommands
+    main.add_command(capture_command, name="capture")
+    main.add_command(sync_command, name="sync")
+    main.add_command(config_command, name="config")

@@ -15,7 +15,7 @@ console = Console()
 @click.option("--domain", "-d", help="Target domain for this learning")
 @click.option("--file", "-f", help="Append to specific file in domain")
 @click.option("--category", "-c", help="Category of learning (fix, pattern, etc)")
-def main(pattern, domain, file, category):
+def capture_command(pattern, domain, file, category):
     """Capture a new learning or pattern directly to domain.
     
     Examples:
@@ -99,5 +99,8 @@ def main(pattern, domain, file, category):
     console.print("   Learning added directly to domain - no review needed!")
 
 
+# Export as main for consistency with other modules
+main = capture_command
+
 if __name__ == "__main__":
-    main()
+    capture_command()
