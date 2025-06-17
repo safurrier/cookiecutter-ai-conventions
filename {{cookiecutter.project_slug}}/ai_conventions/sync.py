@@ -17,7 +17,7 @@ def sync_to_claude(source_dir: Path) -> bool:
     claude_dir.mkdir(parents=True, exist_ok=True)
     
     # Items to sync
-    items = ["domains", "global.md", "staging", "projects"]
+    items = ["domains", "global.md", "projects"]
     
     for item in items:
         source = source_dir / item

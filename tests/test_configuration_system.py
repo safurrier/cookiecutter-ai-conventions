@@ -44,7 +44,8 @@ def test_config_cli_module_created(cookies):
     assert "@click.group()" in content
     assert "def show" in content
     assert "def validate" in content
-    assert "def migrate" in content
+    # migrate removed - YAML-only now
+    assert "def init" in content
 
 
 def test_config_cli_command_registered(cookies):
@@ -78,8 +79,8 @@ def test_config_dependencies_included(cookies):
     content = pyproject_path.read_text(encoding='utf-8')
     
     assert "pydantic" in content
-    assert "tomli" in content
-    assert "tomli-w" in content
+    # YAML-only now, tomli dependencies removed
+    assert "PyYAML" in content or "pyyaml" in content
 
 
 def test_install_py_uses_config_manager(cookies):
@@ -101,7 +102,7 @@ def test_install_py_uses_config_manager(cookies):
 
 
 def test_config_formats_supported(cookies):
-    """Test that multiple config formats are supported."""
+    """Test that YAML-only config format is supported."""
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
@@ -113,15 +114,15 @@ def test_config_formats_supported(cookies):
     config_path = result.project_path / "ai_conventions" / "config.py"
     content = config_path.read_text(encoding='utf-8')
     
-    # Check for format support
+    # Check for YAML-only support
     assert ".yaml" in content
-    assert ".toml" in content
-    assert ".json" in content
-    assert "pyproject.toml" in content
+    assert ".yml" in content
+    # TOML/JSON support removed
+    assert "CONFIG_EXTENSIONS = [\".yaml\", \".yml\"]" in content
 
 
 def test_config_migration_functionality(cookies):
-    """Test configuration migration between formats."""
+    """Test configuration default creation functionality."""
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
@@ -133,13 +134,12 @@ def test_config_migration_functionality(cookies):
     config_path = result.project_path / "ai_conventions" / "config.py"
     content = config_path.read_text(encoding='utf-8')
     
-    assert "def migrate_config" in content
+    # Migration removed, only default creation
+    assert "def create_default_config" in content
     assert "_load_yaml" in content
     assert "_save_yaml" in content
-    assert "_load_toml" in content
-    assert "_save_toml" in content
-    assert "_load_json" in content
-    assert "_save_json" in content
+    # TOML/JSON migration removed
+    assert "yaml.safe_load" in content
 
 
 def test_config_validation_with_pydantic(cookies):

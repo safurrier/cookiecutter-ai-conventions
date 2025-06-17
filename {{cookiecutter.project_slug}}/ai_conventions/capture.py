@@ -13,19 +13,19 @@ console = Console()
 @click.command()
 @click.argument("pattern", required=False)
 @click.option("--domain", "-d", help="Target domain for this learning")
-@click.option("--file", "-f", help="Append to specific file in staging")
+@click.option("--file", "-f", help="Append to specific file in domain")
 @click.option("--category", "-c", help="Category of learning (fix, pattern, etc)")
 def main(pattern, domain, file, category):
-    """Capture a new learning or pattern.
+    """Capture a new learning or pattern directly to domain.
     
     Examples:
         capture-learning "Always use type hints" --domain python
         capture-learning --domain git --category pattern
     """
-    staging_dir = Path("staging")
+    domains_dir = Path("domains")
     
-    if not staging_dir.exists():
-        console.print("[red]❌ No staging directory found![/red]")
+    if not domains_dir.exists():
+        console.print("[red]❌ No domains directory found![/red]")
         console.print("   Make sure you're in a conventions repository with learning capture enabled")
         return
     
@@ -35,7 +35,13 @@ def main(pattern, domain, file, category):
         pattern = Prompt.ask("What pattern or learning did you discover?")
         
         if not domain:
-            domain = Prompt.ask("Which domain does this belong to?", default="general")
+            # Show available domains
+            available_domains = [d.name for d in domains_dir.iterdir() if d.is_dir()]
+            if available_domains:
+                console.print(f"Available domains: {', '.join(available_domains)}")
+                domain = Prompt.ask("Which domain does this belong to?", default="general")
+            else:
+                domain = Prompt.ask("Which domain does this belong to?", default="general")
         
         if not category:
             category = Prompt.ask(
@@ -46,36 +52,36 @@ def main(pattern, domain, file, category):
     
     # Prepare learning entry
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    domain_name = domain or "general"
     
-    learning = {
-        "timestamp": timestamp,
-        "pattern": pattern,
-        "domain": domain or "general",
-        "category": category or "pattern",
-        "status": "pending"
-    }
+    # Ensure domain directory exists
+    domain_dir = domains_dir / domain_name
+    domain_dir.mkdir(exist_ok=True)
     
     # Determine target file
     if file:
-        target_file = staging_dir / file
+        target_file = domain_dir / file
     else:
-        target_file = staging_dir / "learnings.md"
+        target_file = domain_dir / "learnings.md"
     
     # Append to markdown file
     with open(target_file, "a", encoding="utf-8") as f:
-        f.write(f"\n## {timestamp}\n")
-        f.write(f"**Domain:** {learning['domain']}\n")
-        f.write(f"**Category:** {learning['category']}\n")
-        f.write(f"**Status:** {learning['status']}\n\n")
+        f.write(f"\n## {timestamp} - {category or 'pattern'}\n")
         f.write(f"{pattern}\n")
         f.write("\n---\n")
     
     console.print(f"\n✅ Learning captured to {target_file}")
-    console.print(f"   Domain: [cyan]{learning['domain']}[/cyan]")
-    console.print(f"   Category: [cyan]{learning['category']}[/cyan]")
+    console.print(f"   Domain: [cyan]{domain_name}[/cyan]")
+    console.print(f"   Category: [cyan]{category or 'pattern'}[/cyan]")
     
-    # Also save to YAML for easier processing
-    yaml_file = staging_dir / "learnings.yaml"
+    # Also save to YAML for metadata tracking
+    yaml_file = domain_dir / "learnings.yaml"
+    
+    learning = {
+        "timestamp": timestamp,
+        "pattern": pattern,
+        "category": category or "pattern"
+    }
     
     learnings = []
     if yaml_file.exists():
@@ -89,9 +95,8 @@ def main(pattern, domain, file, category):
     with open(yaml_file, "w", encoding="utf-8") as f:
         yaml.dump(learnings, f, default_flow_style=False, sort_keys=False)
     
-    console.print("\n💡 Next steps:")
-    console.print("   1. Review with: ai-conventions review")
-    console.print("   2. Promote to domain when ready")
+    console.print("\n💡 Tip:")
+    console.print("   Learning added directly to domain - no review needed!")
 
 
 if __name__ == "__main__":

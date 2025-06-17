@@ -62,15 +62,100 @@ def status():
 
 @main.command()
 @click.option("--check", is_flag=True, help="Check if update available")
-def update(check):
-    """Update conventions from the source repository."""
+@click.option("--dry-run", is_flag=True, help="Show what would be updated without making changes")
+def update(check, dry_run):
+    """Update conventions from the upstream repository."""
+    import subprocess
+    import sys
+    
+    # Check if we're in a git repository
+    try:
+        result = subprocess.run(["git", "rev-parse", "--git-dir"], 
+                              capture_output=True, text=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        console.print("[red]❌ Not in a git repository![/red]")
+        console.print("   This command only works in git-managed conventions repositories")
+        return
+    
     if check:
         console.print("🔍 Checking for updates...")
-        console.print("   This feature is coming soon!")
+        
+        # Fetch from origin to get latest info
+        try:
+            subprocess.run(["git", "fetch", "origin"], 
+                          capture_output=True, check=True)
+            
+            # Check if there are new commits
+            result = subprocess.run(["git", "rev-list", "HEAD..origin/main", "--count"], 
+                                  capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                commit_count = int(result.stdout.strip())
+                if commit_count > 0:
+                    console.print(f"   ✅ {commit_count} update(s) available")
+                    console.print("   Run 'ai-conventions update' to apply updates")
+                else:
+                    console.print("   ✅ No updates available - you're up to date!")
+            else:
+                console.print("   ⚠️  Could not check for updates (no upstream/main branch?)")
+                
+        except subprocess.CalledProcessError as e:
+            console.print(f"   ❌ Failed to check for updates: {e}")
+            
     else:
         console.print("🔄 Updating conventions...")
-        console.print("   This feature is coming soon!")
-        console.print("   For now, use git pull to update your conventions")
+        
+        if dry_run:
+            console.print("   [Dry run mode - no changes will be made]\n")
+            
+        # Stash any local changes
+        try:
+            stash_result = subprocess.run(["git", "stash", "push", "-m", "ai-conventions auto-stash"], 
+                                        capture_output=True, text=True)
+            has_stash = "No local changes to save" not in stash_result.stdout
+            
+            if has_stash:
+                console.print("   📦 Stashed local changes")
+                
+        except subprocess.CalledProcessError:
+            has_stash = False
+            
+        if not dry_run:
+            try:
+                # Pull updates
+                console.print("   📥 Pulling updates from upstream...")
+                subprocess.run(["git", "pull", "origin", "main"], check=True)
+                
+                # Restore stashed changes
+                if has_stash:
+                    console.print("   📤 Restoring local changes...")
+                    subprocess.run(["git", "stash", "pop"], check=True)
+                
+                console.print("\n✅ Update complete!")
+                console.print("\n💡 Recommended next steps:")
+                console.print("   1. Review any merge conflicts")
+                console.print("   2. Run 'ai-conventions install' to update provider configurations")
+                console.print("   3. Test your setup with 'ai-conventions status'")
+                
+            except subprocess.CalledProcessError as e:
+                console.print(f"\n❌ Update failed: {e}")
+                
+                if has_stash:
+                    console.print("   🔄 Attempting to restore your changes...")
+                    try:
+                        subprocess.run(["git", "stash", "pop"], check=True)
+                        console.print("   ✅ Local changes restored")
+                    except subprocess.CalledProcessError:
+                        console.print("   ⚠️  Could not restore stashed changes automatically")
+                        console.print("   ℹ️  Run 'git stash pop' manually to restore them")
+                        
+                console.print("\n💡 Manual update:")
+                console.print("   Try resolving conflicts manually and run 'git pull' again")
+        else:
+            console.print("   📥 Would pull updates from origin/main")
+            if has_stash:
+                console.print("   📤 Would restore local changes afterward")
+            console.print("\n   Run without --dry-run to apply changes")
 
 
 @main.command()

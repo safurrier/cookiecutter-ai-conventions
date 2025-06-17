@@ -40,13 +40,13 @@ def test_bootstrap_script_has_error_handling():
 
 
 def test_bootstrap_script_is_simple():
-    """Test that bootstrap.sh is simple and focused."""
+    """Test that bootstrap.sh is focused and maintainable."""
     bootstrap_script = Path("bootstrap.sh")
     content = bootstrap_script.read_text(encoding="utf-8")
     
-    # Should be a simple script
+    # Should be focused (allow more lines for TUI integration)
     lines = content.strip().split('\n')
-    assert len(lines) < 30, "Bootstrap script should be simple and concise"
+    assert len(lines) < 100, "Bootstrap script should be maintainable"
     
     # Should not have complex OS detection
     assert "OSTYPE" not in content
@@ -82,12 +82,12 @@ def test_bootstrap_script_runs_cookiecutter():
 
 
 def test_bootstrap_script_passes_arguments():
-    """Test that bootstrap.sh passes all arguments to cookiecutter."""
+    """Test that bootstrap.sh handles cookiecutter arguments correctly."""
     bootstrap_script = Path("bootstrap.sh")
     content = bootstrap_script.read_text(encoding="utf-8")
     
-    # Should pass all arguments using $@
-    assert '"$@"' in content
+    # Should handle cookiecutter arguments (new format with arrays)
+    assert "COOKIECUTTER_ARGS" in content or '"$@"' in content
 
 
 def test_bootstrap_script_has_clear_output():
