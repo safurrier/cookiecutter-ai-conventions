@@ -40,7 +40,7 @@ setup: install-uv ## Set up development environment
 .PHONY: test
 test: ## Run tests with coverage
 	@echo "$(BLUE)Running tests...$(NC)"
-	uv run pytest
+	uv run pytest -n auto
 
 .PHONY: test-watch
 test-watch: ## Run tests in watch mode
@@ -114,7 +114,7 @@ ci-local: ## Run CI checks locally (mimics GitHub Actions)
 	@echo "\n$(YELLOW)3. Running formatter check...$(NC)"
 	uv run ruff format --check .
 	@echo "\n$(YELLOW)4. Running tests...$(NC)"
-	uv run pytest
+	uv run pytest -n auto
 	@echo "\n$(YELLOW)5. Testing cookiecutter generation...$(NC)"
 	uv run cookiecutter . --no-input -o test-output/
 	test -d test-output/my-ai-conventions

@@ -33,9 +33,10 @@ class ConventionsInstaller:
                 "project_name": "{{ cookiecutter.project_name }}",
                 "project_slug": "{{ cookiecutter.project_slug }}",
                 "author_name": "{{ cookiecutter.author_name }}",
-                "enable_learning_capture": {{ cookiecutter.enable_learning_capture | lower }},
-                "enable_context_canary": {{ cookiecutter.enable_context_canary | lower }},
-                "enable_domain_composition": {{ cookiecutter.enable_domain_composition | lower }},
+                "author_email": "{{ cookiecutter.author_email }}",
+                "enable_learning_capture": "{{ cookiecutter.enable_learning_capture }}".lower() in ['true', 'yes', '1', 'y'],
+                "enable_context_canary": "{{ cookiecutter.enable_context_canary }}".lower() in ['true', 'yes', '1', 'y'],
+                "enable_domain_composition": "{{ cookiecutter.enable_domain_composition }}".lower() in ['true', 'yes', '1', 'y'],
                 "default_domains": "{{ cookiecutter.default_domains }}",
                 "selected_providers": "{{ cookiecutter.selected_providers }}"
             }
@@ -106,7 +107,18 @@ def main():
     installer = ConventionsInstaller()
     
     if len(sys.argv) > 1:
-        if sys.argv[1] == "--all":
+        if sys.argv[1] in ["--help", "-h"]:
+            print("Install AI conventions to various providers")
+            print()
+            print("Usage:")
+            print("  python install.py [provider]    Install to specific provider")
+            print("  python install.py --all         Install to all configured providers")
+            print("  python install.py --tui         Run interactive TUI")
+            print("  python install.py --help        Show this help")
+            print()
+            print("Available providers: claude, cursor, windsurf, aider")
+            return
+        elif sys.argv[1] == "--all":
             installer.install_all()
         elif sys.argv[1] == "--tui":
             # Run Textual TUI

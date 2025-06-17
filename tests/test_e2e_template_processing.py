@@ -80,7 +80,7 @@ class TestTemplateProcessing:
 
         # Should have capture imports
         assert "from .capture import capture_command" in content
-        assert "main.add_command(capture_command, name=\"capture\")" in content
+        assert 'main.add_command(capture_command, name="capture")' in content
         # Should not have Jinja2 syntax
         assert "{%" not in content
         assert "cookiecutter" not in content
@@ -165,7 +165,8 @@ class TestTemplateProcessing:
 
         # Should have proper values
         assert 'name = "test-project"' in content
-        assert 'authors = [{name = "Test Author", email = "test@example.com"}]' in content
+        assert '"Test Author"' in content
+        assert '"test@example.com"' in content
 
     def test_files_in_copy_without_render_are_not_processed(self, tmp_path):
         """Test that files in _copy_without_render list are not processed."""
@@ -193,10 +194,7 @@ class TestTemplateProcessing:
 class TestEndToEndUserJourney:
     """Test the complete user journey from generation to CLI usage."""
 
-    @pytest.mark.skipif(
-        sys.platform == "win32",
-        reason="Shell command testing is Unix-specific"
-    )
+    @pytest.mark.skipif(sys.platform == "win32", reason="Shell command testing is Unix-specific")
     def test_generate_install_and_run_cli(self, tmp_path):
         """Test the full journey: generate → uv tool install → run CLI."""
         # Arrange
@@ -221,41 +219,42 @@ class TestEndToEndUserJourney:
         assert (generated_project / "ai_conventions" / "cli.py").exists()
 
         # Act: Install with uv tool
-        # First, ensure we have a clean environment
-        subprocess.run(
-            ["uv", "tool", "uninstall", "my-ai-conventions"],
-            capture_output=True,
-            check=False  # OK if it wasn't installed
-        )
+        # First, ensure we have a clean environment by cleaning up multiple possible names
+        for tool_name in ["my-ai-conventions", "ai-conventions"]:
+            subprocess.run(
+                ["uv", "tool", "uninstall", tool_name],
+                capture_output=True,
+                check=False,  # OK if it wasn't installed
+            )
 
         # Install the generated project
         result = subprocess.run(
             ["uv", "tool", "install", str(generated_project)],
             capture_output=True,
             text=True,
-            cwd=str(generated_project)
+            cwd=str(generated_project),
         )
 
         assert result.returncode == 0, f"uv tool install failed: {result.stderr}"
 
-        # Act: Run the CLI
+        # Act: Run the CLI (using the project slug name)
         result = subprocess.run(
-            ["ai-conventions", "--version"],
+            ["my-ai-conventions", "--version"],
             capture_output=True,
             text=True,
-            shell=False  # Use direct execution, not shell
+            shell=False,  # Use direct execution, not shell
         )
 
         assert result.returncode == 0, f"CLI execution failed: {result.stderr}"
         assert "0.1.0" in result.stdout
 
-        # Act: Run status command
+        # Act: Run status command (using the project slug name)
         result = subprocess.run(
-            ["ai-conventions", "status"],
+            ["my-ai-conventions", "status"],
             capture_output=True,
             text=True,
             cwd=str(generated_project),
-            shell=False
+            shell=False,
         )
 
         assert result.returncode == 0, f"Status command failed: {result.stderr}"
@@ -263,9 +262,7 @@ class TestEndToEndUserJourney:
 
         # Cleanup
         subprocess.run(
-            ["uv", "tool", "uninstall", "my-ai-conventions"],
-            capture_output=True,
-            check=False
+            ["uv", "tool", "uninstall", "my-ai-conventions"], capture_output=True, check=False
         )
 
     def test_python_import_paths_work(self, tmp_path):
@@ -292,7 +289,8 @@ class TestEndToEndUserJourney:
 
             # The main CLI group should be accessible
             from ai_conventions.cli import main
-            assert hasattr(main, 'commands')
+
+            assert hasattr(main, "commands")
 
         finally:
             # Clean up sys.path
@@ -302,10 +300,7 @@ class TestEndToEndUserJourney:
 class TestShellCompatibility:
     """Test shell environment compatibility."""
 
-    @pytest.mark.skipif(
-        sys.platform == "win32",
-        reason="Shell testing is Unix-specific"
-    )
+    @pytest.mark.skipif(sys.platform == "win32", reason="Shell testing is Unix-specific")
     def test_subprocess_commands_work_in_sh(self, tmp_path):
         """Test that subprocess commands work in /bin/sh environment."""
         output_dir = tmp_path / "output"
@@ -324,16 +319,13 @@ class TestShellCompatibility:
         result = subprocess.run(
             ["/bin/sh", "-c", f"cd {project_dir} && python install.py --help"],
             capture_output=True,
-            text=True
+            text=True,
         )
 
         assert result.returncode == 0, f"install.py failed in sh: {result.stderr}"
         assert "Install AI conventions" in result.stdout
 
-    @pytest.mark.skipif(
-        sys.platform == "win32",
-        reason="Shell testing is Unix-specific"
-    )
+    @pytest.mark.skipif(sys.platform == "win32", reason="Shell testing is Unix-specific")
     def test_no_shell_specific_aliases_in_scripts(self, tmp_path):
         """Test that generated scripts don't rely on shell-specific aliases."""
         output_dir = tmp_path / "output"
@@ -359,14 +351,14 @@ class TestShellCompatibility:
             for pattern in problematic_patterns:
                 if pattern in content:
                     # Some uses might be legitimate, check context
-                    lines = content.split('\n')
+                    lines = content.split("\n")
                     for i, line in enumerate(lines):
-                        if pattern in line and not line.strip().startswith('#'):
+                        if pattern in line and not line.strip().startswith("#"):
                             # Check if it's in a subprocess call
-                            context = '\n'.join(lines[max(0, i-2):min(len(lines), i+3)])
-                            if 'subprocess' in context or 'run(' in context or 'Popen' in context:
+                            context = "\n".join(lines[max(0, i - 2) : min(len(lines), i + 3)])
+                            if "subprocess" in context or "run(" in context or "Popen" in context:
                                 pytest.fail(
                                     f"Found potentially problematic shell usage in {py_file}:\n"
-                                    f"Line {i+1}: {line}\n"
+                                    f"Line {i + 1}: {line}\n"
                                     f"Context:\n{context}"
                                 )

@@ -14,20 +14,22 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Optional
 
 import pytest
 from cookiecutter.main import cookiecutter
 
 # Performance thresholds based on 2025 UV best practices
 PERFORMANCE_THRESHOLDS = {
-    'generation': 30,    # 30s for cookiecutter generation
-    'uv_install': 60,    # 60s for UV tool install
-    'uv_command': 30,    # 30s for UV command execution
+    "generation": 30,  # 30s for cookiecutter generation
+    "uv_install": 60,  # 60s for UV tool install
+    "uv_command": 30,  # 30s for UV command execution
 }
 
 
-def monitor_performance(operation_name: str, threshold: float = None):
+def monitor_performance(operation_name: str, threshold: Optional[float] = None):
     """Decorator to monitor operation performance."""
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             start_time = time.time()
@@ -41,7 +43,9 @@ def monitor_performance(operation_name: str, threshold: float = None):
                 )
 
             return result
+
         return wrapper
+
     return decorator
 
 
@@ -81,7 +85,7 @@ def generate_test_project(tmp_path: Path, project_name: str, project_slug: str, 
     generation_duration = time.time() - start_time
 
     # Performance check for generation
-    if generation_duration > PERFORMANCE_THRESHOLDS['generation']:
+    if generation_duration > PERFORMANCE_THRESHOLDS["generation"]:
         pytest.fail(f"Project generation took {generation_duration:.2f}s, exceeding threshold")
 
     return Path(project_dir)
@@ -109,13 +113,16 @@ class TestE2EUVToolWorkflow:
         tool_name = "test-uv-tool"
 
         try:
-            # Act: Install as UV tool with performance monitoring
+            # Act: Clean up any existing installation first
+            safe_uv_tool_cleanup(tool_name)
+
+            # Install as UV tool with performance monitoring
             start_time = time.time()
             install_result = subprocess.run(
                 ["uv", "tool", "install", str(generated_project)],
                 capture_output=True,
                 text=True,
-                timeout=PERFORMANCE_THRESHOLDS['uv_install'],
+                timeout=PERFORMANCE_THRESHOLDS["uv_install"],
             )
             install_duration = time.time() - start_time
 
@@ -127,7 +134,7 @@ class TestE2EUVToolWorkflow:
             )
 
             # Performance check
-            if install_duration > PERFORMANCE_THRESHOLDS['uv_install']:
+            if install_duration > PERFORMANCE_THRESHOLDS["uv_install"]:
                 pytest.fail(f"UV install took {install_duration:.2f}s, exceeding threshold")
 
             # Assert: Tool is available via uv tool list
@@ -170,6 +177,9 @@ class TestE2EUVToolWorkflow:
         tool_name = "test-commands"
 
         try:
+            # Clean up any existing installation first
+            safe_uv_tool_cleanup(tool_name)
+
             # Install UV tool
             install_result = subprocess.run(
                 ["uv", "tool", "install", str(generated_project)],
@@ -199,7 +209,9 @@ class TestE2EUVToolWorkflow:
                 timeout=30,
             )
 
-            assert version_result.returncode == 0, f"Version command failed: {version_result.stderr}"
+            assert version_result.returncode == 0, (
+                f"Version command failed: {version_result.stderr}"
+            )
             assert "0.1.0" in version_result.stdout  # Default version from template
 
         finally:
@@ -330,10 +342,7 @@ class TestE2EUVToolWorkflow:
         assert (generated_project / "README.md").exists()
         assert (generated_project / "install.py").exists()
 
-    @pytest.mark.skipif(
-        sys.platform == "win32",
-        reason="UV tool PATH handling differs on Windows"
-    )
+    @pytest.mark.skipif(sys.platform == "win32", reason="UV tool PATH handling differs on Windows")
     def test_uv_tool_cross_platform_compatibility(self, tmp_path):
         """Test UV tool works across different platforms.
 
@@ -360,6 +369,9 @@ class TestE2EUVToolWorkflow:
         tool_name = "cross-platform"
 
         try:
+            # Clean up any existing installation first
+            safe_uv_tool_cleanup(tool_name)
+
             # Test installation
             subprocess.run(
                 ["uv", "tool", "install", str(generated_project)],
@@ -415,8 +427,8 @@ class TestE2EUVToolWorkflow:
         )
 
         # Clean up any existing test tools
-        for line in existing_tools.stdout.split('\n'):
-            if line.strip() and not line.startswith(' '):
+        for line in existing_tools.stdout.split("\n"):
+            if line.strip() and not line.startswith(" "):
                 tool_name = line.split()[0]
                 for prefix in test_prefixes:
                     if tool_name.startswith(prefix):
@@ -436,10 +448,13 @@ class TestE2EUVToolWorkflow:
         )
 
         # Count actual tools (lines that don't start with space or dash)
-        initial_tool_count = len([
-            line for line in initial_tools.stdout.split('\n')
-            if line.strip() and not line.startswith(' ') and not line.startswith('-')
-        ])
+        initial_tool_count = len(
+            [
+                line
+                for line in initial_tools.stdout.split("\n")
+                if line.strip() and not line.startswith(" ") and not line.startswith("-")
+            ]
+        )
 
         output_dir = tmp_path / "output"
         output_dir.mkdir()
@@ -476,10 +491,13 @@ class TestE2EUVToolWorkflow:
             )
 
             # Should have exactly one more tool
-            after_tool_count = len([
-                line for line in after_install_tools.stdout.split('\n')
-                if line.strip() and not line.startswith(' ') and not line.startswith('-')
-            ])
+            after_tool_count = len(
+                [
+                    line
+                    for line in after_install_tools.stdout.split("\n")
+                    if line.strip() and not line.startswith(" ") and not line.startswith("-")
+                ]
+            )
 
             assert after_tool_count == initial_tool_count + 1, (
                 f"Expected {initial_tool_count + 1} tools, got {after_tool_count}\n"
@@ -507,12 +525,14 @@ class TestE2EUVToolWorkflow:
                 timeout=30,
             )
 
-            final_tool_count = len([
-                line for line in final_tools.stdout.split('\n')
-                if line.strip() and not line.startswith(' ') and not line.startswith('-')
-            ])
+            final_tool_count = len(
+                [
+                    line
+                    for line in final_tools.stdout.split("\n")
+                    if line.strip() and not line.startswith(" ") and not line.startswith("-")
+                ]
+            )
 
             assert final_tool_count == initial_tool_count, (
                 f"Tool cleanup failed. Expected {initial_tool_count} tools, got {final_tool_count}"
             )
-
