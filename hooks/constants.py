@@ -12,13 +12,13 @@ from typing import List
 
 # Installation tools that should be removed if not needed
 INSTALL_TOOLS: List[str] = [
-    'ai_conventions/',
-    'install.py',
-    'pyproject.toml',
-    'requirements.txt',
-    'setup.py',
-    'uv.lock',
-    '.python-version'
+    "ai_conventions/",
+    "install.py",
+    "pyproject.toml",
+    "requirements.txt",
+    "setup.py",
+    "uv.lock",
+    ".python-version",
 ]
 
 
@@ -58,5 +58,9 @@ DEFAULT_DOMAINS: List[str] = ["git", "testing"]
 REGISTRY_LOCATIONS: List[Path] = [
     Path.cwd() / "community-domains" / "registry.yaml",
     Path(__file__).parent.parent / "community-domains" / "registry.yaml",
-    Path.home() / ".cookiecutters" / "cookiecutter-ai-conventions" / "community-domains" / "registry.yaml",
+    Path.home()
+    / ".cookiecutters"
+    / "cookiecutter-ai-conventions"
+    / "community-domains"
+    / "registry.yaml",
 ]

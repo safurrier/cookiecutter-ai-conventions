@@ -12,9 +12,11 @@ import yaml
 # Data models and constants defined inline for cookiecutter compatibility
 # (cookiecutter creates temporary files which breaks imports)
 
+
 @dataclass
 class ProviderFiles:
     """Structured data for provider-specific files."""
+
     name: str
     config_files: List[str] = field(default_factory=list)
     template_dirs: List[str] = field(default_factory=list)
@@ -35,64 +37,67 @@ class ProviderFiles:
 
 # Define all provider file mappings
 PROVIDER_REGISTRY = {
-    'claude': ProviderFiles(
-        name='claude',
-        config_files=['.claude/'],
-        template_dirs=['templates/claude/'],
-        docs=['docs/claude-setup.md'],
-        module='ai_conventions/providers/claude.py',
-        conditional_files={
-            'learning_capture': ['.claude/commands/', 'commands/']
-        }
+    "claude": ProviderFiles(
+        name="claude",
+        config_files=[".claude/"],
+        template_dirs=["templates/claude/"],
+        docs=["docs/claude-setup.md"],
+        module="ai_conventions/providers/claude.py",
+        conditional_files={"learning_capture": [".claude/commands/", "commands/"]},
     ),
-    'cursor': ProviderFiles(
-        name='cursor',
-        config_files=['.cursorrules', '.cursor/'],
-        template_dirs=['templates/cursor/'],
-        docs=['docs/cursor-setup.md'],
-        module='ai_conventions/providers/cursor.py',
-        domain_specific_patterns=['.cursor/rules/*.mdc']
+    "cursor": ProviderFiles(
+        name="cursor",
+        config_files=[".cursorrules", ".cursor/"],
+        template_dirs=["templates/cursor/"],
+        docs=["docs/cursor-setup.md"],
+        module="ai_conventions/providers/cursor.py",
+        domain_specific_patterns=[".cursor/rules/*.mdc"],
     ),
-    'windsurf': ProviderFiles(
-        name='windsurf',
-        config_files=['.windsurfrules', '.windsurf/'],
-        template_dirs=['templates/windsurf/'],
-        docs=['docs/windsurf-setup.md'],
-        module='ai_conventions/providers/windsurf.py',
-        domain_specific_patterns=['.windsurf/rules/*.md']
+    "windsurf": ProviderFiles(
+        name="windsurf",
+        config_files=[".windsurfrules", ".windsurf/"],
+        template_dirs=["templates/windsurf/"],
+        docs=["docs/windsurf-setup.md"],
+        module="ai_conventions/providers/windsurf.py",
+        domain_specific_patterns=[".windsurf/rules/*.md"],
     ),
-    'aider': ProviderFiles(
-        name='aider',
-        config_files=['CONVENTIONS.md', '.aider.conf.yml'],
-        template_dirs=['templates/aider/'],
-        docs=['docs/aider-setup.md'],
-        module='ai_conventions/providers/aider.py'
+    "aider": ProviderFiles(
+        name="aider",
+        config_files=["CONVENTIONS.md", ".aider.conf.yml"],
+        template_dirs=["templates/aider/"],
+        docs=["docs/aider-setup.md"],
+        module="ai_conventions/providers/aider.py",
     ),
-    'copilot': ProviderFiles(
-        name='copilot',
-        config_files=['.github/copilot-instructions.md', '.github/prompts/', 'vscode_config/', '.vscode/'],
-        template_dirs=['templates/copilot/'],
-        docs=['docs/copilot-setup.md'],
-        module='ai_conventions/providers/copilot.py'
+    "copilot": ProviderFiles(
+        name="copilot",
+        config_files=[
+            ".github/copilot-instructions.md",
+            ".github/prompts/",
+            "vscode_config/",
+            ".vscode/",
+        ],
+        template_dirs=["templates/copilot/"],
+        docs=["docs/copilot-setup.md"],
+        module="ai_conventions/providers/copilot.py",
     ),
-    'codex': ProviderFiles(
-        name='codex',
-        config_files=['AGENTS.md', '.codex/', 'codex.sh'],
-        template_dirs=['templates/codex/'],
-        docs=['docs/codex-setup.md'],
-        module='ai_conventions/providers/codex.py'
-    )
+    "codex": ProviderFiles(
+        name="codex",
+        config_files=["AGENTS.md", ".codex/", "codex.sh"],
+        template_dirs=["templates/codex/"],
+        docs=["docs/codex-setup.md"],
+        module="ai_conventions/providers/codex.py",
+    ),
 }
 
 # Installation tools that should be removed if not needed
 INSTALL_TOOLS = [
-    'ai_conventions/',
-    'install.py',
-    'pyproject.toml',
-    'requirements.txt',
-    'setup.py',
-    'uv.lock',
-    '.python-version'
+    "ai_conventions/",
+    "install.py",
+    "pyproject.toml",
+    "requirements.txt",
+    "setup.py",
+    "uv.lock",
+    ".python-version",
 ]
 
 # Directories to check for cleanup after selective file generation
@@ -138,20 +143,20 @@ def copy_domain(domain, source_dir, target_dir):
 def create_config_file(providers, domains, config_data):
     """Create a configuration file for the generated project."""
     config = {
-        "project_name": config_data['project_name'],
-        "project_slug": config_data['project_slug'],
-        "author_name": config_data['author_name'],
-        "author_email": config_data.get('author_email'),
+        "project_name": config_data["project_name"],
+        "project_slug": config_data["project_slug"],
+        "author_name": config_data["author_name"],
+        "author_email": config_data.get("author_email"),
         "selected_providers": providers,
         "default_domains": domains,
-        "enable_learning_capture": config_data.get('enable_learning_capture', True),
-        "enable_context_canary": config_data.get('enable_context_canary', True),
-        "enable_domain_composition": config_data.get('enable_domain_composition', True),
+        "enable_learning_capture": config_data.get("enable_learning_capture", True),
+        "enable_context_canary": config_data.get("enable_context_canary", True),
+        "enable_domain_composition": config_data.get("enable_domain_composition", True),
     }
 
     # Save as .ai-conventions.yaml
     config_path = Path(".ai-conventions.yaml")
-    with open(config_path, 'w') as f:
+    with open(config_path, "w") as f:
         yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
     print(f"  Created configuration file: {config_path}")
@@ -188,13 +193,13 @@ def update_readme(providers, domains, include_tools):
         included_section += "\n"
 
     # Insert after the first heading
-    lines = content.split('\n')
+    lines = content.split("\n")
     for i, line in enumerate(lines):
-        if line.startswith('# ') and i > 0:
+        if line.startswith("# ") and i > 0:
             lines.insert(i + 2, included_section)
             break
 
-    readme_path.write_text('\n'.join(lines))
+    readme_path.write_text("\n".join(lines))
     print("  Updated README.md with included components")
 
 
@@ -221,8 +226,11 @@ def remove_unselected_providers(selected_providers, enable_learning_capture=True
                         print(f"    Warning: Could not remove {path}: {e}")
 
             # Handle conditional files
-            if not enable_learning_capture and 'learning_capture' in provider_files.conditional_files:
-                for path_str in provider_files.conditional_files['learning_capture']:
+            if (
+                not enable_learning_capture
+                and "learning_capture" in provider_files.conditional_files
+            ):
+                for path_str in provider_files.conditional_files["learning_capture"]:
                     path = Path(path_str)
                     if path.exists():
                         try:
@@ -265,27 +273,28 @@ def remove_install_tools():
 def main():
     """Process the generated project."""
     # Get selected domains
-    selected_domains = "{{ cookiecutter.default_domains }}"  # noqa: F821
+    selected_domains = "{{ cookiecutter.default_domains }}"
 
     # Check if learning capture is enabled
-    enable_learning = {{ cookiecutter.enable_learning_capture }}  # noqa: F821
+    enable_learning_str = "{{ cookiecutter.enable_learning_capture }}"
+    enable_learning = enable_learning_str.lower() in ["true", "yes", "1", "y"]
 
     # Check if domain composition is enabled
-    enable_composition = {{ cookiecutter.enable_domain_composition }}  # noqa: F821
+    enable_composition_str = "{{ cookiecutter.enable_domain_composition }}"
+    enable_composition = enable_composition_str.lower() in ["true", "yes", "1", "y"]
 
     # Check if install tools should be included
-    include_tools_str = "{{ cookiecutter.include_install_tools }}"  # noqa: F821
-    include_tools = include_tools_str.lower() in ['true', 'yes', '1', 'y']
+    include_tools_str = "{{ cookiecutter.include_install_tools }}"
+    include_tools = include_tools_str.lower() in ["true", "yes", "1", "y"]
 
     # Get providers
-    providers = "{{ cookiecutter.selected_providers }}"  # noqa: F821
-
+    providers = "{{ cookiecutter.selected_providers }}"
 
     # Ensure providers is a list
     if isinstance(providers, str):
         # Handle comma-separated providers
-        if ',' in providers:
-            providers = [p.strip() for p in providers.split(',')]
+        if "," in providers:
+            providers = [p.strip() for p in providers.split(",")]
         else:
             providers = [providers]
 
@@ -303,12 +312,13 @@ def main():
     if isinstance(selected_domains, str):
         # If it's a JSON string, parse it
         import json
+
         try:
             selected_domains = json.loads(selected_domains)
         except json.JSONDecodeError:
             # If it's not JSON, try comma-separated
-            if ',' in selected_domains:
-                selected_domains = [d.strip() for d in selected_domains.split(',')]
+            if "," in selected_domains:
+                selected_domains = [d.strip() for d in selected_domains.split(",")]
             else:
                 selected_domains = [selected_domains]
 
@@ -342,6 +352,10 @@ def main():
     if community_domains.exists():
         shutil.rmtree(community_domains)
 
+    # Parse context canary setting
+    enable_canary_str = "{{ cookiecutter.enable_context_canary }}"
+    enable_canary = enable_canary_str.lower() in ["true", "yes", "1", "y"]
+
     # Create configuration file early so it's available for tools
     print("\nCreating configuration file...")
     config_data = {
@@ -350,7 +364,7 @@ def main():
         "author_name": "{{ cookiecutter.author_name }}",
         "author_email": "{{ cookiecutter.author_email }}",
         "enable_learning_capture": enable_learning,
-        "enable_context_canary": {{ cookiecutter.enable_context_canary }},
+        "enable_context_canary": enable_canary,
         "enable_domain_composition": enable_composition,
         "include_install_tools": include_tools,
     }
@@ -398,13 +412,12 @@ def main():
     # Codex: Make script executable (Unix-like systems only)
     if providers and "codex" in providers:
         codex_script = Path("codex.sh")
-        if codex_script.exists() and os.name != 'nt':  # Skip chmod on Windows
+        if codex_script.exists() and os.name != "nt":  # Skip chmod on Windows
             try:
                 codex_script.chmod(codex_script.stat().st_mode | 0o111)
                 print("  Made codex.sh executable")
             except (OSError, AttributeError):
                 print("  Warning: Could not make codex.sh executable")
-
 
     # Clean up learning capture commands if not enabled
     if not enable_learning:

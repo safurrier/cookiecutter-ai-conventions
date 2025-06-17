@@ -26,7 +26,7 @@ This domain extends the base testing domain.
 """)
 
     # Parse the frontmatter
-    content = domain_path.read_text(encoding='utf-8')
+    content = domain_path.read_text(encoding="utf-8")
     assert "extends: testing" in content
 
 
@@ -93,7 +93,7 @@ def test_circular_dependency_detection(cookies):
     assert resolver_path.exists()
 
     # The resolver should have circular dependency detection logic
-    resolver_content = resolver_path.read_text(encoding='utf-8')
+    resolver_content = resolver_path.read_text(encoding="utf-8")
     assert "circular" in resolver_content.lower() or "cycle" in resolver_content.lower()
 
 
@@ -113,7 +113,7 @@ def test_claude_md_includes_inheritance_info(cookies):
     claude_template = result.project_path / "templates" / "claude" / "CLAUDE.md.j2"
     assert claude_template.exists()
 
-    content = claude_template.read_text(encoding='utf-8')
+    content = claude_template.read_text(encoding="utf-8")
     # Should mention domain composition or inheritance
     assert "domain composition" in content.lower() or "domain inheritance" in content.lower()
     assert "extends" in content.lower()
@@ -143,7 +143,7 @@ extends:
 Combines testing and API domains.
 """)
 
-    content = domain_path.read_text(encoding='utf-8')
+    content = domain_path.read_text(encoding="utf-8")
     assert "extends:" in content
     assert "- testing" in content
     assert "- api" in content
@@ -165,7 +165,7 @@ def test_domain_resolver_module_created(cookies):
     assert resolver.exists()
 
     # Check it has the necessary functions
-    content = resolver.read_text(encoding='utf-8')
+    content = resolver.read_text(encoding="utf-8")
     assert "def resolve_domain" in content or "def load_domain" in content
     assert "class" in content  # Should have a resolver class
 

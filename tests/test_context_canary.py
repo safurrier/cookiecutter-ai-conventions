@@ -15,7 +15,7 @@ def test_canary_enabled_in_claude_md(cookies):
             "default_domains": "git,testing",
             "enable_learning_capture": True,
             "enable_context_canary": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -41,7 +41,7 @@ def test_canary_disabled_when_setting_false(cookies):
             "default_domains": "git,testing",
             "enable_learning_capture": True,
             "enable_context_canary": False,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -57,6 +57,7 @@ def test_canary_configuration_in_cookiecutter_json():
     assert cookiecutter_json.exists()
 
     import json
+
     with open(cookiecutter_json, encoding="utf-8") as f:
         config = json.load(f)
 
@@ -90,7 +91,7 @@ def test_canary_template_content(cookies):
             "default_domains": "git,testing",
             "enable_learning_capture": True,
             "enable_context_canary": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -109,12 +110,7 @@ def test_canary_template_content(cookies):
 def test_multiple_trigger_phrases_documented():
     """Test that multiple trigger phrases are documented."""
     # This would be in the generated documentation
-    trigger_phrases = [
-        "convention check",
-        "check conventions",
-        "canary",
-        "conventions loaded?"
-    ]
+    trigger_phrases = ["convention check", "check conventions", "canary", "conventions loaded?"]
 
     # Verify these are reasonable trigger phrases
     for phrase in trigger_phrases:
@@ -132,7 +128,7 @@ def test_canary_in_install_py_generation(cookies):
             "default_domains": "git,testing",
             "enable_learning_capture": True,
             "enable_context_canary": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 

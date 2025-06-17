@@ -18,7 +18,7 @@ def test_tui_handles_comma_separated_providers(cookies):
     sys.path.insert(0, str(result.project_path))
 
     # Clear any previously imported modules
-    modules_to_remove = [key for key in sys.modules.keys() if key.startswith('ai_conventions')]
+    modules_to_remove = [key for key in sys.modules.keys() if key.startswith("ai_conventions")]
     for module in modules_to_remove:
         del sys.modules[module]
 
@@ -49,10 +49,10 @@ def test_install_py_handles_comma_separated_providers(cookies):
 
     # Check that install.py was generated correctly
     install_py = result.project_path / "install.py"
-    content = install_py.read_text(encoding='utf-8')
+    content = install_py.read_text(encoding="utf-8")
 
     # Should not have jsonify filter
-    assert '| jsonify' not in content
+    assert "| jsonify" not in content
 
     # Check that the template variable is properly formatted without jsonify
     # After cookiecutter processing, the actual values will be substituted

@@ -39,12 +39,13 @@ def test_canary_generation_in_claude_md(cookies):
 
     # Create a test installation directory
     import tempfile
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_claude_dir = Path(tmpdir) / ".claude"
         test_claude_dir.mkdir()
 
         # Monkey patch the install path
-        provider.get_install_path = lambda: test_claude_dir
+        provider.get_install_path = lambda path=test_claude_dir: path
 
         # Install
         install_result = provider.install()
@@ -54,7 +55,7 @@ def test_canary_generation_in_claude_md(cookies):
         claude_md = test_claude_dir / "CLAUDE.md"
         assert claude_md.exists()
 
-        content = claude_md.read_text(encoding='utf-8')
+        content = claude_md.read_text(encoding="utf-8")
 
         # Check for canary section
         assert "## 🦜 Context Health Check" in content
@@ -109,14 +110,14 @@ def test_canary_uniqueness_per_install(cookies):
             test_claude_dir = Path(tmpdir) / ".claude"
             test_claude_dir.mkdir()
 
-            provider.get_install_path = lambda: test_claude_dir
+            provider.get_install_path = lambda path=test_claude_dir: path
 
             # Install
             provider.install()
 
             # Extract timestamp from CLAUDE.md
             claude_md = test_claude_dir / "CLAUDE.md"
-            content = claude_md.read_text(encoding='utf-8')
+            content = claude_md.read_text(encoding="utf-8")
 
             match = re.search(r"🦜-CONVENTIONS-ACTIVE-(\d{8}-\d{6})", content)
             assert match is not None
@@ -162,6 +163,7 @@ def test_canary_disabled_when_setting_false(cookies):
     provider = ClaudeProvider(result.project_path, config)
 
     import tempfile
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_claude_dir = Path(tmpdir) / ".claude"
         test_claude_dir.mkdir()
@@ -175,7 +177,7 @@ def test_canary_disabled_when_setting_false(cookies):
         claude_md = test_claude_dir / "CLAUDE.md"
         assert claude_md.exists()
 
-        content = claude_md.read_text(encoding='utf-8')
+        content = claude_md.read_text(encoding="utf-8")
 
         # Should NOT have canary section
         assert "## 🦜 Context Health Check" not in content
@@ -197,7 +199,7 @@ def test_canary_trigger_phrases_in_template(cookies):
     template_path = result.project_path / "templates" / "claude" / "CLAUDE.md.j2"
     assert template_path.exists()
 
-    content = template_path.read_text(encoding='utf-8')
+    content = template_path.read_text(encoding="utf-8")
 
     # Check for trigger phrases
     assert "check conventions" in content
@@ -219,7 +221,7 @@ def test_canary_response_format_documented(cookies):
 
     # Check the template
     template_path = result.project_path / "templates" / "claude" / "CLAUDE.md.j2"
-    content = template_path.read_text(encoding='utf-8')
+    content = template_path.read_text(encoding="utf-8")
 
     # Check for response format
     assert "✓ Conventions loaded!" in content
@@ -261,7 +263,7 @@ def test_canary_in_install_py_config(cookies):
 
     # Check install.py
     install_py = result.project_path / "install.py"
-    content = install_py.read_text(encoding='utf-8')
+    content = install_py.read_text(encoding="utf-8")
 
     # Should have enable_context_canary in config
     assert "enable_context_canary" in content

@@ -1,7 +1,6 @@
 """Test Windsurf provider integration."""
 
 
-
 def test_windsurf_creates_windsurfrules_file(cookies):
     """Test that selecting Windsurf creates a .windsurfrules file."""
     result = cookies.bake(
@@ -11,7 +10,7 @@ def test_windsurf_creates_windsurfrules_file(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "windsurf"
+            "selected_providers": "windsurf",
         }
     )
 
@@ -23,7 +22,7 @@ def test_windsurf_creates_windsurfrules_file(cookies):
     assert windsurfrules_file.exists()
 
     # Check content includes project info and domains
-    content = windsurfrules_file.read_text(encoding='utf-8')
+    content = windsurfrules_file.read_text(encoding="utf-8")
     assert "# AI Development Conventions" in content
     assert "Test AI Conventions" in content
     assert "git" in content
@@ -39,7 +38,7 @@ def test_windsurf_creates_rules_directory_structure(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "windsurf"
+            "selected_providers": "windsurf",
         }
     )
 
@@ -64,7 +63,7 @@ def test_windsurf_domain_specific_rules_with_globs(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing,writing",
             "enable_learning_capture": True,
-            "selected_providers": "windsurf"
+            "selected_providers": "windsurf",
         }
     )
 
@@ -75,15 +74,15 @@ def test_windsurf_domain_specific_rules_with_globs(cookies):
     # Check git rules with glob patterns
     git_rules = windsurf_rules_dir / "git.md"
     assert git_rules.exists()
-    content = git_rules.read_text(encoding='utf-8')
+    content = git_rules.read_text(encoding="utf-8")
     assert '[glob: "**/.git*", "**/COMMIT_*"]' in content
     assert "conventional commits" in content.lower()
 
     # Check testing rules with glob patterns
     testing_rules = windsurf_rules_dir / "testing.md"
     assert testing_rules.exists()
-    content = testing_rules.read_text(encoding='utf-8')
-    assert '**/test_*.py' in content and '**/*_test.py' in content and '**/tests/**' in content
+    content = testing_rules.read_text(encoding="utf-8")
+    assert "**/test_*.py" in content and "**/*_test.py" in content and "**/tests/**" in content
     assert "pytest" in content.lower()
 
 
@@ -96,7 +95,7 @@ def test_windsurf_character_limit_awareness(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing,writing",
             "enable_learning_capture": True,
-            "selected_providers": "windsurf"
+            "selected_providers": "windsurf",
         }
     )
 
@@ -106,7 +105,7 @@ def test_windsurf_character_limit_awareness(cookies):
 
     # Check that individual rule files are under 6000 characters
     for rule_file in windsurf_rules_dir.glob("*.md"):
-        content = rule_file.read_text(encoding='utf-8')
+        content = rule_file.read_text(encoding="utf-8")
         assert len(content) < 6000, f"{rule_file.name} exceeds 6000 character limit"
 
 
@@ -119,7 +118,7 @@ def test_windsurf_not_selected_no_files_created(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -139,7 +138,7 @@ def test_windsurf_setup_documentation_created(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "windsurf"
+            "selected_providers": "windsurf",
         }
     )
 
@@ -148,7 +147,7 @@ def test_windsurf_setup_documentation_created(cookies):
     # Check Windsurf setup docs exist
     windsurf_docs = result.project_path / "docs" / "windsurf-setup.md"
     assert windsurf_docs.exists()
-    content = windsurf_docs.read_text(encoding='utf-8')
+    content = windsurf_docs.read_text(encoding="utf-8")
     assert "Windsurf Setup Guide" in content
     assert ".windsurfrules" in content
     assert ".windsurf/rules" in content
@@ -164,7 +163,7 @@ def test_windsurf_learning_capture_integration(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "windsurf"
+            "selected_providers": "windsurf",
         }
     )
 
@@ -172,13 +171,13 @@ def test_windsurf_learning_capture_integration(cookies):
 
     # Check main rules mention learning capture
     main_rules = result.project_path / ".windsurf" / "rules" / "main.md"
-    content = main_rules.read_text(encoding='utf-8')
+    content = main_rules.read_text(encoding="utf-8")
     assert "staging/learnings.md" in content
     assert "capture-learning" in content
 
     # Check .windsurfrules also mentions it
     windsurfrules = result.project_path / ".windsurfrules"
-    content = windsurfrules.read_text(encoding='utf-8')
+    content = windsurfrules.read_text(encoding="utf-8")
     assert "Learning System" in content
 
 
@@ -191,7 +190,7 @@ def test_windsurf_without_learning_capture(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": False,
-            "selected_providers": "windsurf"
+            "selected_providers": "windsurf",
         }
     )
 
@@ -199,6 +198,6 @@ def test_windsurf_without_learning_capture(cookies):
 
     # Check no learning capture mentions
     windsurfrules = result.project_path / ".windsurfrules"
-    content = windsurfrules.read_text(encoding='utf-8')
+    content = windsurfrules.read_text(encoding="utf-8")
     assert "capture-learning" not in content
     assert "staging/learnings" not in content

@@ -1,7 +1,6 @@
 """Test OpenAI Codex provider integration."""
 
 
-
 def test_codex_creates_agents_md_file(cookies):
     """Test that selecting Codex creates AGENTS.md file."""
     result = cookies.bake(
@@ -11,7 +10,7 @@ def test_codex_creates_agents_md_file(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "codex"
+            "selected_providers": "codex",
         }
     )
 
@@ -38,7 +37,7 @@ def test_codex_agents_includes_all_domains(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing,writing",
             "enable_learning_capture": True,
-            "selected_providers": "codex"
+            "selected_providers": "codex",
         }
     )
 
@@ -68,7 +67,7 @@ def test_codex_creates_config_directory(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "codex"
+            "selected_providers": "codex",
         }
     )
 
@@ -93,7 +92,7 @@ def test_codex_not_selected_no_files_created(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "aider"
+            "selected_providers": "aider",
         }
     )
 
@@ -113,7 +112,7 @@ def test_codex_setup_documentation_created(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "codex"
+            "selected_providers": "codex",
         }
     )
 
@@ -137,7 +136,7 @@ def test_codex_agents_format(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "codex"
+            "selected_providers": "codex",
         }
     )
 
@@ -162,7 +161,7 @@ def test_codex_with_learning_capture(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "codex"
+            "selected_providers": "codex",
         }
     )
 
@@ -183,7 +182,7 @@ def test_codex_creates_wrapper_script(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "codex"
+            "selected_providers": "codex",
         }
     )
 
@@ -194,6 +193,7 @@ def test_codex_creates_wrapper_script(cookies):
     assert wrapper_script.exists()
     # Check executable bit (skip on Windows)
     import platform
+
     if platform.system() != "Windows":
         assert wrapper_script.stat().st_mode & 0o111  # Is executable
 

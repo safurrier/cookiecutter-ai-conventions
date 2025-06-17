@@ -11,7 +11,11 @@ DEFAULT_DOMAINS = ["git", "testing"]
 REGISTRY_LOCATIONS = [
     Path.cwd() / "community-domains" / "registry.yaml",
     Path(__file__).parent.parent / "community-domains" / "registry.yaml",
-    Path.home() / ".cookiecutters" / "cookiecutter-ai-conventions" / "community-domains" / "registry.yaml",
+    Path.home()
+    / ".cookiecutters"
+    / "cookiecutter-ai-conventions"
+    / "community-domains"
+    / "registry.yaml",
 ]
 
 
@@ -24,6 +28,7 @@ def load_domain_registry():
         if registry_path.exists():
             try:
                 import yaml
+
                 with open(registry_path) as f:
                     return yaml.safe_load(f)
             except ImportError:
@@ -59,18 +64,14 @@ def interactive_domain_selection():
 
         domains = registry.get("domains", {})
         for domain_id, info in domains.items():
-            table.add_row(
-                domain_id,
-                info.get("description", ""),
-                info.get("author", "Community")
-            )
+            table.add_row(domain_id, info.get("description", ""), info.get("author", "Community"))
 
         console.print(table)
         console.print("\n[bold]Select domains to include:[/bold]")
 
         # Get selections
         selected = []
-        for domain_id, info in domains.items():
+        for domain_id, _info in domains.items():
             if Confirm.ask(f"Include [cyan]{domain_id}[/cyan]?", default=True):
                 selected.append(domain_id)
 
@@ -140,8 +141,9 @@ def main():
 
     # Update cookiecutter context
     # This is a bit hacky but works with cookiecutter's internals
+    # Note: cookiecutter variable is available in template context but not in linting
     if "cookiecutter" in globals():
-        cookiecutter["domains"] = selected  # noqa: F821
+        globals()["cookiecutter"]["domains"] = selected  # cookiecutter context variable
 
 
 if __name__ == "__main__":

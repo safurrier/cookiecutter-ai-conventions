@@ -127,7 +127,7 @@ def test_invalid_provider_handled_gracefully(cookies):
 def test_cookiecutter_json_format():
     """Test that cookiecutter.json has correct format."""
     cookiecutter_json = Path("cookiecutter.json")
-    with open(cookiecutter_json, encoding='utf-8') as f:
+    with open(cookiecutter_json, encoding="utf-8") as f:
         config = json.load(f)
 
     # selected_providers should be a string, not an array

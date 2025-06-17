@@ -26,7 +26,7 @@ ensure_uv
 
 # Run cookiecutter with all arguments passed through
 echo "Creating your AI conventions repository..."
-if uv tool run cookiecutter gh:safurrier/cookiecutter-ai-conventions "$@"; then
+if uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions "$@"; then
     echo
     echo "Success! Your AI conventions repository is ready."
     echo

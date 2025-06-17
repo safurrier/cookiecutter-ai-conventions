@@ -1,7 +1,6 @@
 """Test UV-first CLI architecture."""
 
 
-
 def test_pyproject_toml_created_with_cli_scripts(cookies):
     """Test that pyproject.toml is created with CLI entry points."""
     result = cookies.bake(
@@ -11,7 +10,7 @@ def test_pyproject_toml_created_with_cli_scripts(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -26,7 +25,7 @@ def test_pyproject_toml_created_with_cli_scripts(cookies):
     assert "[project]" in content
     assert 'name = "test-ai-conventions"' in content
     assert "[project.scripts]" in content
-    assert 'ai-conventions = "ai_conventions.cli:main"' in content
+    assert 'test-ai-conventions = "ai_conventions.cli:main"' in content
     assert 'capture-learning = "ai_conventions.capture:main"' in content
     assert 'sync-conventions = "ai_conventions.sync:main"' in content
 
@@ -40,7 +39,7 @@ def test_cli_module_structure_created(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -60,7 +59,7 @@ def test_cli_module_structure_created(cookies):
     assert cli_file.exists()
     content = cli_file.read_text(encoding="utf-8")
     assert "import click" in content or "from click import" in content
-    assert "def main()" in content
+    assert "def main(" in content
 
     # Check capture.py
     capture_file = ai_conventions_dir / "capture.py"
@@ -80,7 +79,7 @@ def test_cli_status_command_exists(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -103,7 +102,7 @@ def test_capture_learning_command_structure(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -126,7 +125,7 @@ def test_sync_conventions_command_exists(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude,cursor"
+            "selected_providers": "claude,cursor",
         }
     )
 
@@ -135,7 +134,7 @@ def test_sync_conventions_command_exists(cookies):
     # Check sync.py has proper implementation
     sync_file = result.project_path / "ai_conventions" / "sync.py"
     content = sync_file.read_text(encoding="utf-8")
-    assert "def main(" in content or "def sync_conventions(" in content
+    assert "def sync_command(" in content or "def main(" in content
     assert "provider" in content.lower()
 
 
@@ -148,7 +147,7 @@ def test_pyproject_includes_dependencies(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -173,7 +172,7 @@ def test_legacy_scripts_removed_when_cli_enabled(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 

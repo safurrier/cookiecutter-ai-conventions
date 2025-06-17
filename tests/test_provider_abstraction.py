@@ -23,7 +23,7 @@ def test_base_provider_interface(cookies):
     assert base_provider_path.exists()
 
     # Verify it has required imports and classes
-    content = base_provider_path.read_text(encoding='utf-8')
+    content = base_provider_path.read_text(encoding="utf-8")
     assert "from abc import ABC, abstractmethod" in content
     assert "class BaseProvider(ABC):" in content
     assert "@abstractmethod" in content
@@ -44,6 +44,7 @@ def test_provider_capabilities_dataclass(cookies):
 
     # Import and test the dataclass
     import sys
+
     sys.path.insert(0, str(result.project_path))
 
     from ai_conventions.providers.base import ProviderCapabilities
@@ -54,7 +55,7 @@ def test_provider_capabilities_dataclass(cookies):
         max_context_tokens=200000,
         file_watch_capable=False,
         symlink_capable=True,
-        config_format="markdown"
+        config_format="markdown",
     )
 
     assert capabilities.supports_imports is True
@@ -78,6 +79,7 @@ def test_install_result_dataclass(cookies):
 
     # Import and test the dataclass
     import sys
+
     sys.path.insert(0, str(result.project_path))
 
     from ai_conventions.providers.base import InstallResult
@@ -86,7 +88,7 @@ def test_install_result_dataclass(cookies):
         success=True,
         message="Installation successful",
         installed_path=Path("/home/user/.claude"),
-        mode="symlink"
+        mode="symlink",
     )
 
     assert install_result.success is True
@@ -112,6 +114,7 @@ def test_claude_provider_implements_interface(cookies):
 
     # Import and test
     import sys
+
     sys.path.insert(0, str(result.project_path))
 
     from ai_conventions.providers.base import BaseProvider
@@ -143,10 +146,11 @@ def test_provider_registry(cookies):
 
     # Import and test registry
     import sys
+
     sys.path.insert(0, str(result.project_path))
 
     # Clear any previously imported provider modules to avoid caching issues
-    modules_to_remove = [key for key in sys.modules.keys() if key.startswith('ai_conventions')]
+    modules_to_remove = [key for key in sys.modules.keys() if key.startswith("ai_conventions")]
     for module in modules_to_remove:
         del sys.modules[module]
 
@@ -184,6 +188,7 @@ def test_symlink_detection(cookies):
     assert result.exit_code == 0
 
     import sys
+
     sys.path.insert(0, str(result.project_path))
 
     from ai_conventions.providers.claude import ClaudeProvider
@@ -218,6 +223,7 @@ def test_install_method_returns_result(cookies):
     (result.project_path / "staging" / "learnings.md").write_text("# Learnings")
 
     import sys
+
     sys.path.insert(0, str(result.project_path))
 
     from ai_conventions.providers.claude import ClaudeProvider
@@ -229,7 +235,7 @@ def test_install_method_returns_result(cookies):
         "project_slug": "test-project",
         "author_name": "Test Author",
         "default_domains": "git,testing",
-        "selected_providers": "claude"
+        "selected_providers": "claude",
     }
 
     provider = ClaudeProvider(result.project_path, config)
@@ -257,7 +263,7 @@ def test_provider_abstraction_in_install_py(cookies):
     assert result.exit_code == 0
 
     install_py = result.project_path / "install.py"
-    content = install_py.read_text(encoding='utf-8')
+    content = install_py.read_text(encoding="utf-8")
 
     # Should import provider system
     assert "from ai_conventions.providers import get_provider" in content

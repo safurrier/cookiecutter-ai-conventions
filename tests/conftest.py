@@ -1,7 +1,7 @@
 """Shared test configuration and fixtures for UV tool testing."""
 
 import subprocess
-from typing import List
+from typing import List, Optional
 
 import pytest
 
@@ -100,16 +100,16 @@ def performance_monitor():
         def __init__(self):
             self.start_time = None
             self.thresholds = {
-                'generation': 30,  # 30s for cookiecutter generation
-                'uv_install': 60,  # 60s for UV tool install
-                'uv_command': 30,  # 30s for UV command execution
+                "generation": 30,  # 30s for cookiecutter generation
+                "uv_install": 60,  # 60s for UV tool install
+                "uv_command": 30,  # 30s for UV command execution
             }
 
         def start(self):
             """Start timing an operation."""
             self.start_time = time.time()
 
-        def check(self, operation: str, custom_threshold: float = None):
+        def check(self, operation: str, custom_threshold: Optional[float] = None):
             """Check if operation completed within threshold."""
             if self.start_time is None:
                 raise ValueError("Must call start() before check()")
@@ -118,9 +118,7 @@ def performance_monitor():
             threshold = custom_threshold or self.thresholds.get(operation, 60)
 
             if duration > threshold:
-                pytest.fail(
-                    f"{operation} took {duration:.2f}s, exceeding {threshold}s threshold"
-                )
+                pytest.fail(f"{operation} took {duration:.2f}s, exceeding {threshold}s threshold")
 
             self.start_time = None  # Reset for next operation
             return duration

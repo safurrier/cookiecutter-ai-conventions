@@ -159,7 +159,7 @@ class TestE2EInstallation:
         sys.path.insert(0, str(generated_project))
 
         # Clear any previously imported modules
-        modules_to_remove = [key for key in sys.modules.keys() if key.startswith('ai_conventions')]
+        modules_to_remove = [key for key in sys.modules.keys() if key.startswith("ai_conventions")]
         for module in modules_to_remove:
             del sys.modules[module]
 
@@ -167,14 +167,14 @@ class TestE2EInstallation:
         from install import ConventionsInstaller
 
         installer = ConventionsInstaller(generated_project)
-        assert installer.config['selected_providers'] == "claude"
+        assert installer.config["selected_providers"] == "claude"
 
         # Test CLI help
         from ai_conventions.cli import main
         from click.testing import CliRunner
 
         runner = CliRunner()
-        result = runner.invoke(main, ['--help'])
+        result = runner.invoke(main, ["--help"])
         assert result.exit_code == 0
         assert "Usage:" in result.output
 
@@ -222,7 +222,9 @@ class TestE2EInstallation:
         # This test actually runs cookiecutter as a subprocess
         result = subprocess.run(
             [
-                sys.executable, "-m", "cookiecutter",
+                sys.executable,
+                "-m",
+                "cookiecutter",
                 ".",
                 "--no-input",
                 f"--output-dir={tmp_path}",
@@ -258,7 +260,7 @@ class TestE2EInstallation:
         bootstrap_path = Path("bootstrap.sh")
         assert bootstrap_path.exists()
 
-        content = bootstrap_path.read_text(encoding='utf-8')
+        content = bootstrap_path.read_text(encoding="utf-8")
         assert content.startswith("#!/bin/bash") or content.startswith("#!/usr/bin/env bash")
         assert "cookiecutter" in content
         assert "uv" in content
@@ -307,7 +309,7 @@ class TestE2EInstallation:
                 output_dir=str(output_dir),
                 extra_context={
                     "project_slug": f"test-{test_case['provider']}",
-                    "selected_providers": test_case['provider'],
+                    "selected_providers": test_case["provider"],
                     "default_domains": "git,testing",
                     "enable_learning_capture": True,
                 },
@@ -315,12 +317,12 @@ class TestE2EInstallation:
 
             generated_project = Path(project_dir)
 
-            for expected_file in test_case['expected_files']:
+            for expected_file in test_case["expected_files"]:
                 file_path = generated_project / expected_file
                 assert file_path.exists(), f"Missing {expected_file} for {test_case['provider']}"
 
             # Check learning capture files when enabled
-            if test_case['provider'] == 'claude':
+            if test_case["provider"] == "claude":
                 assert (generated_project / "commands" / "capture-learning.md").exists()
                 assert (generated_project / "commands" / "review-learnings.md").exists()
 

@@ -1,7 +1,6 @@
 """Test Aider provider integration."""
 
 
-
 def test_aider_creates_conventions_md_file(cookies):
     """Test that selecting Aider creates a CONVENTIONS.md file."""
     result = cookies.bake(
@@ -11,7 +10,7 @@ def test_aider_creates_conventions_md_file(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "aider"
+            "selected_providers": "aider",
         }
     )
 
@@ -23,7 +22,7 @@ def test_aider_creates_conventions_md_file(cookies):
     assert conventions_file.exists()
 
     # Check content includes project info and domains
-    content = conventions_file.read_text(encoding='utf-8')
+    content = conventions_file.read_text(encoding="utf-8")
     assert "# Coding Standards" in content
     assert "Test AI Conventions" in content
     assert "git" in content.lower()
@@ -39,7 +38,7 @@ def test_aider_creates_conf_yml_file(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "aider"
+            "selected_providers": "aider",
         }
     )
 
@@ -50,7 +49,7 @@ def test_aider_creates_conf_yml_file(cookies):
     assert conf_file.exists()
 
     # Check content references CONVENTIONS.md
-    content = conf_file.read_text(encoding='utf-8')
+    content = conf_file.read_text(encoding="utf-8")
     assert "read: CONVENTIONS.md" in content or "read-only: CONVENTIONS.md" in content
 
 
@@ -63,14 +62,14 @@ def test_aider_conventions_includes_all_domains(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing,writing",
             "enable_learning_capture": True,
-            "selected_providers": "aider"
+            "selected_providers": "aider",
         }
     )
 
     assert result.exit_code == 0
 
     conventions_file = result.project_path / "CONVENTIONS.md"
-    content = conventions_file.read_text(encoding='utf-8')
+    content = conventions_file.read_text(encoding="utf-8")
 
     # Check git conventions
     assert "## Git Conventions" in content or "## Version Control" in content
@@ -94,14 +93,14 @@ def test_aider_conf_yml_includes_extra_read_files(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "aider"
+            "selected_providers": "aider",
         }
     )
 
     assert result.exit_code == 0
 
     conf_file = result.project_path / ".aider.conf.yml"
-    content = conf_file.read_text(encoding='utf-8')
+    content = conf_file.read_text(encoding="utf-8")
 
     # Should list CONVENTIONS.md and potentially domain files
     assert "CONVENTIONS.md" in content
@@ -117,7 +116,7 @@ def test_aider_not_selected_no_files_created(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
 
@@ -137,7 +136,7 @@ def test_aider_setup_documentation_created(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "aider"
+            "selected_providers": "aider",
         }
     )
 
@@ -146,7 +145,7 @@ def test_aider_setup_documentation_created(cookies):
     # Check Aider setup docs exist
     aider_docs = result.project_path / "docs" / "aider-setup.md"
     assert aider_docs.exists()
-    content = aider_docs.read_text(encoding='utf-8')
+    content = aider_docs.read_text(encoding="utf-8")
     assert "Aider Setup Guide" in content
     assert "CONVENTIONS.md" in content
     assert ".aider.conf.yml" in content
@@ -162,7 +161,7 @@ def test_aider_learning_capture_integration(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "aider"
+            "selected_providers": "aider",
         }
     )
 
@@ -170,12 +169,12 @@ def test_aider_learning_capture_integration(cookies):
 
     # Check CONVENTIONS.md mentions learning capture
     conventions_file = result.project_path / "CONVENTIONS.md"
-    content = conventions_file.read_text(encoding='utf-8')
+    content = conventions_file.read_text(encoding="utf-8")
     assert "staging/learnings.md" in content or "Learning Capture" in content
 
     # Check .aider.conf.yml might include staging/learnings.md
     conf_file = result.project_path / ".aider.conf.yml"
-    content = conf_file.read_text(encoding='utf-8')
+    content = conf_file.read_text(encoding="utf-8")
     # Could optionally include staging/learnings.md in read list
 
 
@@ -188,7 +187,7 @@ def test_aider_without_learning_capture(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": False,
-            "selected_providers": "aider"
+            "selected_providers": "aider",
         }
     )
 
@@ -196,6 +195,6 @@ def test_aider_without_learning_capture(cookies):
 
     # Check no learning capture mentions
     conventions_file = result.project_path / "CONVENTIONS.md"
-    content = conventions_file.read_text(encoding='utf-8')
+    content = conventions_file.read_text(encoding="utf-8")
     assert "capture-learning" not in content
     assert "staging/learnings" not in content
