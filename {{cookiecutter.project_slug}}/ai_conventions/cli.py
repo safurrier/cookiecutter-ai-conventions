@@ -8,14 +8,17 @@ from rich.table import Table
 console = Console()
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(version="0.1.0", prog_name="ai-conventions")
-def main():
+@click.pass_context
+def main(ctx):
     """AI Conventions management tool.
     
     Manage your AI development conventions across multiple tools.
     """
-    pass
+    # Show help if no command provided
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 @main.command()
@@ -51,13 +54,21 @@ def status():
     console.print(table)
     
     # Check for conventions repo
-    if Path("domains").exists():
-        console.print("\n✅ Conventions repository detected")
-        domain_count = len(list(Path("domains").glob("*")))
-        console.print(f"   Found {domain_count} domain(s)")
-    else:
-        console.print("\n❌ Not in a conventions repository")
-        console.print("   Run this command from your conventions project")
+    import pathlib
+    try:
+        domains_path = pathlib.Path("domains")
+        if domains_path.exists():
+            console.print("\n✅ Conventions repository detected")
+            # Use os.listdir to avoid potential Path/Click conflicts
+            import os
+            domain_items = [f for f in os.listdir("domains") if os.path.isdir(os.path.join("domains", f))]
+            domain_count = len(domain_items)
+            console.print(f"   Found {domain_count} domain(s)")
+        else:
+            console.print("\n❌ Not in a conventions repository")
+            console.print("   Run this command from your conventions project")
+    except Exception as e:
+        console.print(f"\n❌ Error checking conventions repository: {e}")
 
 
 @main.command()
@@ -94,4 +105,36 @@ def list():
 
 
 if __name__ == "__main__":
+    # Import subcommands when running as main module
+    {%- if cookiecutter.enable_learning_capture %}
+    from .capture import capture_command
+    from .sync import sync_command
+    {%- else %}
+    from .sync import sync_command
+    {%- endif %}
+    from .config_cli import config_command
+    
+    # Add subcommands
+    {%- if cookiecutter.enable_learning_capture %}
+    main.add_command(capture_command, name="capture")
+    {%- endif %}
+    main.add_command(sync_command, name="sync")
+    main.add_command(config_command, name="config")
+    
     main()
+else:
+    # Import subcommands when imported as module
+    {%- if cookiecutter.enable_learning_capture %}
+    from .capture import capture_command
+    from .sync import sync_command
+    {%- else %}
+    from .sync import sync_command
+    {%- endif %}
+    from .config_cli import config_command
+    
+    # Add subcommands
+    {%- if cookiecutter.enable_learning_capture %}
+    main.add_command(capture_command, name="capture")
+    {%- endif %}
+    main.add_command(sync_command, name="sync")
+    main.add_command(config_command, name="config")

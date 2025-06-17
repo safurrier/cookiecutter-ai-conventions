@@ -22,12 +22,15 @@ dependencies = [
 ]
 
 [project.scripts]
-ai-conventions = "ai_conventions.cli:main"
+{{ cookiecutter.project_slug }} = "ai_conventions.cli:main"
 {%- if cookiecutter.enable_learning_capture %}
 capture-learning = "ai_conventions.capture:main"
-{%- endif %}
 sync-conventions = "ai_conventions.sync:main"
+{%- endif %}
 conventions-config = "ai_conventions.config_cli:main"
+
+[tool.setuptools]
+packages = ["ai_conventions"]
 
 [tool.uv]
 dev-dependencies = [

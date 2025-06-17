@@ -93,7 +93,7 @@ PROVIDERS = {
 @click.command()
 @click.option("--provider", "-p", multiple=True, help="Specific provider(s) to sync")
 @click.option("--all", "sync_all", is_flag=True, help="Sync to all configured providers")
-def main(provider, sync_all):
+def sync_command(provider, sync_all):
     """Sync conventions to AI tool providers.
     
     Examples:
@@ -162,5 +162,8 @@ def main(provider, sync_all):
     console.print("\n✨ Sync complete!")
 
 
+# Export as main for consistency with other modules
+main = sync_command
+
 if __name__ == "__main__":
-    main()
+    sync_command()

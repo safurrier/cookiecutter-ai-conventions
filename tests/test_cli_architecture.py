@@ -1,11 +1,5 @@
 """Test UV-first CLI architecture."""
 
-import pytest
-from pathlib import Path
-import subprocess
-import json
-import sys
-
 
 def test_pyproject_toml_created_with_cli_scripts(cookies):
     """Test that pyproject.toml is created with CLI entry points."""
@@ -16,22 +10,22 @@ def test_pyproject_toml_created_with_cli_scripts(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Check pyproject.toml exists
     pyproject_file = result.project_path / "pyproject.toml"
     assert pyproject_file.exists()
-    
+
     # Check it contains the right content
     content = pyproject_file.read_text(encoding="utf-8")
     assert "[project]" in content
     assert 'name = "test-ai-conventions"' in content
     assert "[project.scripts]" in content
-    assert 'ai-conventions = "ai_conventions.cli:main"' in content
+    assert 'test-ai-conventions = "ai_conventions.cli:main"' in content
     assert 'capture-learning = "ai_conventions.capture:main"' in content
     assert 'sync-conventions = "ai_conventions.sync:main"' in content
 
@@ -45,32 +39,32 @@ def test_cli_module_structure_created(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Check module structure
     ai_conventions_dir = result.project_path / "ai_conventions"
     assert ai_conventions_dir.exists()
     assert ai_conventions_dir.is_dir()
-    
+
     # Check __init__.py
     init_file = ai_conventions_dir / "__init__.py"
     assert init_file.exists()
-    
+
     # Check cli.py
     cli_file = ai_conventions_dir / "cli.py"
     assert cli_file.exists()
     content = cli_file.read_text(encoding="utf-8")
     assert "import click" in content or "from click import" in content
-    assert "def main()" in content
-    
+    assert "def main(" in content
+
     # Check capture.py
     capture_file = ai_conventions_dir / "capture.py"
     assert capture_file.exists()
-    
+
     # Check sync.py
     sync_file = ai_conventions_dir / "sync.py"
     assert sync_file.exists()
@@ -85,12 +79,12 @@ def test_cli_status_command_exists(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Check cli.py contains status command
     cli_file = result.project_path / "ai_conventions" / "cli.py"
     content = cli_file.read_text(encoding="utf-8")
@@ -108,12 +102,12 @@ def test_capture_learning_command_structure(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Check capture.py has proper CLI structure
     capture_file = result.project_path / "ai_conventions" / "capture.py"
     content = capture_file.read_text(encoding="utf-8")
@@ -131,16 +125,16 @@ def test_sync_conventions_command_exists(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude,cursor"
+            "selected_providers": "claude,cursor",
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Check sync.py has proper implementation
     sync_file = result.project_path / "ai_conventions" / "sync.py"
     content = sync_file.read_text(encoding="utf-8")
-    assert "def main(" in content or "def sync_conventions(" in content
+    assert "def sync_command(" in content or "def main(" in content
     assert "provider" in content.lower()
 
 
@@ -153,15 +147,15 @@ def test_pyproject_includes_dependencies(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     pyproject_file = result.project_path / "pyproject.toml"
     content = pyproject_file.read_text(encoding="utf-8")
-    
+
     # Check dependencies
     assert "dependencies" in content
     assert "click" in content
@@ -178,12 +172,12 @@ def test_legacy_scripts_removed_when_cli_enabled(cookies):
             "author_name": "Test Author",
             "default_domains": "git,testing",
             "enable_learning_capture": True,
-            "selected_providers": "claude"
+            "selected_providers": "claude",
         }
     )
-    
+
     assert result.exit_code == 0
-    
+
     # Old command scripts should not exist
     commands_dir = result.project_path / "commands"
     if commands_dir.exists():
