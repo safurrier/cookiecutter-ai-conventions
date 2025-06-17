@@ -10,10 +10,34 @@ These tests ensure that:
 import ast
 import subprocess
 import sys
+import uuid
 from pathlib import Path
 
 import pytest
 from cookiecutter.main import cookiecutter
+
+
+@pytest.fixture
+def unique_tool_name():
+    """Generate a unique tool name for each test to avoid conflicts."""
+    return f"test-tool-{uuid.uuid4().hex[:8]}"
+
+
+@pytest.fixture
+def safe_uv_tool_cleanup(unique_tool_name):
+    """Ensure UV tool cleanup after test."""
+    yield unique_tool_name
+
+    # Cleanup after test
+    try:
+        subprocess.run(
+            ["uv", "tool", "uninstall", unique_tool_name],
+            capture_output=True,
+            timeout=30,
+            check=False,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
 
 
 class TestTemplateProcessing:
@@ -195,17 +219,21 @@ class TestEndToEndUserJourney:
     """Test the complete user journey from generation to CLI usage."""
 
     @pytest.mark.skipif(sys.platform == "win32", reason="Shell command testing is Unix-specific")
-    def test_generate_install_and_run_cli(self, tmp_path):
+    @pytest.mark.serial
+    def test_generate_install_and_run_cli(self, tmp_path, safe_uv_tool_cleanup):
         """Test the full journey: generate → uv tool install → run CLI."""
+        tool_name = safe_uv_tool_cleanup  # This is the unique tool name
+
         # Arrange
         output_dir = tmp_path / "output"
         output_dir.mkdir()
 
-        # Act: Generate project
+        # Act: Generate project with unique name
         project_dir = cookiecutter(
             str(Path.cwd()),
             no_input=True,
             extra_context={
+                "project_slug": tool_name,
                 "enable_learning_capture": True,
             },
             output_dir=str(output_dir),
@@ -218,16 +246,7 @@ class TestEndToEndUserJourney:
         assert (generated_project / "ai_conventions" / "__init__.py").exists()
         assert (generated_project / "ai_conventions" / "cli.py").exists()
 
-        # Act: Install with uv tool
-        # First, ensure we have a clean environment by cleaning up multiple possible names
-        for tool_name in ["my-ai-conventions", "ai-conventions"]:
-            subprocess.run(
-                ["uv", "tool", "uninstall", tool_name],
-                capture_output=True,
-                check=False,  # OK if it wasn't installed
-            )
-
-        # Install the generated project
+        # Act: Install with UV tool (unique name prevents conflicts)
         result = subprocess.run(
             ["uv", "tool", "install", str(generated_project)],
             capture_output=True,
@@ -237,20 +256,20 @@ class TestEndToEndUserJourney:
 
         assert result.returncode == 0, f"uv tool install failed: {result.stderr}"
 
-        # Act: Run the CLI (using the project slug name)
+        # Act: Run the CLI with unique tool name
         result = subprocess.run(
-            ["my-ai-conventions", "--version"],
+            [tool_name, "--version"],
             capture_output=True,
             text=True,
-            shell=False,  # Use direct execution, not shell
+            shell=False,
         )
 
         assert result.returncode == 0, f"CLI execution failed: {result.stderr}"
         assert "0.1.0" in result.stdout
 
-        # Act: Run status command (using the project slug name)
+        # Act: Run status command
         result = subprocess.run(
-            ["my-ai-conventions", "status"],
+            [tool_name, "status"],
             capture_output=True,
             text=True,
             cwd=str(generated_project),
@@ -259,11 +278,6 @@ class TestEndToEndUserJourney:
 
         assert result.returncode == 0, f"Status command failed: {result.stderr}"
         assert "AI Conventions Status" in result.stdout
-
-        # Cleanup
-        subprocess.run(
-            ["uv", "tool", "uninstall", "my-ai-conventions"], capture_output=True, check=False
-        )
 
     def test_python_import_paths_work(self, tmp_path):
         """Test that the generated package can be imported and used."""

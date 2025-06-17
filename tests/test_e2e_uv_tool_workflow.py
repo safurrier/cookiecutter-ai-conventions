@@ -13,6 +13,7 @@ Following the progressive testing approach:
 import subprocess
 import sys
 import time
+import uuid
 from pathlib import Path
 from typing import Optional
 
@@ -25,6 +26,12 @@ PERFORMANCE_THRESHOLDS = {
     "uv_install": 60,  # 60s for UV tool install
     "uv_command": 30,  # 30s for UV command execution
 }
+
+
+@pytest.fixture
+def unique_tool_name():
+    """Generate a unique tool name for each test to avoid conflicts."""
+    return f"test-tool-{uuid.uuid4().hex[:8]}"
 
 
 def monitor_performance(operation_name: str, threshold: Optional[float] = None):
@@ -47,21 +54,6 @@ def monitor_performance(operation_name: str, threshold: Optional[float] = None):
         return wrapper
 
     return decorator
-
-
-def safe_uv_tool_cleanup(tool_name: str):
-    """Safely cleanup UV tool with proper error handling."""
-    try:
-        result = subprocess.run(
-            ["uv", "tool", "uninstall", tool_name],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            check=False,  # OK if tool wasn't installed
-        )
-        return result.returncode == 0
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        return False
 
 
 def generate_test_project(tmp_path: Path, project_name: str, project_slug: str, **extra_context):
@@ -91,11 +83,12 @@ def generate_test_project(tmp_path: Path, project_name: str, project_slug: str, 
     return Path(project_dir)
 
 
+@pytest.mark.serial
 class TestE2EUVToolWorkflow:
     """Test complete UV tool workflow from generation to execution."""
 
     @pytest.mark.slow
-    def test_complete_uv_tool_workflow(self, tmp_path):
+    def test_complete_uv_tool_workflow(self, tmp_path, unique_tool_name, uv_tool_cleanup):
         """Test that generated project can be installed and used as UV tool.
 
         This is the core E2E test that should FAIL initially because:
@@ -103,55 +96,51 @@ class TestE2EUVToolWorkflow:
         2. pyproject.toml missing [project.scripts] section
         3. No CLI entry point defined
         """
+        tool_name = unique_tool_name
+
         # Arrange: Generate project with UV tool support
         generated_project = generate_test_project(
             tmp_path,
             "Test UV Tool",
-            "test-uv-tool",
+            tool_name,  # Use unique name to avoid conflicts
             enable_learning_capture=True,
         )
-        tool_name = "test-uv-tool"
 
-        try:
-            # Act: Clean up any existing installation first
-            safe_uv_tool_cleanup(tool_name)
+        # Act: Install as UV tool
+        start_time = time.time()
+        install_result = subprocess.run(
+            ["uv", "tool", "install", str(generated_project)],
+            capture_output=True,
+            text=True,
+            timeout=PERFORMANCE_THRESHOLDS["uv_install"],
+        )
+        install_duration = time.time() - start_time
 
-            # Install as UV tool with performance monitoring
-            start_time = time.time()
-            install_result = subprocess.run(
-                ["uv", "tool", "install", str(generated_project)],
-                capture_output=True,
-                text=True,
-                timeout=PERFORMANCE_THRESHOLDS["uv_install"],
-            )
-            install_duration = time.time() - start_time
+        # Assert: Tool installation succeeds
+        assert install_result.returncode == 0, (
+            f"UV tool install failed: {install_result.stderr}\n"
+            f"Generated project: {generated_project}\n"
+            f"Install duration: {install_duration:.2f}s"
+        )
 
-            # Assert: Tool installation succeeds
-            assert install_result.returncode == 0, (
-                f"UV tool install failed: {install_result.stderr}\n"
-                f"Generated project: {generated_project}\n"
-                f"Install duration: {install_duration:.2f}s"
-            )
+        # Track tool for cleanup
+        uv_tool_cleanup.add(tool_name)
 
-            # Performance check
-            if install_duration > PERFORMANCE_THRESHOLDS["uv_install"]:
-                pytest.fail(f"UV install took {install_duration:.2f}s, exceeding threshold")
+        # Performance check
+        if install_duration > PERFORMANCE_THRESHOLDS["uv_install"]:
+            pytest.fail(f"UV install took {install_duration:.2f}s, exceeding threshold")
 
-            # Assert: Tool is available via uv tool list
-            list_result = subprocess.run(
-                ["uv", "tool", "list"],
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            assert tool_name in list_result.stdout
-
-        finally:
-            # Cleanup: Always remove UV tool
-            safe_uv_tool_cleanup(tool_name)
+        # Assert: Tool is available via uv tool list
+        list_result = subprocess.run(
+            ["uv", "tool", "list"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        assert tool_name in list_result.stdout
 
     @pytest.mark.slow
-    def test_uv_tool_command_execution(self, tmp_path):
+    def test_uv_tool_command_execution(self, tmp_path, unique_tool_name, uv_tool_cleanup):
         """Test that UV tool commands execute successfully.
 
         This should FAIL initially because:
@@ -159,68 +148,49 @@ class TestE2EUVToolWorkflow:
         2. Entry points missing or incorrect
         3. Command help/version not implemented
         """
-        # Arrange: Generate and install UV tool
-        output_dir = tmp_path / "output"
-        output_dir.mkdir()
+        tool_name = unique_tool_name
 
-        project_dir = cookiecutter(
-            str(Path.cwd()),
-            no_input=True,
-            output_dir=str(output_dir),
-            extra_context={
-                "project_name": "Test Commands",
-                "project_slug": "test-commands",
-            },
+        # Arrange: Generate project with unique name
+        generated_project = generate_test_project(
+            tmp_path,
+            "Test Commands",
+            tool_name,
         )
 
-        generated_project = Path(project_dir)
-        tool_name = "test-commands"
+        # Act: Install UV tool
+        install_result = subprocess.run(
+            ["uv", "tool", "install", str(generated_project)],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
 
-        try:
-            # Clean up any existing installation first
-            safe_uv_tool_cleanup(tool_name)
+        assert install_result.returncode == 0, f"Install failed: {install_result.stderr}"
 
-            # Install UV tool
-            install_result = subprocess.run(
-                ["uv", "tool", "install", str(generated_project)],
-                capture_output=True,
-                text=True,
-                timeout=60,
-            )
+        # Track tool for cleanup
+        uv_tool_cleanup.add(tool_name)
 
-            assert install_result.returncode == 0, f"Install failed: {install_result.stderr}"
+        # Act & Assert: Test --help command
+        help_result = subprocess.run(
+            [tool_name, "--help"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
 
-            # Act & Assert: Test --help command
-            help_result = subprocess.run(
-                [tool_name, "--help"],
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
+        assert help_result.returncode == 0, f"Help command failed: {help_result.stderr}"
+        assert "Usage:" in help_result.stdout or "usage:" in help_result.stdout
 
-            assert help_result.returncode == 0, f"Help command failed: {help_result.stderr}"
-            assert "Usage:" in help_result.stdout or "usage:" in help_result.stdout
+        # Act & Assert: Test --version command
+        version_result = subprocess.run(
+            [tool_name, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
 
-            # Act & Assert: Test --version command
-            version_result = subprocess.run(
-                [tool_name, "--version"],
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-
-            assert version_result.returncode == 0, (
-                f"Version command failed: {version_result.stderr}"
-            )
-            assert "0.1.0" in version_result.stdout  # Default version from template
-
-        finally:
-            # Cleanup
-            subprocess.run(
-                ["uv", "tool", "uninstall", tool_name],
-                capture_output=True,
-                check=False,
-            )
+        assert version_result.returncode == 0, f"Version command failed: {version_result.stderr}"
+        assert "0.1.0" in version_result.stdout  # Default version from template
 
     @pytest.mark.slow
     def test_uv_tool_status_command(self, tmp_path):
@@ -370,7 +340,11 @@ class TestE2EUVToolWorkflow:
 
         try:
             # Clean up any existing installation first
-            safe_uv_tool_cleanup(tool_name)
+            subprocess.run(
+                ["uv", "tool", "uninstall", tool_name],
+                capture_output=True,
+                check=False,  # OK if tool wasn't installed
+            )
 
             # Test installation
             subprocess.run(

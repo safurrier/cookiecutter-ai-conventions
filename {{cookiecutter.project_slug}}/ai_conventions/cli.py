@@ -54,13 +54,21 @@ def status():
     console.print(table)
     
     # Check for conventions repo
-    if Path("domains").exists():
-        console.print("\n✅ Conventions repository detected")
-        domain_count = len(list(Path("domains").glob("*")))
-        console.print(f"   Found {domain_count} domain(s)")
-    else:
-        console.print("\n❌ Not in a conventions repository")
-        console.print("   Run this command from your conventions project")
+    import pathlib
+    try:
+        domains_path = pathlib.Path("domains")
+        if domains_path.exists():
+            console.print("\n✅ Conventions repository detected")
+            # Use os.listdir to avoid potential Path/Click conflicts
+            import os
+            domain_items = [f for f in os.listdir("domains") if os.path.isdir(os.path.join("domains", f))]
+            domain_count = len(domain_items)
+            console.print(f"   Found {domain_count} domain(s)")
+        else:
+            console.print("\n❌ Not in a conventions repository")
+            console.print("   Run this command from your conventions project")
+    except Exception as e:
+        console.print(f"\n❌ Error checking conventions repository: {e}")
 
 
 @main.command()
