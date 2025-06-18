@@ -17,10 +17,24 @@ console = Console()
 def capture_command(pattern, domain, file, category):
     """Capture a new learning or pattern directly to domain.
     
+    By default, captures go to {domain}/core.md. Use --file to specify
+    a different file within the domain. Supports nested paths for organization.
+    
     Examples:
+    
+    Basic usage (goes to domains/python/core.md):
         ai-conventions capture "Always use type hints" --domain python
+        
+    Specific file (goes to domains/git/commits.md):
         ai-conventions capture "Use semantic commit messages" --domain git --file commits
+        
+    Nested organization (goes to domains/git/pr-summaries/guidelines.md):
         ai-conventions capture "Keep PRs focused" --domain git --file pr-summaries/guidelines
+        
+    With custom category:
+        ai-conventions capture "Fix edge case" --domain python --category fix
+    
+    All captures are logged to .ai-conventions-log.yaml for tracking.
     """
     domains_dir = Path("domains")
     
