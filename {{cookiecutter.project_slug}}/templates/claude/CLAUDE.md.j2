@@ -38,6 +38,14 @@ This is your AI Development Standard Library. It implements automatic domain loa
 @domains/{{ domain.strip() }}/core.md
 {%- endfor %}
 
+### Shorthand Domain References
+You can also use shorthand syntax for quick domain references:
+{%- for domain in domains %}
+- %{{ domain.strip() }} → @domains/{{ domain.strip() }}/core.md
+{%- endfor %}
+- %writing%commit-messages → @domains/writing/commit-messages.md
+- %testing%unit-tests → @domains/testing/unit-tests.md
+
 {%- if cookiecutter.enable_learning_capture %}
 
 ### Learning System
@@ -86,6 +94,41 @@ This CLAUDE.md system follows a **progressive context loading** approach:
 - Creating pull request descriptions
 {%- endif %}
 
+## Shorthand Domain Syntax
+
+**Quick Reference**: Use `%domain` or `%domain%section` syntax for faster domain loading.
+
+### Syntax Patterns
+- `%writing` → Loads @domains/writing/core.md  
+- `%writing%commit-messages` → Loads @domains/writing/commit-messages.md
+- `%testing%unit-tests` → Loads @domains/testing/unit-tests.md
+
+### Context-Aware Usage
+```markdown
+When writing commit messages, follow %writing%commit-messages conventions.
+
+For testing this feature, apply %testing patterns and %testing%e2e approaches.
+
+Use %git conventions for branch naming and merge strategies.
+```
+
+### Shorthand Reference Table
+{%- for domain in domains %}
+{%- if domain.strip() == "git" %}
+| `%git` | Git workflows and commit standards |
+| `%git%commits` | Commit message formats |
+| `%git%branching` | Branch naming and strategies |
+{%- elif domain.strip() == "testing" %}
+| `%testing` | Testing patterns and philosophy |
+| `%testing%unit-tests` | Unit testing approaches |  
+| `%testing%e2e` | End-to-end testing strategies |
+{%- elif domain.strip() == "writing" %}
+| `%writing` | Technical writing standards |
+| `%writing%commit-messages` | Commit message guidelines |
+| `%writing%pr-summaries` | Pull request descriptions |
+{%- endif %}
+{%- endfor %}
+
 ## Usage Examples
 
 ### Automatic Loading in Action
@@ -116,6 +159,113 @@ Available commands:
 - `/capture-learning` - Format and save new learnings
 - `/review-learnings` - Review staged learnings for promotion
 {%- endif %}
+
+## Convention Improvement Workflow
+
+**For AI dev tools: Use this workflow to continuously improve conventions based on user corrections and feedback.**
+
+### 1. Review Conversation History
+
+After completing tasks, analyze the conversation for improvement opportunities:
+
+**High-priority signals to capture:**
+- User corrected your assumptions or approach
+- User provided specific feedback about your suggestions
+- User manually referenced a convention file you should have loaded automatically
+- User pointed out missed patterns or anti-patterns
+- User had to explain domain-specific requirements
+
+**Example review questions:**
+- "Where did the user correct me?"
+- "What patterns emerged that aren't documented?"
+- "Which domain should have auto-loaded but didn't?"
+- "What conventions were applied successfully vs. missed?"
+
+### 2. CLI Workflow for Convention Updates
+
+Use these commands to discover and update conventions:
+
+```bash
+# Step 1: Explore available domains
+ai-conventions list
+
+# Step 2: Check current status  
+ai-conventions status
+
+# Step 3: Capture learnings (multiple scenarios)
+{%- if cookiecutter.enable_learning_capture %}
+
+# Scenario A: User correction on code pattern
+capture-learning "User corrected: Use pathlib instead of os.path for file operations" \
+  --domain python --category fix
+
+# Scenario B: New pattern discovered
+capture-learning "Always validate input parameters before processing" \
+  --domain global --category pattern
+
+# Scenario C: Tool-specific gotcha
+capture-learning "pytest fixtures with scope='session' cause issues in parallel tests" \
+  --domain testing --category anti-pattern
+
+# Scenario D: Interactive mode (prompts for details)
+capture-learning
+
+# Scenario E: Append to specific learning file
+capture-learning "Git branch naming should include ticket numbers" \
+  --domain git --file branch-naming.md --category pattern
+
+# Step 4: Sync updated conventions to AI providers
+ai-conventions sync
+{%- else %}
+
+# When learning capture is disabled, manually edit domain files
+# Then sync to providers
+ai-conventions sync
+{%- endif %}
+```
+
+### 3. Workflow Examples
+
+**Example 1: User corrected commit message format**
+```bash
+# User said: "Commit messages should start with ticket number"
+ai-conventions list | grep git
+capture-learning "Prefix commit messages with ticket number: [TICKET-123]" \
+  --domain git --category pattern
+ai-conventions sync
+```
+
+**Example 2: Missed testing pattern**
+```bash
+# User pointed out: "Always mock external API calls in tests"
+capture-learning "Mock external APIs in tests to avoid flaky tests" \
+  --domain testing --category pattern  
+ai-conventions sync
+```
+
+**Example 3: Anti-pattern discovered**
+```bash
+# User corrected: "Don't use global variables for configuration"
+capture-learning "Avoid global variables for config, use dependency injection" \
+  --domain global --category anti-pattern
+ai-conventions sync
+```
+
+### 4. Integration with Automatic Loading
+
+When capturing learnings, consider if automatic domain loading could be improved:
+
+- Should this context trigger automatic domain loading?
+- Was there a keyword that should have loaded the relevant domain?
+- Can this pattern help improve context detection?
+
+```bash
+# Example: Improve automatic loading triggers
+capture-learning "Add 'API' and 'endpoint' as triggers for loading @domains/api/core.md" \
+  --domain global --category tool-specific
+```
+
+This workflow ensures conventions evolve based on real usage patterns and user feedback, creating a continuously improving AI development experience.
 
 ## Available Domains
 

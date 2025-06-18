@@ -7,6 +7,38 @@ from typing import Dict, List, Optional, Set, Tuple
 import yaml
 
 
+def resolve_shorthand_syntax(content: str) -> str:
+    """
+    Resolve shorthand domain syntax to standard @domains format.
+    
+    Converts:
+    - %writing -> @domains/writing/core.md
+    - %writing%pr-summaries -> @domains/writing/pr-summaries.md
+    - %testing%unit-tests -> @domains/testing/unit-tests.md
+    
+    Args:
+        content: Content containing potential shorthand syntax
+        
+    Returns:
+        Content with shorthand syntax resolved to @domains format
+    """
+    # Pattern to match %domain or %domain%section
+    shorthand_pattern = r'%([a-zA-Z_-]+)(?:%([a-zA-Z_-]+))?'
+    
+    def replace_shorthand(match):
+        domain = match.group(1)
+        section = match.group(2)
+        
+        if section:
+            # %domain%section -> @domains/domain/section.md
+            return f'@domains/{domain}/{section}.md'
+        else:
+            # %domain -> @domains/domain/core.md
+            return f'@domains/{domain}/core.md'
+    
+    return re.sub(shorthand_pattern, replace_shorthand, content)
+
+
 class CircularDependencyError(Exception):
     """Raised when circular dependencies are detected in domain inheritance."""
     pass

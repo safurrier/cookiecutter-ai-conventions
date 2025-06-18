@@ -199,7 +199,7 @@ We welcome contributions! You can:
 4. Improve documentation
 5. Share your conventions as examples
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for details.
+See [Contributing Guide](https://github.com/safurrier/cookiecutter-ai-conventions/blob/main/CONTRIBUTING.md) for details.
 
 ### I found a bug, what should I do?
 
@@ -222,6 +222,6 @@ Yes! To add support for a new AI tool:
 
 - 📧 Open an [issue](https://github.com/safurrier/cookiecutter-ai-conventions/issues)
 - 💬 Join the [discussions](https://github.com/safurrier/cookiecutter-ai-conventions/discussions)
-- 📚 Read the [full documentation](../README.md)
+- 📚 Read the [full documentation](https://github.com/safurrier/cookiecutter-ai-conventions/blob/main/README.md)
 
 Remember: There are no stupid questions. If you're wondering about something, others probably are too!
