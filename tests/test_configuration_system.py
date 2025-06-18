@@ -54,11 +54,11 @@ def test_config_cli_command_registered(cookies):
     # Config is now a subcommand of ai-conventions
     cli_path = result.project_path / "ai_conventions" / "cli.py"
     cli_content = cli_path.read_text(encoding="utf-8")
-    
+
     # Check that config is imported and registered as subcommand
     assert "from .config_cli import config_command" in cli_content
-    assert "main.add_command(config_command, name=\"config\")" in cli_content
-    
+    assert 'main.add_command(config_command, name="config")' in cli_content
+
     # Check that config_cli module exists
     config_cli_path = result.project_path / "ai_conventions" / "config_cli.py"
     assert config_cli_path.exists()
@@ -117,7 +117,7 @@ def test_config_formats_supported(cookies):
     assert ".yaml" in content
     assert ".yml" in content
     # TOML/JSON support removed
-    assert "CONFIG_EXTENSIONS = [\".yaml\", \".yml\"]" in content
+    assert 'CONFIG_EXTENSIONS = [".yaml", ".yml"]' in content
 
 
 def test_config_migration_functionality(cookies):

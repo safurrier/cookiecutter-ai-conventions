@@ -93,6 +93,43 @@ This project uses a learning capture system. When you notice patterns that shoul
 - Help maintain consistency across the codebase
 {%- endif %}
 
+## Convention Improvement Workflow
+
+**Use this workflow to continuously improve conventions based on user corrections and feedback.**
+
+### Review & Capture Process
+
+1. **Analyze interactions** for improvement opportunities:
+   - Where did the user correct your approach?
+   - What patterns emerged that aren't documented?
+   - Which domain conventions were missed?
+
+2. **Use CLI commands** to update conventions:
+
+```bash
+# Explore available convention domains
+ai-conventions list
+
+# Check installation status
+ai-conventions status
+
+{%- if cookiecutter.enable_learning_capture %}
+# Capture learnings from user corrections
+capture-learning "User feedback or correction" --domain [target] --category [type]
+
+# Examples:
+capture-learning "Use async/await for database calls" --domain python --category pattern
+capture-learning "Avoid nested ternary operators" --domain global --category anti-pattern
+{%- endif %}
+
+# Sync updated conventions to AI providers  
+ai-conventions sync
+```
+
+3. **Improve automatic loading**: Consider if context triggers should be enhanced to auto-load relevant domains.
+
+This systematic approach ensures conventions evolve based on real development patterns and user feedback.
+
 ## File Organization
 
 Understand the project structure:

@@ -241,7 +241,7 @@ After installing, test with real coding tasks to ensure they're working as expec
 ## 🆘 Getting Help
 
 - **Installation Issues**: Check [Troubleshooting](troubleshooting.md)
-- **Convention Ideas**: Browse [community domains](../community-domains/)
+- **Convention Ideas**: Browse [community domains](https://github.com/safurrier/cookiecutter-ai-conventions/tree/main/community-domains)
 - **Feature Requests**: Open an [issue](https://github.com/safurrier/cookiecutter-ai-conventions/issues)
 
 ## 🎉 Next Steps

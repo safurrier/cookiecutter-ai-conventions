@@ -78,7 +78,7 @@ class TestSelectiveFileGeneration:
         assert len(py_files) == 8  # All providers + base + __init__
         assert (providers_dir / "base.py").exists()
         assert (providers_dir / "__init__.py").exists()
-        
+
         # But no config files should exist since no providers selected
         assert not (generated_project / ".claude").exists()
         assert not (generated_project / ".cursorrules").exists()
@@ -199,7 +199,7 @@ class TestSelectiveFileGeneration:
         # staging removed - direct domain capture now
         assert not (generated_project / "staging").exists()
         assert (generated_project / "commands").exists()
-        
+
         # Domain composition can still be disabled
         assert not (generated_project / "ai_conventions" / "domain_resolver.py").exists()
 

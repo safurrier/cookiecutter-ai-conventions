@@ -29,7 +29,7 @@ def test_single_provider_selection(cookies):
     assert not (result.project_path / ".cursorrules").exists()
     assert not (result.project_path / "CONVENTIONS.md").exists()  # Aider config
     assert not (result.project_path / ".windsurfrules").exists()
-    
+
     # Claude config should exist since we selected Claude
     assert (result.project_path / ".claude").exists()
 

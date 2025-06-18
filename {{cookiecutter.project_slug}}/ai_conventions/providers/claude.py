@@ -7,6 +7,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 from .base import BaseProvider, InstallResult, ProviderCapabilities
+from ..domain_resolver import resolve_shorthand_syntax
 
 
 class ClaudeProvider(BaseProvider):
@@ -131,6 +132,10 @@ class ClaudeProvider(BaseProvider):
             
             # Render and save
             content = template.render(**context)
+            
+            # Apply shorthand syntax resolution
+            content = resolve_shorthand_syntax(content)
+            
             claude_md = claude_dir / "CLAUDE.md"
             claude_md.write_text(content, encoding="utf-8")
             
