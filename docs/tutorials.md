@@ -7,7 +7,7 @@ Let's fix the most annoying AI habit - inline imports.
 ### 1. Generate Your Conventions Repository
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions-experimental/main/bootstrap.sh | sh
+uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions
 ```
 
 When prompted:

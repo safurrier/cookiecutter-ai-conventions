@@ -13,7 +13,7 @@ This guide walks you through setting up AI conventions for your project, from in
 ### 1. Run the Installer
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions/main/bootstrap.sh | sh
+uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions
 ```
 
 ### 2. Answer the Prompts

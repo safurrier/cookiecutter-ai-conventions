@@ -11,40 +11,57 @@ console = Console()
 
 def sync_to_claude(source_dir: Path) -> bool:
     """Sync conventions to Claude."""
-    claude_dir = Path.home() / ".claude"
-    
-    # Ensure directory exists
-    claude_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Items to sync
-    items = ["domains", "global.md", "staging", "projects"]
-    
-    for item in items:
-        source = source_dir / item
-        if source.exists():
-            dest = claude_dir / item
-            
-            # Remove existing
-            if dest.exists():
-                if dest.is_dir():
-                    shutil.rmtree(dest)
-                else:
-                    dest.unlink()
-            
-            # Copy new
-            if source.is_dir():
-                shutil.copytree(source, dest)
-            else:
-                shutil.copy2(source, dest)
-    
-    # Generate CLAUDE.md
-    # This would use the CLAUDE.md.j2 template in real implementation
-    claude_md = claude_dir / "CLAUDE.md"
-    if (source_dir / "templates" / "claude" / "CLAUDE.md.j2").exists():
-        # In real implementation, render the Jinja2 template
-        claude_md.write_text("# CLAUDE.md\n\nConventions synced!", encoding="utf-8")
-    
-    return True
+    try:
+        claude_dir = Path.home() / ".claude"
+        
+        # Ensure directory exists
+        claude_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Items to sync (removed staging since we eliminated it)
+        items = ["domains", "global.md", "projects"]
+        success_count = 0
+        
+        for item in items:
+            source = source_dir / item
+            if source.exists():
+                dest = claude_dir / item
+                
+                try:
+                    # Remove existing
+                    if dest.exists():
+                        if dest.is_dir():
+                            shutil.rmtree(dest)
+                        else:
+                            dest.unlink()
+                    
+                    # Copy new
+                    if source.is_dir():
+                        shutil.copytree(source, dest)
+                    else:
+                        shutil.copy2(source, dest)
+                    
+                    success_count += 1
+                        
+                except (OSError, PermissionError, shutil.Error) as e:
+                    # Continue with other items if one fails
+                    console.print(f"[yellow]Warning: Could not sync {item}: {e}[/yellow]")
+                    continue
+        
+        # Generate CLAUDE.md
+        try:
+            claude_md = claude_dir / "CLAUDE.md"
+            if (source_dir / "templates" / "claude" / "CLAUDE.md.j2").exists():
+                # In real implementation, render the Jinja2 template
+                claude_md.write_text("# CLAUDE.md\n\nConventions synced!", encoding="utf-8")
+        except Exception as e:
+            console.print(f"[yellow]Warning: Could not create CLAUDE.md: {e}[/yellow]")
+        
+        # Return True if at least some items were synced successfully
+        return success_count > 0
+        
+    except Exception as e:
+        console.print(f"[red]Error setting up Claude sync: {e}[/red]")
+        return False
 
 
 def sync_to_cursor(source_dir: Path) -> bool:
@@ -93,7 +110,7 @@ PROVIDERS = {
 @click.command()
 @click.option("--provider", "-p", multiple=True, help="Specific provider(s) to sync")
 @click.option("--all", "sync_all", is_flag=True, help="Sync to all configured providers")
-def main(provider, sync_all):
+def sync_command(provider, sync_all):
     """Sync conventions to AI tool providers.
     
     Examples:
@@ -162,5 +179,8 @@ def main(provider, sync_all):
     console.print("\n✨ Sync complete!")
 
 
+# Export as main for consistency with other modules
+main = sync_command
+
 if __name__ == "__main__":
-    main()
+    sync_command()

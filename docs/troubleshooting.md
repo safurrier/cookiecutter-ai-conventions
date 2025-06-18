@@ -252,12 +252,15 @@ Your AI keeps suggesting old patterns even after updating conventions.
 
 **Alternative installation methods:**
 
-1. **Use wget**:
+1. **Install uv first, then use uvx**:
    ```bash
-   wget -qO- https://raw.githubusercontent.com/safurrier/cookiecutter-ai-conventions-experimental/main/bootstrap.sh | sh
+   # Install uv if not already installed
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   # Then run the command
+   uvx cookiecutter gh:safurrier/cookiecutter-ai-conventions
    ```
 
-2. **Manual bootstrap**:
+2. **Manual installation**:
    ```bash
    # Install uv first
    pip install uv

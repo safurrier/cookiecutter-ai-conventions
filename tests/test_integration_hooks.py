@@ -28,6 +28,7 @@ class TestPostGenProjectHook:
 
         # Arrange: Create selection file
         import tempfile
+
         temp_file = Path(tempfile.gettempdir()) / "cookiecutter_selected_domains.json"
         temp_file.write_text(json.dumps({"selected_domains": ["git", "testing"]}))
 
@@ -105,6 +106,7 @@ class TestPostGenProjectHook:
 
         # Assert: Scripts are executable (skip on Windows)
         import platform
+
         if platform.system() != "Windows":
             assert capture_script.stat().st_mode & 0o111
             assert review_script.stat().st_mode & 0o111
@@ -121,6 +123,6 @@ class TestPostGenProjectHook:
 
         # Assert: File exists with correct content
         assert providers_file.exists()
-        content = providers_file.read_text(encoding='utf-8')
+        content = providers_file.read_text(encoding="utf-8")
         assert "claude" in content
         assert "cursor" in content

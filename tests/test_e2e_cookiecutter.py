@@ -85,7 +85,8 @@ class TestE2ECookiecutterGeneration:
         generated_project = Path(project_dir)
         # With default claude provider, should have Claude commands
         assert (generated_project / ".claude" / "commands").exists()
-        assert (generated_project / "staging").exists()
+        # staging removed - direct domain capture now
+        assert not (generated_project / "staging").exists()
         assert (generated_project / ".claude" / "commands" / "capture-learning.md").exists()
         assert (generated_project / ".claude" / "commands" / "review-learnings.md").exists()
         # Python scripts should be removed but commands directory exists with .md files
@@ -96,8 +97,8 @@ class TestE2ECookiecutterGeneration:
         assert (commands_dir / "capture-learning.md").exists()
         assert (commands_dir / "review-learnings.md").exists()
 
-    def test_learning_capture_disabled_removes_commands(self, tmp_path):
-        """Test that learning capture disabled removes command directories."""
+    def test_learning_capture_always_available(self, tmp_path):
+        """Test that learning capture is always available for better UX."""
         # Arrange
         output_dir = tmp_path / "output"
         output_dir.mkdir()
@@ -107,16 +108,21 @@ class TestE2ECookiecutterGeneration:
             str(Path.cwd()),
             no_input=True,
             extra_context={
-                "enable_learning_capture": False,
+                "enable_learning_capture": False,  # Even when disabled, should be available
             },
             output_dir=str(output_dir),
         )
 
-        # Assert
+        # Assert: Learning capture should always be available for better UX
         generated_project = Path(project_dir)
-        assert not (generated_project / "commands").exists()
-        assert not (generated_project / ".claude").exists()
+        assert (generated_project / "commands").exists()
+        assert (generated_project / ".claude").exists()  # Default provider is Claude
+        # staging removed - direct domain capture now
         assert not (generated_project / "staging").exists()
+        
+        # Verify specific learning capture files
+        assert (generated_project / "commands" / "capture-learning.md").exists()
+        assert (generated_project / ".claude" / "commands" / "capture-learning.md").exists()
 
     def test_provider_selection_creates_config(self, tmp_path):
         """Test that provider selection creates proper configuration."""
@@ -166,3 +172,47 @@ class TestE2ECookiecutterGeneration:
         assert (domains_dir / "git" / "core.md").exists()
         assert (domains_dir / "testing" / "core.md").exists()
         # Note: For now we can only test default domains due to cookiecutter limitations
+
+    def test_python_files_are_processed_correctly(self, tmp_path):
+        """Test that Python files with Jinja2 syntax are processed correctly."""
+        # Arrange
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+
+        # Act
+        project_dir = cookiecutter(
+            str(Path.cwd()),
+            no_input=True,
+            extra_context={
+                "enable_learning_capture": True,
+            },
+            output_dir=str(output_dir),
+        )
+
+        # Assert: Verify Python files don't contain unprocessed Jinja2 syntax
+        generated_project = Path(project_dir)
+        
+        # Check cli.py - this file has conditional imports based on enable_learning_capture
+        cli_py = generated_project / "ai_conventions" / "cli.py"
+        assert cli_py.exists()
+        cli_content = cli_py.read_text(encoding="utf-8")
+        
+        # Should not contain any Jinja2 syntax
+        assert "{%" not in cli_content
+        assert "{{" not in cli_content
+        assert "cookiecutter." not in cli_content
+        
+        # Should contain the processed result
+        assert "from .capture import capture_command" in cli_content
+        
+        # Check install.py - this file has cookiecutter variables
+        install_py = generated_project / "install.py"
+        assert install_py.exists()
+        install_content = install_py.read_text(encoding="utf-8")
+        
+        # Should not contain any Jinja2 syntax
+        assert "{{" not in install_content
+        assert "cookiecutter." not in install_content
+        
+        # Should contain the processed values
+        assert '"project_name": "My AI Conventions"' in install_content
