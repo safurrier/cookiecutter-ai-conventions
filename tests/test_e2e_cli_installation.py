@@ -55,7 +55,7 @@ class TestE2ECLIInstallation:
             assert callable(config_command)
 
         except ImportError as e:
-            raise AssertionError(f"CLI modules should be importable: {e}")
+            raise AssertionError(f"CLI modules should be importable: {e}") from e
         finally:
             # Clean up sys.path
             if str(result.project_path) in sys.path:
