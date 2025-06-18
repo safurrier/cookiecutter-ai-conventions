@@ -194,25 +194,16 @@ def list():
             console.print(f"  • [cyan]{domain.name}[/cyan] (error counting files: {e})")
 
 
+# Import and register subcommands
+from .capture import capture_command
+from .sync import sync_command
+from .config_cli import config_command
+
+# Add subcommands to main group
+main.add_command(capture_command, name="capture")
+main.add_command(sync_command, name="sync")
+main.add_command(config_command, name="config")
+
+
 if __name__ == "__main__":
-    # Import subcommands when running as main module
-    from .capture import capture_command
-    from .sync import sync_command
-    from .config_cli import config_command
-    
-    # Add subcommands
-    main.add_command(capture_command, name="capture")
-    main.add_command(sync_command, name="sync")
-    main.add_command(config_command, name="config")
-    
     main()
-else:
-    # Import subcommands when imported as module
-    from .capture import capture_command
-    from .sync import sync_command
-    from .config_cli import config_command
-    
-    # Add subcommands
-    main.add_command(capture_command, name="capture")
-    main.add_command(sync_command, name="sync")
-    main.add_command(config_command, name="config")

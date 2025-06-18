@@ -14,14 +14,16 @@ def test_cli_commands_available_after_install(cookies):
 
     assert result.exit_code == 0
 
-    # Check pyproject.toml has entry points
+    # Check pyproject.toml has entry points - now consolidated under ai-conventions
     pyproject = result.project_path / "pyproject.toml"
     content = pyproject.read_text(encoding="utf-8")
 
     assert "[project.scripts]" in content
     assert 'ai-conventions = "ai_conventions.cli:main"' in content
-    assert 'capture-learning = "ai_conventions.capture:main"' in content
-    assert 'sync-conventions = "ai_conventions.sync:main"' in content
+    # All commands are now subcommands under ai-conventions
+    assert 'capture-learning = "ai_conventions.capture:main"' not in content
+    assert 'sync-conventions = "ai_conventions.sync:main"' not in content
+    assert 'conventions-config = "ai_conventions.config_cli:main"' not in content
 
 
 def test_ai_conventions_status_command(cookies):
@@ -194,9 +196,16 @@ def test_learning_capture_always_available(cookies):
     # CLI should use consistent naming (ai-conventions, not project slug)
     assert 'ai-conventions = "ai_conventions.cli:main"' in content
 
-    # Learning capture commands should always be available for better UX
-    assert "capture-learning" in content
-    assert "sync-conventions" in content
+    # Learning capture commands should always be available as subcommands for better UX
+    # No separate executables - they're subcommands under ai-conventions
+    assert "capture-learning" not in content
+    assert "sync-conventions" not in content
+    
+    # But the CLI should have the capture and sync functionality
+    cli_module = result.project_path / "ai_conventions" / "cli.py"
+    cli_content = cli_module.read_text(encoding="utf-8")
+    assert "capture_command" in cli_content
+    assert "sync_command" in cli_content
 
 
 def test_cli_shell_completion_support(cookies):
