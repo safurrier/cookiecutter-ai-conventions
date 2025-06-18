@@ -42,7 +42,7 @@ def test_config_cli_module_created(cookies):
 
 
 def test_config_cli_command_registered(cookies):
-    """Test that conventions-config command is registered."""
+    """Test that config functionality is available as subcommand."""
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
@@ -51,11 +51,17 @@ def test_config_cli_command_registered(cookies):
 
     assert result.exit_code == 0
 
-    pyproject_path = result.project_path / "pyproject.toml"
-    content = pyproject_path.read_text(encoding="utf-8")
-
-    assert "conventions-config" in content
-    assert "ai_conventions.config_cli:main" in content
+    # Config is now a subcommand of ai-conventions
+    cli_path = result.project_path / "ai_conventions" / "cli.py"
+    cli_content = cli_path.read_text(encoding="utf-8")
+    
+    # Check that config is imported and registered as subcommand
+    assert "from .config_cli import config_command" in cli_content
+    assert "main.add_command(config_command, name=\"config\")" in cli_content
+    
+    # Check that config_cli module exists
+    config_cli_path = result.project_path / "ai_conventions" / "config_cli.py"
+    assert config_cli_path.exists()
 
 
 def test_config_dependencies_included(cookies):

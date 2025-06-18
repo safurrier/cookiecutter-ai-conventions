@@ -23,10 +23,10 @@ class TestE2ECLIInstallation:
         scripts_section = pyproject_content.split('[project.scripts]')[1].split('[')[0]
         assert '"my-custom-project"' not in scripts_section
         
-        # Verify other CLI tools are correctly named
-        assert 'capture-learning = "ai_conventions.capture:main"' in pyproject_content
-        assert 'sync-conventions = "ai_conventions.sync:main"' in pyproject_content
-        assert 'conventions-config = "ai_conventions.config_cli:main"' in pyproject_content
+        # Verify no separate CLI tools (they're all subcommands now)
+        assert 'capture-learning = "ai_conventions.capture:main"' not in pyproject_content
+        assert 'sync-conventions = "ai_conventions.sync:main"' not in pyproject_content
+        assert 'conventions-config = "ai_conventions.config_cli:main"' not in pyproject_content
 
     def test_bootstrap_script_not_in_generated_project(self, cookies):
         """Test that bootstrap.sh is not included in generated projects."""

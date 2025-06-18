@@ -26,8 +26,10 @@ def test_pyproject_toml_created_with_cli_scripts(cookies):
     assert 'name = "test-ai-conventions"' in content
     assert "[project.scripts]" in content
     assert 'ai-conventions = "ai_conventions.cli:main"' in content
-    assert 'capture-learning = "ai_conventions.capture:main"' in content
-    assert 'sync-conventions = "ai_conventions.sync:main"' in content
+    # No separate commands anymore - they're all subcommands
+    assert 'capture-learning = "ai_conventions.capture:main"' not in content
+    assert 'sync-conventions = "ai_conventions.sync:main"' not in content
+    assert 'conventions-config = "ai_conventions.config_cli:main"' not in content
 
 
 def test_cli_module_structure_created(cookies):
