@@ -139,7 +139,8 @@ class TestE2EInstallation:
         assert (generated_project / "templates" / "claude" / "CLAUDE.md.j2").exists()
 
         # Verify learning capture is always available (improved UX)
-        assert (generated_project / "staging").exists()
+        # staging removed - direct domain capture now
+        assert not (generated_project / "staging").exists()
         assert (generated_project / "commands").exists()
         
         # Domain composition can still be disabled

@@ -152,18 +152,10 @@ class TestCLIComprehensive(unittest.TestCase):
                 cli_function="config"
             ),
             CLITestCase(
-                command_args=["show", "--format", "yaml"],
+                command_args=["validate"],
                 expected_exit_code=0,
-                expected_output_not_contains="Error",
-                description="Config show with YAML format should work",
-                cli_module="ai_conventions.config_cli",
-                cli_function="config"
-            ),
-            CLITestCase(
-                command_args=["show", "--format", "json"],
-                expected_exit_code=0,
-                expected_output_not_contains="Error",
-                description="Config show with JSON format should work",
+                expected_output_contains="Configuration is valid",
+                description="Config validate should work",
                 cli_module="ai_conventions.config_cli",
                 cli_function="config"
             ),
