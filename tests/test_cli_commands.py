@@ -200,7 +200,7 @@ def test_learning_capture_always_available(cookies):
     # No separate executables - they're subcommands under ai-conventions
     assert "capture-learning" not in content
     assert "sync-conventions" not in content
-    
+
     # But the CLI should have the capture and sync functionality
     cli_module = result.project_path / "ai_conventions" / "cli.py"
     cli_content = cli_module.read_text(encoding="utf-8")

@@ -23,7 +23,9 @@ def resolve_shorthand_syntax(content: str) -> str:
         Content with shorthand syntax resolved to @domains format
     """
     # Pattern to match %domain or %domain%section
-    shorthand_pattern = r'%([a-zA-Z_-]+)(?:%([a-zA-Z_-]+))?'
+    # Use negative lookbehind to avoid matching %%
+    # Use negative lookahead to avoid matching %domain%%
+    shorthand_pattern = r'(?<!%)%([a-zA-Z_-]+)(?:%([a-zA-Z0-9_-]+))?(?!%|\w)'
     
     def replace_shorthand(match):
         domain = match.group(1)

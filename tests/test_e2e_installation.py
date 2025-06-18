@@ -142,7 +142,7 @@ class TestE2EInstallation:
         # staging removed - direct domain capture now
         assert not (generated_project / "staging").exists()
         assert (generated_project / "commands").exists()
-        
+
         # Domain composition can still be disabled
         assert not (generated_project / "ai_conventions" / "domain_resolver.py").exists()
 
@@ -183,7 +183,7 @@ class TestE2EInstallation:
             providers_dir = generated_project / "ai_conventions" / "providers"
             for check_provider in providers:
                 assert (providers_dir / f"{check_provider}.py").exists()
-            
+
             # Also verify base modules always exist
             assert (providers_dir / "base.py").exists()
             assert (providers_dir / "__init__.py").exists()

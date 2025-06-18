@@ -213,13 +213,17 @@ def remove_unselected_providers(selected_providers, enable_learning_capture=True
 
             # Remove only config files, templates, and docs - NOT Python modules
             paths_to_remove = []
-            
+
             # Add config files and template dirs
-            for file_list in [provider_files.config_files, provider_files.template_dirs, provider_files.docs]:
+            for file_list in [
+                provider_files.config_files,
+                provider_files.template_dirs,
+                provider_files.docs,
+            ]:
                 paths_to_remove.extend(Path(f) for f in file_list)
-            
+
             # Note: We explicitly do NOT remove provider_files.module (the Python file)
-            
+
             for path in paths_to_remove:
                 if path.exists():
                     try:

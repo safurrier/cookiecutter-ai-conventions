@@ -86,7 +86,7 @@ def test_claude_learning_capture_always_available(cookies):
     commands_dir = result.project_path / "commands"
     assert claude_dir.exists()  # Claude config should exist since we selected Claude
     assert commands_dir.exists()  # Commands should always be available
-    
+
     # Check specific learning capture files exist
     assert (claude_dir / "commands" / "capture-learning.md").exists()
     assert (commands_dir / "capture-learning.md").exists()
