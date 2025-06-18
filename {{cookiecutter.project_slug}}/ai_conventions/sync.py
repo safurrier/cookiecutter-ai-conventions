@@ -17,8 +17,8 @@ def sync_to_claude(source_dir: Path) -> bool:
         # Ensure directory exists
         claude_dir.mkdir(parents=True, exist_ok=True)
         
-        # Items to sync
-        items = ["domains", "global.md", "staging", "projects"]
+        # Items to sync (removed staging since we eliminated it)
+        items = ["domains", "global.md", "projects"]
         success_count = 0
         
         for item in items:

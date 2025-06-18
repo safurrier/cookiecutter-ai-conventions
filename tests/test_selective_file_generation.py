@@ -32,7 +32,8 @@ class TestSelectiveFileGeneration:
 
         # Learning capture is always available for better UX (improved architecture)
         assert (generated_project / "commands").exists()
-        assert (generated_project / "staging").exists()
+        # staging removed - direct domain capture now
+        assert not (generated_project / "staging").exists()
         assert not (generated_project / ".cursor").exists()
         assert not (generated_project / ".windsurf").exists()
         assert not (generated_project / ".aider").exists()
@@ -195,7 +196,8 @@ class TestSelectiveFileGeneration:
         generated_project = Path(project_dir)
 
         # Learning capture is now always available (improved UX)
-        assert (generated_project / "staging").exists()
+        # staging removed - direct domain capture now
+        assert not (generated_project / "staging").exists()
         assert (generated_project / "commands").exists()
         
         # Domain composition can still be disabled

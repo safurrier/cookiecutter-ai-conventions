@@ -85,7 +85,8 @@ class TestE2ECookiecutterGeneration:
         generated_project = Path(project_dir)
         # With default claude provider, should have Claude commands
         assert (generated_project / ".claude" / "commands").exists()
-        assert (generated_project / "staging").exists()
+        # staging removed - direct domain capture now
+        assert not (generated_project / "staging").exists()
         assert (generated_project / ".claude" / "commands" / "capture-learning.md").exists()
         assert (generated_project / ".claude" / "commands" / "review-learnings.md").exists()
         # Python scripts should be removed but commands directory exists with .md files
@@ -116,7 +117,8 @@ class TestE2ECookiecutterGeneration:
         generated_project = Path(project_dir)
         assert (generated_project / "commands").exists()
         assert (generated_project / ".claude").exists()  # Default provider is Claude
-        assert (generated_project / "staging").exists()
+        # staging removed - direct domain capture now
+        assert not (generated_project / "staging").exists()
         
         # Verify specific learning capture files
         assert (generated_project / "commands" / "capture-learning.md").exists()

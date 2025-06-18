@@ -445,7 +445,7 @@ def main():
             print("\nClaude setup:")
             print("  Your conventions will be automatically loaded via CLAUDE.md")
             if enable_learning:
-                print("  Capture learnings with: capture-learning")
+                print("  Capture learnings with: ai-conventions capture")
                 print("  Review learnings with: ai-conventions review")
 
         if "cursor" in providers:

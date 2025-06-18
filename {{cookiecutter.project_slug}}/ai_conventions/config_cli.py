@@ -14,17 +14,12 @@ def config_command():
 
 @config_command.command()
 @click.option(
-    "--format", "-f",
-    type=click.Choice(["yaml", "toml", "json"]),
-    help="Configuration format"
-)
-@click.option(
     "--path", "-p",
     type=click.Path(),
     help="Path to configuration file"
 )
-def show(format, path):
-    """Show current configuration."""
+def show(path):
+    """Show current YAML configuration."""
     manager = ConfigManager()
     
     if path:
@@ -35,19 +30,9 @@ def show(format, path):
     try:
         config = manager.load_config(config_path)
         
-        if format == "json":
-            import json
-            click.echo(json.dumps(config.model_dump(), indent=2))
-        elif format == "toml":
-            try:
-                import tomli_w
-                click.echo(tomli_w.dumps(config.model_dump()))
-            except ImportError:
-                click.echo("Error: tomli-w required for TOML output", err=True)
-        else:
-            # Default to YAML
-            import yaml
-            click.echo(yaml.safe_dump(config.model_dump(), default_flow_style=False))
+        # Always output YAML
+        import yaml
+        click.echo(yaml.safe_dump(config.model_dump(), default_flow_style=False))
             
     except Exception as e:
         click.echo(f"Error loading config: {e}", err=True)
@@ -74,39 +59,12 @@ def validate(path):
             click.echo(f"  - {error}", err=True)
 
 
-@config_command.command()
-@click.argument("source", type=click.Path(exists=True))
-@click.argument("target_format", type=click.Choice(["yaml", "toml", "json"]))
-@click.option(
-    "--output", "-o",
-    type=click.Path(),
-    help="Output path (defaults to same name with new extension)"
-)
-def migrate(source, target_format, output):
-    """Migrate configuration between formats."""
-    manager = ConfigManager()
-    
-    source_path = Path(source)
-    target_path = Path(output) if output else None
-    
-    try:
-        result_path = manager.migrate_config(source_path, target_format, target_path)
-        click.echo(f"✓ Migrated to {result_path}")
-    except Exception as e:
-        click.echo(f"✗ Migration failed: {e}", err=True)
-
 
 @config_command.command()
-@click.option(
-    "--format", "-f",
-    type=click.Choice(["yaml", "toml", "json"]),
-    default="yaml",
-    help="Configuration format (default: yaml)"
-)
 @click.option(
     "--path", "-p", 
     type=click.Path(),
-    help="Output path (defaults to .ai-conventions.{format})"
+    help="Output path (defaults to .ai-conventions.yaml)"
 )
 @click.option("--project-name", prompt=True, help="Project name")
 @click.option("--author-name", prompt=True, help="Author name")
@@ -115,8 +73,8 @@ def migrate(source, target_format, output):
     prompt=True,
     help="Comma-separated list of providers (e.g. claude,cursor)"
 )
-def init(format, path, project_name, author_name, providers):
-    """Initialize a new configuration file."""
+def init(path, project_name, author_name, providers):
+    """Initialize a new YAML configuration file."""
     manager = ConfigManager()
     
     # Parse providers
@@ -134,11 +92,10 @@ def init(format, path, project_name, author_name, providers):
     if path:
         save_path = Path(path)
     else:
-        ext = {"yaml": ".yaml", "toml": ".toml", "json": ".json"}[format]
-        save_path = Path(f".ai-conventions{ext}")
+        save_path = Path(".ai-conventions.yaml")
         
     try:
-        result_path = manager.save_config(config, save_path, format)
+        result_path = manager.save_config(config, save_path)
         click.echo(f"✓ Created {result_path}")
     except Exception as e:
         click.echo(f"✗ Failed to create config: {e}", err=True)

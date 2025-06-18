@@ -1,13 +1,7 @@
 """Configuration management with migration support."""
 
-import json
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
-
-try:
-    import tomllib
-except ImportError:
-    import tomli as tomllib
+from typing import Any, Dict, Optional
 
 import yaml
 
@@ -65,14 +59,9 @@ class ConventionsConfig(BaseModel):
 
 
 class ConfigManager:
-    """Manages configuration loading, validation, and migration."""
+    """Manages configuration loading, validation, and YAML-only operations."""
     
-    CONFIG_FORMATS = {
-        ".yaml": "yaml",
-        ".yml": "yaml", 
-        ".toml": "toml",
-        ".json": "json",
-    }
+    CONFIG_EXTENSIONS = [".yaml", ".yml"]
     
     def __init__(self, project_root: Path = None):
         """Initialize the config manager."""
@@ -80,7 +69,7 @@ class ConfigManager:
         self._config: Optional[ConventionsConfig] = None
         
     def find_config_file(self) -> Optional[Path]:
-        """Find configuration file in standard locations."""
+        """Find YAML configuration file in standard locations."""
         config_names = [
             ".ai-conventions",
             "ai-conventions",
@@ -89,26 +78,15 @@ class ConfigManager:
         ]
         
         for name in config_names:
-            for ext in self.CONFIG_FORMATS:
+            for ext in self.CONFIG_EXTENSIONS:
                 config_path = self.project_root / f"{name}{ext}"
                 if config_path.exists():
                     return config_path
-                    
-        # Check pyproject.toml for tool.ai-conventions section
-        pyproject = self.project_root / "pyproject.toml"
-        if pyproject.exists():
-            try:
-                with open(pyproject, "rb") as f:
-                    data = tomllib.load(f)
-                    if "tool" in data and "ai-conventions" in data["tool"]:
-                        return pyproject
-            except Exception:
-                pass
                 
         return None
     
     def load_config(self, config_path: Optional[Path] = None) -> ConventionsConfig:
-        """Load configuration from file or defaults."""
+        """Load YAML configuration from file or defaults."""
         if config_path is None:
             config_path = self.find_config_file()
             
@@ -120,21 +98,12 @@ class ConfigManager:
                 author_name="Your Name",
             )
             
-        # Determine format
-        if config_path.name == "pyproject.toml":
-            config_dict = self._load_pyproject_toml(config_path)
-        else:
-            ext = config_path.suffix
-            format_type = self.CONFIG_FORMATS.get(ext)
+        # Load YAML configuration
+        ext = config_path.suffix
+        if ext not in self.CONFIG_EXTENSIONS:
+            raise ValueError(f"Unsupported config format: {ext}. Only YAML (.yaml/.yml) is supported.")
             
-            if format_type == "yaml":
-                config_dict = self._load_yaml(config_path)
-            elif format_type == "toml":
-                config_dict = self._load_toml(config_path)
-            elif format_type == "json":
-                config_dict = self._load_json(config_path)
-            else:
-                raise ValueError(f"Unsupported config format: {ext}")
+        config_dict = self._load_yaml(config_path)
                 
         # Validate and create config object
         self._config = ConventionsConfig(**config_dict)
@@ -144,88 +113,43 @@ class ConfigManager:
         """Load YAML configuration."""
         with open(path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
-            
-    def _load_toml(self, path: Path) -> dict:
-        """Load TOML configuration."""
-        with open(path, "rb") as f:
-            return tomllib.load(f)
-            
-    def _load_json(self, path: Path) -> dict:
-        """Load JSON configuration."""
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-            
-    def _load_pyproject_toml(self, path: Path) -> dict:
-        """Load configuration from pyproject.toml."""
-        with open(path, "rb") as f:
-            data = tomllib.load(f)
-            return data.get("tool", {}).get("ai-conventions", {})
     
     def save_config(
         self, 
         config: ConventionsConfig,
-        path: Optional[Path] = None,
-        format_type: Optional[str] = None
+        path: Optional[Path] = None
     ) -> Path:
-        """Save configuration to file."""
+        """Save configuration to YAML file."""
         if path is None:
             path = self.project_root / ".ai-conventions.yaml"
             
-        if format_type is None:
-            ext = path.suffix
-            format_type = self.CONFIG_FORMATS.get(ext, "yaml")
+        # Ensure YAML extension
+        if path.suffix not in self.CONFIG_EXTENSIONS:
+            # Change extension to .yaml
+            path = path.with_suffix(".yaml")
             
         config_dict = config.model_dump(exclude_unset=True)
-        
-        if format_type == "yaml":
-            self._save_yaml(config_dict, path)
-        elif format_type == "toml":
-            self._save_toml(config_dict, path)
-        elif format_type == "json":
-            self._save_json(config_dict, path)
-        else:
-            raise ValueError(f"Unsupported format: {format_type}")
-            
+        self._save_yaml(config_dict, path)
         return path
     
     def _save_yaml(self, data: dict, path: Path) -> None:
         """Save YAML configuration."""
         with open(path, "w", encoding="utf-8") as f:
             yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
-            
-    def _save_toml(self, data: dict, path: Path) -> None:
-        """Save TOML configuration."""
-        try:
-            import tomli_w
-        except ImportError:
-            raise ImportError("tomli-w required for saving TOML files")
-            
-        with open(path, "wb") as f:
-            tomli_w.dump(data, f)
-            
-    def _save_json(self, data: dict, path: Path) -> None:
-        """Save JSON configuration."""
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
     
-    def migrate_config(
-        self,
-        source_path: Path,
-        target_format: str,
-        target_path: Optional[Path] = None
-    ) -> Path:
-        """Migrate configuration between formats."""
-        # Load from source
-        config = self.load_config(source_path)
-        
-        # Determine target path
+    def create_default_config(self, target_path: Optional[Path] = None) -> Path:
+        """Create a default YAML configuration file."""
         if target_path is None:
-            base_name = source_path.stem
-            ext = next(k for k, v in self.CONFIG_FORMATS.items() if v == target_format)
-            target_path = source_path.parent / f"{base_name}{ext}"
+            target_path = self.project_root / ".ai-conventions.yaml"
             
-        # Save in new format
-        return self.save_config(config, target_path, target_format)
+        # Create default config
+        default_config = ConventionsConfig(
+            project_name="My AI Conventions",
+            project_slug="my-ai-conventions", 
+            author_name="Your Name",
+        )
+        
+        return self.save_config(default_config, target_path)
     
     def validate_config(self, config_path: Optional[Path] = None) -> tuple[bool, list[str]]:
         """Validate configuration file."""

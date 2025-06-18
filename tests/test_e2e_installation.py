@@ -139,7 +139,8 @@ class TestE2EInstallation:
         assert (generated_project / "templates" / "claude" / "CLAUDE.md.j2").exists()
 
         # Verify learning capture is always available (improved UX)
-        assert (generated_project / "staging").exists()
+        # staging removed - direct domain capture now
+        assert not (generated_project / "staging").exists()
         assert (generated_project / "commands").exists()
         
         # Domain composition can still be disabled
@@ -148,48 +149,6 @@ class TestE2EInstallation:
         # With canary disabled, the template should not include canary content
         # but the template file itself will still have the conditional logic
         # We can verify the feature is disabled by checking the post-generation output
-
-    @pytest.mark.skip(reason="Requires dependencies to be installed in generated project")
-    def test_cli_execution_in_generated_project(self, tmp_path):
-        """Test that CLI commands work in generated project."""
-        output_dir = tmp_path / "output"
-        output_dir.mkdir()
-
-        project_dir = cookiecutter(
-            str(Path.cwd()),
-            no_input=True,
-            output_dir=str(output_dir),
-            extra_context={
-                "project_name": "Test CLI",
-                "project_slug": "test-cli",
-                "selected_providers": "claude",
-            },
-        )
-
-        generated_project = Path(project_dir)
-
-        # Test that install.py can be imported and run
-        sys.path.insert(0, str(generated_project))
-
-        # Clear any previously imported modules
-        modules_to_remove = [key for key in sys.modules.keys() if key.startswith("ai_conventions")]
-        for module in modules_to_remove:
-            del sys.modules[module]
-
-        # Import the installer
-        from install import ConventionsInstaller
-
-        installer = ConventionsInstaller(generated_project)
-        assert installer.config["selected_providers"] == "claude"
-
-        # Test CLI help
-        from ai_conventions.cli import main
-        from click.testing import CliRunner
-
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "Usage:" in result.output
 
     def test_all_provider_combinations_generate_correctly(self, tmp_path):
         """Test that all individual providers generate correctly."""

@@ -4,94 +4,97 @@ import click
 from pathlib import Path
 from datetime import datetime
 from rich.console import Console
-from rich.prompt import Prompt
 import yaml
 
 console = Console()
 
 
 @click.command()
-@click.argument("pattern", required=False)
-@click.option("--domain", "-d", help="Target domain for this learning")
-@click.option("--file", "-f", help="Append to specific file in staging")
-@click.option("--category", "-c", help="Category of learning (fix, pattern, etc)")
+@click.argument("pattern", required=True)
+@click.option("--domain", "-d", required=True, help="Target domain (e.g., 'git', 'python')")
+@click.option("--file", "-f", default="core", help="Target file within domain (default: core)")
+@click.option("--category", "-c", default="pattern", help="Category of learning (fix, pattern, etc)")
 def capture_command(pattern, domain, file, category):
-    """Capture a new learning or pattern.
+    """Capture a new learning or pattern directly to domain.
+    
+    By default, captures go to {domain}/core.md. Use --file to specify
+    a different file within the domain. Supports nested paths for organization.
     
     Examples:
-        capture-learning "Always use type hints" --domain python
-        capture-learning --domain git --category pattern
+    
+    Basic usage (goes to domains/python/core.md):
+        ai-conventions capture "Always use type hints" --domain python
+        
+    Specific file (goes to domains/git/commits.md):
+        ai-conventions capture "Use semantic commit messages" --domain git --file commits
+        
+    Nested organization (goes to domains/git/pr-summaries/guidelines.md):
+        ai-conventions capture "Keep PRs focused" --domain git --file pr-summaries/guidelines
+        
+    With custom category:
+        ai-conventions capture "Fix edge case" --domain python --category fix
+    
+    All captures are logged to .ai-conventions-log.yaml for tracking.
     """
-    staging_dir = Path("staging")
+    domains_dir = Path("domains")
     
-    if not staging_dir.exists():
-        console.print("[red]❌ No staging directory found![/red]")
-        console.print("   Make sure you're in a conventions repository with learning capture enabled")
+    if not domains_dir.exists():
+        console.print("[red]❌ No domains directory found![/red]")
+        console.print("   Make sure you're in a conventions repository")
         return
-    
-    # Interactive mode if no pattern provided
-    if not pattern:
-        console.print("[bold]Capture New Learning[/bold]\n")
-        pattern = Prompt.ask("What pattern or learning did you discover?")
-        
-        if not domain:
-            domain = Prompt.ask("Which domain does this belong to?", default="general")
-        
-        if not category:
-            category = Prompt.ask(
-                "Category", 
-                choices=["pattern", "fix", "anti-pattern", "tool-specific", "other"],
-                default="pattern"
-            )
     
     # Prepare learning entry
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    learning = {
-        "timestamp": timestamp,
-        "pattern": pattern,
-        "domain": domain or "general",
-        "category": category or "pattern",
-        "status": "pending"
-    }
+    # Ensure domain directory exists
+    domain_dir = domains_dir / domain
+    domain_dir.mkdir(exist_ok=True, parents=True)
     
     # Determine target file
-    if file:
-        target_file = staging_dir / file
-    else:
-        target_file = staging_dir / "learnings.md"
+    if not file.endswith(".md"):
+        file += ".md"
+    target_file = domain_dir / file
+    
+    # Ensure parent directories for nested files exist
+    target_file.parent.mkdir(exist_ok=True, parents=True)
     
     # Append to markdown file
     with open(target_file, "a", encoding="utf-8") as f:
-        f.write(f"\n## {timestamp}\n")
-        f.write(f"**Domain:** {learning['domain']}\n")
-        f.write(f"**Category:** {learning['category']}\n")
-        f.write(f"**Status:** {learning['status']}\n\n")
+        f.write(f"\n## {timestamp} - {category}\n")
         f.write(f"{pattern}\n")
         f.write("\n---\n")
     
     console.print(f"\n✅ Learning captured to {target_file}")
-    console.print(f"   Domain: [cyan]{learning['domain']}[/cyan]")
-    console.print(f"   Category: [cyan]{learning['category']}[/cyan]")
+    console.print(f"   Domain: [cyan]{domain}[/cyan]")
+    console.print(f"   File: [cyan]{file}[/cyan]")
+    console.print(f"   Category: [cyan]{category}[/cyan]")
     
-    # Also save to YAML for easier processing
-    yaml_file = staging_dir / "learnings.yaml"
+    # Log to central capture log
+    log_file = Path(".ai-conventions-log.yaml")
+    log_entry = {
+        "timestamp": timestamp,
+        "domain": domain,
+        "file": file,
+        "category": category,
+        "pattern": pattern,
+        "target_file": str(target_file)
+    }
     
-    learnings = []
-    if yaml_file.exists():
-        with open(yaml_file, "r", encoding="utf-8") as f:
+    logs = []
+    if log_file.exists():
+        with open(log_file, "r", encoding="utf-8") as f:
             existing = yaml.safe_load(f)
             if existing and isinstance(existing, list):
-                learnings = existing
+                logs = existing
     
-    learnings.append(learning)
+    logs.append(log_entry)
     
-    with open(yaml_file, "w", encoding="utf-8") as f:
-        yaml.dump(learnings, f, default_flow_style=False, sort_keys=False)
+    with open(log_file, "w", encoding="utf-8") as f:
+        yaml.dump(logs, f, default_flow_style=False, sort_keys=False)
     
     console.print("\n💡 Next steps:")
-    console.print("   1. Review with: ai-conventions review")
-    console.print("   2. Promote to domain when ready")
+    console.print("   - Review and refine the captured learning")
+    console.print("   - Run 'ai-conventions sync' to update AI tool configurations")
 
 
 # Export as main for consistency with other modules

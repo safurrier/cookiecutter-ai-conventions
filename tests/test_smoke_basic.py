@@ -110,7 +110,8 @@ class TestSmokeTemplateStructure:
 
         # Assert: Conditional directories exist in template
         assert (template_dir / "commands").exists()
-        assert (template_dir / "staging").exists()
+        # staging removed - direct domain capture now
+        assert not (template_dir / "staging").exists()
 
         # Assert: Command files exist
         assert (template_dir / "commands" / "capture-learning.md").exists()
@@ -118,5 +119,5 @@ class TestSmokeTemplateStructure:
         assert (template_dir / "commands" / "capture-learning.py").exists()
         assert (template_dir / "commands" / "review-learnings.py").exists()
 
-        # Assert: Staging file exists
-        assert (template_dir / "staging" / "learnings.md").exists()
+        # staging removed - direct domain capture now
+        # Learnings go directly to domains instead
