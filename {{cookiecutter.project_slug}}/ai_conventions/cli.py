@@ -195,13 +195,12 @@ def list():
 
 
 # Import and register subcommands
-from .capture import capture_command
-from .sync import sync_command
+from .capture import add_command, remove_command
 from .config_cli import config_command
 
 # Add subcommands to main group
-main.add_command(capture_command, name="capture")
-main.add_command(sync_command, name="sync")
+main.add_command(add_command, name="add")
+main.add_command(remove_command, name="remove")
 main.add_command(config_command, name="config")
 
 
