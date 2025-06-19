@@ -149,15 +149,16 @@ Claude: [IMMEDIATELY reads @domains/testing/core.md]
 
 {%- if cookiecutter.enable_learning_capture %}
 
-### Learning Capture
+### Learning Management
 When patterns emerge or corrections are needed:
-1. Use `/capture-learning` to format insights
-2. Add to staging/learnings.md with target domain
-3. Review periodically and promote stable patterns
+1. Use `ai-conventions add` to capture insights directly to domains
+2. Use `ai-conventions remove` to undo recent additions if needed
+3. Changes automatically sync to all AI providers
 
 Available commands:
-- `/capture-learning` - Format and save new learnings
-- `/review-learnings` - Review staged learnings for promotion
+- `ai-conventions add` - Add new learnings and conventions
+- `ai-conventions remove` - Remove recent additions
+- Auto-sync - Changes automatically propagate to providers
 {%- endif %}
 
 ## Convention Improvement Workflow
@@ -192,36 +193,32 @@ ai-conventions list
 # Step 2: Check current status  
 ai-conventions status
 
-# Step 3: Capture learnings (multiple scenarios)
-{%- if cookiecutter.enable_learning_capture %}
+# Step 3: Add learnings (multiple scenarios)
 
 # Scenario A: User correction on code pattern
-capture-learning "User corrected: Use pathlib instead of os.path for file operations" \
+ai-conventions add "User corrected: Use pathlib instead of os.path for file operations" \
   --domain python --category fix
 
-# Scenario B: New pattern discovered
-capture-learning "Always validate input parameters before processing" \
-  --domain global --category pattern
+# Scenario B: New pattern discovered  
+ai-conventions add "Always validate input parameters before processing" \
+  --domain python --category pattern
 
 # Scenario C: Tool-specific gotcha
-capture-learning "pytest fixtures with scope='session' cause issues in parallel tests" \
+ai-conventions add "pytest fixtures with scope='session' cause issues in parallel tests" \
   --domain testing --category anti-pattern
 
-# Scenario D: Interactive mode (prompts for details)
-capture-learning
+# Scenario D: Domain management syntax
+ai-conventions add "python/testing" "Use pytest fixtures for test data"
 
 # Scenario E: Append to specific learning file
-capture-learning "Git branch naming should include ticket numbers" \
+ai-conventions add "Git branch naming should include ticket numbers" \
   --domain git --file branch-naming.md --category pattern
 
-# Step 4: Sync updated conventions to AI providers
-ai-conventions sync
-{%- else %}
+# Step 4: Remove recent additions if needed
+ai-conventions remove          # Remove last addition
+ai-conventions remove 3        # Remove last 3 additions
 
-# When learning capture is disabled, manually edit domain files
-# Then sync to providers
-ai-conventions sync
-{%- endif %}
+# Note: All changes automatically sync to AI providers
 ```
 
 ### 3. Workflow Examples
@@ -229,26 +226,26 @@ ai-conventions sync
 **Example 1: User corrected commit message format**
 ```bash
 # User said: "Commit messages should start with ticket number"
-ai-conventions list | grep git
-capture-learning "Prefix commit messages with ticket number: [TICKET-123]" \
+ai-conventions list
+ai-conventions add "Prefix commit messages with ticket number: [TICKET-123]" \
   --domain git --category pattern
-ai-conventions sync
+# Changes automatically sync to all providers
 ```
 
 **Example 2: Missed testing pattern**
 ```bash
 # User pointed out: "Always mock external API calls in tests"
-capture-learning "Mock external APIs in tests to avoid flaky tests" \
+ai-conventions add "Mock external APIs in tests to avoid flaky tests" \
   --domain testing --category pattern  
-ai-conventions sync
+# Changes automatically sync to all providers
 ```
 
 **Example 3: Anti-pattern discovered**
 ```bash
 # User corrected: "Don't use global variables for configuration"
-capture-learning "Avoid global variables for config, use dependency injection" \
-  --domain global --category anti-pattern
-ai-conventions sync
+ai-conventions add "Avoid global variables for config, use dependency injection" \
+  --domain python --category anti-pattern
+# Changes automatically sync to all providers
 ```
 
 ### 4. Integration with Automatic Loading
@@ -261,8 +258,9 @@ When capturing learnings, consider if automatic domain loading could be improved
 
 ```bash
 # Example: Improve automatic loading triggers
-capture-learning "Add 'API' and 'endpoint' as triggers for loading @domains/api/core.md" \
+ai-conventions add "Add 'API' and 'endpoint' as triggers for loading @domains/api/core.md" \
   --domain global --category tool-specific
+# Changes automatically sync to all providers
 ```
 
 This workflow ensures conventions evolve based on real usage patterns and user feedback, creating a continuously improving AI development experience.
@@ -306,15 +304,10 @@ This enables DRY (Don't Repeat Yourself) convention management by allowing speci
 ## Evolution Process
 
 This system evolves through use:
-{%- if cookiecutter.enable_learning_capture %}
-1. **Capture**: New learnings go to staging/learnings.md
-2. **Review**: Periodic review of staged learnings
-3. **Promote**: Stable patterns move to appropriate domain files
-4. **Archive**: Historical learnings preserved for context
-{%- else %}
-1. **Manual Updates**: Edit domain files directly as patterns emerge
-2. **Version Control**: Track changes through git history
-{%- endif %}
+1. **Add**: New learnings go directly to appropriate domain files via `ai-conventions add`
+2. **Remove**: Incorrect or outdated patterns can be removed with `ai-conventions remove`
+3. **Auto-sync**: Changes automatically propagate to all AI providers
+4. **Version Control**: Track changes through git history for full audit trail
 
 The goal is building a comprehensive, maintainable knowledge base that improves AI assistance quality over time while keeping context manageable.
 {%- if cookiecutter.enable_context_canary %}
