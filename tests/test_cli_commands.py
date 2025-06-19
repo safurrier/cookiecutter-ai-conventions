@@ -51,8 +51,8 @@ def test_ai_conventions_status_command(cookies):
     assert "@click.group(" in content
 
 
-def test_capture_learning_command_structure(cookies):
-    """Test the capture-learning command structure."""
+def test_add_command_structure(cookies):
+    """Test the add command structure."""
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
@@ -62,24 +62,24 @@ def test_capture_learning_command_structure(cookies):
 
     assert result.exit_code == 0
 
-    # Check capture module exists
-    capture_module = result.project_path / "ai_conventions" / "capture.py"
-    assert capture_module.exists()
+    # Check add command module exists in commands directory
+    add_module = result.project_path / "ai_conventions" / "commands" / "add.py"
+    assert add_module.exists()
 
-    content = capture_module.read_text(encoding="utf-8")
+    content = add_module.read_text(encoding="utf-8")
 
-    # Check main function (might have parameters due to @click.command decorator)
-    assert "def capture_command(" in content or "def main(" in content
+    # Check add_command function exists
+    assert "def add_command(" in content
 
     # Check it imports necessary modules
     assert "from pathlib import Path" in content
 
-    # Check for learning capture logic
-    assert "learnings" in content.lower() or "capture" in content.lower()
+    # Check for add/convention logic
+    assert "add" in content.lower() or "convention" in content.lower()
 
 
-def test_sync_conventions_command_structure(cookies):
-    """Test the sync-conventions command structure."""
+def test_auto_sync_functionality_structure(cookies):
+    """Test the auto-sync functionality structure."""
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
@@ -88,17 +88,17 @@ def test_sync_conventions_command_structure(cookies):
 
     assert result.exit_code == 0
 
-    # Check sync module exists
-    sync_module = result.project_path / "ai_conventions" / "sync.py"
+    # Check auto-sync module exists in commands directory
+    sync_module = result.project_path / "ai_conventions" / "commands" / "sync.py"
     assert sync_module.exists()
 
     content = sync_module.read_text(encoding="utf-8")
 
-    # Check main function
-    assert "def sync_command(" in content or "def main(" in content
+    # Check auto_sync function exists (sync is now built into add command)
+    assert "def auto_sync(" in content
 
     # Check for sync logic
-    assert "sync" in content.lower() or "install" in content.lower()
+    assert "sync" in content.lower() or "providers" in content.lower()
 
 
 def test_cli_help_command(cookies):
@@ -178,8 +178,8 @@ def test_cli_list_command_execution(cookies):
     assert "git" in result.output or "testing" in result.output or "domain" in result.output.lower()
 
 
-def test_learning_capture_always_available(cookies):
-    """Test that learning capture commands are always available (improved UX)."""
+def test_add_remove_commands_always_available(cookies):
+    """Test that add/remove commands are always available (improved UX)."""
     result = cookies.bake(
         extra_context={
             "project_slug": "my-project",
@@ -196,16 +196,25 @@ def test_learning_capture_always_available(cookies):
     # CLI should use consistent naming (ai-conventions, not project slug)
     assert 'ai-conventions = "ai_conventions.cli:main"' in content
 
-    # Learning capture commands should always be available as subcommands for better UX
+    # Learning commands should always be available as subcommands for better UX
     # No separate executables - they're subcommands under ai-conventions
     assert "capture-learning" not in content
     assert "sync-conventions" not in content
 
-    # But the CLI should have the capture and sync functionality
+    # But the CLI should have the add/remove/sync functionality
     cli_module = result.project_path / "ai_conventions" / "cli.py"
     cli_content = cli_module.read_text(encoding="utf-8")
-    assert "capture_command" in cli_content
-    assert "sync_command" in cli_content
+    assert "add_command" in cli_content
+    assert "remove_command" in cli_content
+    assert "config_command" in cli_content
+
+    # Check that commands directory exists with all command modules
+    commands_dir = result.project_path / "ai_conventions" / "commands"
+    assert commands_dir.exists()
+    assert (commands_dir / "add.py").exists()
+    assert (commands_dir / "remove.py").exists()
+    assert (commands_dir / "config.py").exists()
+    assert (commands_dir / "sync.py").exists()
 
 
 def test_cli_shell_completion_support(cookies):
