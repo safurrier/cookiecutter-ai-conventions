@@ -19,22 +19,26 @@ class ConventionsConfig(BaseModel):
         default_factory=lambda: ["claude"],
         description="List of AI tool providers to configure"
     )
-    enable_learning_capture: bool = Field(
-        True,
-        description="Enable learning capture commands"
-    )
-    enable_context_canary: bool = Field(
-        True,
-        description="Enable context canary for health checks"
-    )
-    enable_domain_composition: bool = Field(
-        True,
-        description="Enable domain inheritance and composition"
-    )
     default_domains: str = Field(
         "git,testing",
         description="Comma-separated list of default domains"
     )
+    
+    # Features that are always enabled (removed optional config)
+    @property
+    def enable_learning_capture(self) -> bool:
+        """Learning capture is always enabled."""
+        return True
+    
+    @property 
+    def enable_context_canary(self) -> bool:
+        """Context canary is always enabled."""
+        return True
+    
+    @property
+    def enable_domain_composition(self) -> bool:
+        """Domain composition is always enabled."""
+        return True
     
     @field_validator("selected_providers")
     @classmethod
