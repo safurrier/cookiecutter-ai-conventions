@@ -63,12 +63,22 @@ def test_cli_module_structure_created(cookies):
     assert "import click" in content or "from click import" in content
     assert "def main(" in content
 
-    # Check capture.py
-    capture_file = ai_conventions_dir / "capture.py"
-    assert capture_file.exists()
+    # Check commands directory
+    commands_dir = ai_conventions_dir / "commands"
+    assert commands_dir.exists()
+    assert commands_dir.is_dir()
 
-    # Check sync.py
-    sync_file = ai_conventions_dir / "sync.py"
+    # Check command files
+    add_file = commands_dir / "add.py"
+    assert add_file.exists()
+
+    remove_file = commands_dir / "remove.py"
+    assert remove_file.exists()
+
+    config_file = commands_dir / "config.py"
+    assert config_file.exists()
+
+    sync_file = commands_dir / "sync.py"
     assert sync_file.exists()
 
 
@@ -95,8 +105,8 @@ def test_cli_status_command_exists(cookies):
     assert "claude" in content.lower()
 
 
-def test_capture_learning_command_structure(cookies):
-    """Test capture-learning command accepts domain parameter."""
+def test_add_command_structure(cookies):
+    """Test add command accepts domain parameter."""
     result = cookies.bake(
         extra_context={
             "project_name": "Test AI Conventions",
@@ -110,16 +120,16 @@ def test_capture_learning_command_structure(cookies):
 
     assert result.exit_code == 0
 
-    # Check capture.py has proper CLI structure
-    capture_file = result.project_path / "ai_conventions" / "capture.py"
-    content = capture_file.read_text(encoding="utf-8")
+    # Check add.py has proper CLI structure
+    add_file = result.project_path / "ai_conventions" / "commands" / "add.py"
+    content = add_file.read_text(encoding="utf-8")
     assert "import click" in content or "from click import" in content
     assert "@click.argument" in content or "@click.option" in content
     assert "--domain" in content or "'domain'" in content
 
 
-def test_sync_conventions_command_exists(cookies):
-    """Test sync-conventions command is implemented."""
+def test_auto_sync_functionality_exists(cookies):
+    """Test auto-sync functionality is implemented."""
     result = cookies.bake(
         extra_context={
             "project_name": "Test AI Conventions",
@@ -133,11 +143,11 @@ def test_sync_conventions_command_exists(cookies):
 
     assert result.exit_code == 0
 
-    # Check sync.py has proper implementation
-    sync_file = result.project_path / "ai_conventions" / "sync.py"
+    # Check auto-sync.py has proper implementation (no user-facing sync command, auto-sync is built-in)
+    sync_file = result.project_path / "ai_conventions" / "commands" / "sync.py"
     content = sync_file.read_text(encoding="utf-8")
-    assert "def sync_command(" in content or "def main(" in content
-    assert "provider" in content.lower()
+    assert "def auto_sync(" in content
+    assert "provider" in content.lower() or "sync" in content.lower()
 
 
 def test_pyproject_includes_dependencies(cookies):
@@ -180,9 +190,17 @@ def test_legacy_scripts_removed_when_cli_enabled(cookies):
 
     assert result.exit_code == 0
 
-    # Old command scripts should not exist
-    commands_dir = result.project_path / "commands"
-    if commands_dir.exists():
-        # If commands dir exists, it should only have .md files
-        py_files = list(commands_dir.glob("*.py"))
+    # Old command scripts should not exist in root commands dir
+    root_commands_dir = result.project_path / "commands"
+    if root_commands_dir.exists():
+        # If root commands dir exists, it should only have .md files
+        py_files = list(root_commands_dir.glob("*.py"))
         assert len(py_files) == 0, "Legacy .py scripts should be removed"
+
+    # But new commands should exist in ai_conventions/commands/
+    new_commands_dir = result.project_path / "ai_conventions" / "commands"
+    assert new_commands_dir.exists()
+    assert (new_commands_dir / "add.py").exists()
+    assert (new_commands_dir / "remove.py").exists()
+    assert (new_commands_dir / "config.py").exists()
+    assert (new_commands_dir / "sync.py").exists()

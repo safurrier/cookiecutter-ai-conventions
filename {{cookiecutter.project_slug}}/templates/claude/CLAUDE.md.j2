@@ -151,13 +151,14 @@ Claude: [IMMEDIATELY reads @domains/testing/core.md]
 
 ### Learning Capture
 When patterns emerge or corrections are needed:
-1. Use `/capture-learning` to format insights
-2. Add to staging/learnings.md with target domain
-3. Review periodically and promote stable patterns
+1. Use `ai-conventions add` to capture insights
+2. Conventions are added directly to domain files
+3. Review and refine conventions using `ai-conventions remove` if needed
 
 Available commands:
-- `/capture-learning` - Format and save new learnings
-- `/review-learnings` - Review staged learnings for promotion
+- `ai-conventions add` - Add new learnings and conventions
+- `ai-conventions remove` - Remove recent additions
+- `ai-conventions list` - View domain structure
 {%- endif %}
 
 ## Convention Improvement Workflow
@@ -196,31 +197,26 @@ ai-conventions status
 {%- if cookiecutter.enable_learning_capture %}
 
 # Scenario A: User correction on code pattern
-capture-learning "User corrected: Use pathlib instead of os.path for file operations" \
+ai-conventions add "User corrected: Use pathlib instead of os.path for file operations" \
   --domain python --category fix
 
 # Scenario B: New pattern discovered
-capture-learning "Always validate input parameters before processing" \
+ai-conventions add "Always validate input parameters before processing" \
   --domain global --category pattern
 
 # Scenario C: Tool-specific gotcha
-capture-learning "pytest fixtures with scope='session' cause issues in parallel tests" \
+ai-conventions add "pytest fixtures with scope='session' cause issues in parallel tests" \
   --domain testing --category anti-pattern
 
-# Scenario D: Interactive mode (prompts for details)
-capture-learning
+# Scenario D: Append to specific learning file
+ai-conventions add "Git branch naming should include ticket numbers" \
+  --domain git --file branch-naming --category pattern
 
-# Scenario E: Append to specific learning file
-capture-learning "Git branch naming should include ticket numbers" \
-  --domain git --file branch-naming.md --category pattern
-
-# Step 4: Sync updated conventions to AI providers
-ai-conventions sync
+# Note: Auto-sync happens automatically after each add/remove operation
 {%- else %}
 
 # When learning capture is disabled, manually edit domain files
-# Then sync to providers
-ai-conventions sync
+# Changes are automatically synced when using ai-conventions commands
 {%- endif %}
 ```
 
@@ -229,26 +225,23 @@ ai-conventions sync
 **Example 1: User corrected commit message format**
 ```bash
 # User said: "Commit messages should start with ticket number"
-ai-conventions list | grep git
-capture-learning "Prefix commit messages with ticket number: [TICKET-123]" \
+ai-conventions list --domains-only
+ai-conventions add "Prefix commit messages with ticket number: [TICKET-123]" \
   --domain git --category pattern
-ai-conventions sync
 ```
 
 **Example 2: Missed testing pattern**
 ```bash
 # User pointed out: "Always mock external API calls in tests"
-capture-learning "Mock external APIs in tests to avoid flaky tests" \
-  --domain testing --category pattern  
-ai-conventions sync
+ai-conventions add "Mock external APIs in tests to avoid flaky tests" \
+  --domain testing --category pattern
 ```
 
 **Example 3: Anti-pattern discovered**
 ```bash
 # User corrected: "Don't use global variables for configuration"
-capture-learning "Avoid global variables for config, use dependency injection" \
+ai-conventions add "Avoid global variables for config, use dependency injection" \
   --domain global --category anti-pattern
-ai-conventions sync
 ```
 
 ### 4. Integration with Automatic Loading
@@ -261,7 +254,7 @@ When capturing learnings, consider if automatic domain loading could be improved
 
 ```bash
 # Example: Improve automatic loading triggers
-capture-learning "Add 'API' and 'endpoint' as triggers for loading @domains/api/core.md" \
+ai-conventions add "Add 'API' and 'endpoint' as triggers for loading @domains/api/core.md" \
   --domain global --category tool-specific
 ```
 

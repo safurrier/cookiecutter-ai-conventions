@@ -30,15 +30,14 @@ def test_config_cli_module_created(cookies):
 
     assert result.exit_code == 0
 
-    config_cli_path = result.project_path / "ai_conventions" / "config_cli.py"
+    config_cli_path = result.project_path / "ai_conventions" / "commands" / "config.py"
     assert config_cli_path.exists()
 
     content = config_cli_path.read_text(encoding="utf-8")
-    assert "@click.group()" in content
-    assert "def show" in content
-    assert "def validate" in content
-    # migrate removed - YAML-only now
-    assert "def init" in content
+    assert "@click.command()" in content
+    assert "def config_command" in content
+    # Config command now handles show/set/reset functionality
+    assert "--show" in content or "--set" in content
 
 
 def test_config_cli_command_registered(cookies):
@@ -56,11 +55,11 @@ def test_config_cli_command_registered(cookies):
     cli_content = cli_path.read_text(encoding="utf-8")
 
     # Check that config is imported and registered as subcommand
-    assert "from .config_cli import config_command" in cli_content
+    assert "from .commands" in cli_content and "config_command" in cli_content
     assert 'main.add_command(config_command, name="config")' in cli_content
 
-    # Check that config_cli module exists
-    config_cli_path = result.project_path / "ai_conventions" / "config_cli.py"
+    # Check that config command module exists
+    config_cli_path = result.project_path / "ai_conventions" / "commands" / "config.py"
     assert config_cli_path.exists()
 
 

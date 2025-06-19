@@ -1,4 +1,4 @@
-"""Test capture command functionality."""
+"""Test add command functionality."""
 
 import os
 import sys
@@ -7,8 +7,8 @@ import yaml
 from click.testing import CliRunner
 
 
-def test_capture_defaults_to_core_md(cookies):
-    """Test that capture defaults to core.md when no --file specified."""
+def test_add_defaults_to_core_md(cookies):
+    """Test that add defaults to core.md when no --file specified."""
     bake_result = cookies.bake(
         extra_context={
             "project_slug": "test-capture",
@@ -30,10 +30,10 @@ def test_capture_defaults_to_core_md(cookies):
     os.chdir(bake_result.project_path)
 
     try:
-        from ai_conventions.capture import capture_command
+        from ai_conventions.commands.add import add_command
 
         runner = CliRunner()
-        cli_result = runner.invoke(capture_command, ["Always use type hints", "--domain", "python"])
+        cli_result = runner.invoke(add_command, ["Always use type hints", "--domain", "python"])
 
         assert cli_result.exit_code == 0
 
@@ -51,8 +51,8 @@ def test_capture_defaults_to_core_md(cookies):
             sys.path.remove(str(bake_result.project_path))
 
 
-def test_capture_with_specific_file(cookies):
-    """Test capture with --file option."""
+def test_add_with_specific_file(cookies):
+    """Test add with --file option."""
     bake_result = cookies.bake(
         extra_context={
             "project_slug": "test-capture",
@@ -70,11 +70,11 @@ def test_capture_with_specific_file(cookies):
     os.chdir(bake_result.project_path)
 
     try:
-        from ai_conventions.capture import capture_command
+        from ai_conventions.commands.add import add_command
 
         runner = CliRunner()
         cli_result = runner.invoke(
-            capture_command,
+            add_command,
             ["Use semantic commit messages", "--domain", "git", "--file", "commits"],
         )
 
@@ -93,8 +93,8 @@ def test_capture_with_specific_file(cookies):
             sys.path.remove(str(bake_result.project_path))
 
 
-def test_capture_with_nested_file_path(cookies):
-    """Test capture with nested file path like pr-summaries/guidelines."""
+def test_add_with_nested_file_path(cookies):
+    """Test add with nested file path like pr-summaries/guidelines."""
     bake_result = cookies.bake(
         extra_context={
             "project_slug": "test-capture",
@@ -112,11 +112,11 @@ def test_capture_with_nested_file_path(cookies):
     os.chdir(bake_result.project_path)
 
     try:
-        from ai_conventions.capture import capture_command
+        from ai_conventions.commands.add import add_command
 
         runner = CliRunner()
         cli_result = runner.invoke(
-            capture_command,
+            add_command,
             ["Keep PRs focused and small", "--domain", "git", "--file", "pr-summaries/guidelines"],
         )
 
@@ -138,8 +138,8 @@ def test_capture_with_nested_file_path(cookies):
             sys.path.remove(str(bake_result.project_path))
 
 
-def test_capture_creates_central_log(cookies):
-    """Test that captures are logged to central .ai-conventions-log.yaml."""
+def test_add_creates_central_log(cookies):
+    """Test that additions are logged to central .ai-conventions-log.yaml."""
     bake_result = cookies.bake(
         extra_context={
             "project_slug": "test-capture",
@@ -157,11 +157,11 @@ def test_capture_creates_central_log(cookies):
     os.chdir(bake_result.project_path)
 
     try:
-        from ai_conventions.capture import capture_command
+        from ai_conventions.commands.add import add_command
 
         runner = CliRunner()
         cli_result = runner.invoke(
-            capture_command,
+            add_command,
             [
                 "Test logging functionality",
                 "--domain",
@@ -199,7 +199,7 @@ def test_capture_creates_central_log(cookies):
             sys.path.remove(str(bake_result.project_path))
 
 
-def test_capture_auto_adds_md_extension(cookies):
+def test_add_auto_adds_md_extension(cookies):
     """Test that .md extension is automatically added to file names."""
     bake_result = cookies.bake(
         extra_context={
@@ -218,11 +218,11 @@ def test_capture_auto_adds_md_extension(cookies):
     os.chdir(bake_result.project_path)
 
     try:
-        from ai_conventions.capture import capture_command
+        from ai_conventions.commands.add import add_command
 
         runner = CliRunner()
         cli_result = runner.invoke(
-            capture_command,
+            add_command,
             [
                 "Test auto extension",
                 "--domain",

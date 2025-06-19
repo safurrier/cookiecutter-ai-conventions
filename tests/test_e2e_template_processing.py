@@ -103,9 +103,10 @@ class TestTemplateProcessing:
         content = cli_py.read_text(encoding="utf-8")
 
         # Should have all imports (better architecture)
-        assert "from .capture import capture_command" in content
-        assert "from .sync import sync_command" in content
-        assert 'main.add_command(capture_command, name="capture")' in content
+        assert "from .commands import add_command, remove_command, config_command" in content
+        assert 'main.add_command(add_command, name="add")' in content
+        assert 'main.add_command(remove_command, name="remove")' in content
+        assert 'main.add_command(config_command, name="config")' in content
         # Should not have Jinja2 syntax
         assert "{%" not in content
         assert "cookiecutter" not in content
@@ -127,9 +128,10 @@ class TestTemplateProcessing:
         content2 = cli_py2.read_text(encoding="utf-8")
 
         # Should have all imports (no conditional removal)
-        assert "from .capture import capture_command" in content2
-        assert "main.add_command(capture_command" in content2
-        assert "from .sync import sync_command" in content2
+        assert "from .commands import add_command, remove_command, config_command" in content2
+        assert 'main.add_command(add_command, name="add")' in content2
+        assert 'main.add_command(remove_command, name="remove")' in content2
+        assert 'main.add_command(config_command, name="config")' in content2
         # Should not have Jinja2 syntax
         assert "{%" not in content2
         assert "cookiecutter" not in content2

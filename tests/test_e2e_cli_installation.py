@@ -27,7 +27,7 @@ class TestE2ECLIInstallation:
         # Verify no separate CLI tools (they're all subcommands now)
         assert 'capture-learning = "ai_conventions.capture:main"' not in pyproject_content
         assert 'sync-conventions = "ai_conventions.sync:main"' not in pyproject_content
-        assert 'conventions-config = "ai_conventions.config_cli:main"' not in pyproject_content
+        assert 'conventions-config = "ai_conventions.commands.config:main"' not in pyproject_content
 
     def test_bootstrap_script_not_in_generated_project(self, cookies):
         """Test that bootstrap.sh is not included in generated projects."""
@@ -44,15 +44,15 @@ class TestE2ECLIInstallation:
         sys.path.insert(0, str(result.project_path))
 
         try:
-            # These imports should work
+            # These imports should work (main user-facing commands)
             from ai_conventions.cli import main
-            from ai_conventions.config_cli import config_command
-            from ai_conventions.sync import main as sync_main
+            from ai_conventions.commands.add import add_command
+            from ai_conventions.commands.config import config_command
 
             # Verify they are callable
             assert callable(main)
-            assert callable(sync_main)
             assert callable(config_command)
+            assert callable(add_command)
 
         except ImportError as e:
             raise AssertionError(f"CLI modules should be importable: {e}") from e

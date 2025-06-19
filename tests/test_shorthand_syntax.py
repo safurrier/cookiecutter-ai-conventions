@@ -39,7 +39,9 @@ class TestShorthandSyntax:
     def test_shorthand_with_hyphens_and_underscores(self):
         """Test shorthand works with hyphens and underscores in names."""
         content = "Use %web-api%error-handling and %database_queries patterns."
-        expected = "Use @domains/web-api/error-handling.md and @domains/database_queries/core.md patterns."
+        expected = (
+            "Use @domains/web-api/error-handling.md and @domains/database_queries/core.md patterns."
+        )
         assert resolve_shorthand_syntax(content) == expected
 
     def test_no_shorthand_syntax_unchanged(self):

@@ -23,7 +23,7 @@ dependencies = [
 ai-conventions = "ai_conventions.cli:main"
 
 [tool.setuptools]
-packages = ["ai_conventions"]
+packages = ["ai_conventions", "ai_conventions.commands", "ai_conventions.providers"]
 
 [tool.uv]
 dev-dependencies = [
